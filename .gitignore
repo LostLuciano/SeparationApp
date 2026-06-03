@@ -1,0 +1,24 @@
+# Xcode build products
+build/
+DerivedData/
+
+# User-specific Xcode files
+*.perspective3
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/
+*.xcuserdatad
+*.xcuserstate
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE configuration
+.idea/
+.vscode/
+
+# Local cache & logs
+.kiro/
+*.log
+.gemini/

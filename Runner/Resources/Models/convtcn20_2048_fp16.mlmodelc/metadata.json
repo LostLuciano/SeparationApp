@@ -1,0 +1,88 @@
+[
+  {
+    "metadataOutputVersion" : "3.0",
+    "storagePrecision" : "Float16",
+    "outputSchema" : [
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32 1 × 2048 × 1)",
+        "shortDescription" : "Output beat frame-wise probabilities",
+        "shape" : "[1, 2048, 1]",
+        "name" : "beats",
+        "type" : "MultiArray"
+      },
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32 1 × 2048 × 1)",
+        "shortDescription" : "Output downbeat frame-wise probabilities",
+        "shape" : "[1, 2048, 1]",
+        "name" : "downbeats",
+        "type" : "MultiArray"
+      },
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32 300)",
+        "shortDescription" : "Output tempo probability vector (up to 300 BPM)",
+        "shape" : "[300]",
+        "name" : "tempo",
+        "type" : "MultiArray"
+      }
+    ],
+    "modelParameters" : [
+
+    ],
+    "author" : "Clément Tabary",
+    "specificationVersion" : 4,
+    "license" : "MWM",
+    "computePrecision" : "Float16",
+    "isUpdatable" : "0",
+    "availability" : {
+      "macOS" : "10.15",
+      "tvOS" : "13.0",
+      "visionOS" : "1.0",
+      "watchOS" : "6.0",
+      "iOS" : "13.0",
+      "macCatalyst" : "13.0"
+    },
+    "modelType" : {
+      "name" : "MLModelType_neuralNetwork"
+    },
+    "inputSchema" : [
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32 1 × 1 × 2048 × 128)",
+        "shortDescription" : "Input audio chunk (log-mel spectrogram)",
+        "shape" : "[1, 1, 2048, 128]",
+        "name" : "logmel",
+        "type" : "MultiArray"
+      }
+    ],
+    "userDefinedMetadata" : {
+      "com.github.apple.coremltools.version" : "6.2",
+      "com.github.apple.coremltools.source" : "torch==1.9.1"
+    },
+    "generatedClassName" : "convtcn20_2048_fp16",
+    "neuralNetworkLayerTypeHistogram" : {
+      "PoolingMax" : 4,
+      "Squeeze" : 48,
+      "Transpose" : 1,
+      "ActivationELU" : 16,
+      "Add" : 21,
+      "PoolingAverage" : 1,
+      "ExpandDims" : 45,
+      "ConcatND" : 11,
+      "Convolution" : 48,
+      "ActivationSigmoid" : 2,
+      "InnerProduct" : 3
+    },
+    "method" : "predict"
+  }
+]

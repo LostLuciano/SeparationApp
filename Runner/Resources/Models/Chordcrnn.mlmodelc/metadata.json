@@ -1,0 +1,78 @@
+[
+  {
+    "metadataOutputVersion" : "3.0",
+    "storagePrecision" : "Float32",
+    "outputSchema" : [
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32)",
+        "shortDescription" : "Output chord logits (170-class configuration)",
+        "shape" : "[]",
+        "name" : "logits",
+        "type" : "MultiArray"
+      }
+    ],
+    "modelParameters" : [
+
+    ],
+    "author" : "Clément Tabary",
+    "specificationVersion" : 4,
+    "license" : "MWM",
+    "computePrecision" : "Float16",
+    "isUpdatable" : "0",
+    "availability" : {
+      "macOS" : "10.15",
+      "tvOS" : "13.0",
+      "visionOS" : "1.0",
+      "watchOS" : "6.0",
+      "iOS" : "13.0",
+      "macCatalyst" : "13.0"
+    },
+    "modelType" : {
+      "name" : "MLModelType_neuralNetwork"
+    },
+    "inputSchema" : [
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32 1 × 320 × 24)",
+        "shortDescription" : "Input both-chroma chunk",
+        "shape" : "[1, 320, 24]",
+        "name" : "bothchroma",
+        "type" : "MultiArray"
+      }
+    ],
+    "userDefinedMetadata" : {
+      "com.github.apple.coremltools.version" : "5.2.0",
+      "com.github.apple.coremltools.source" : "torch==1.9.1"
+    },
+    "generatedClassName" : "Chordcrnn",
+    "neuralNetworkLayerTypeHistogram" : {
+      "ConcatND" : 2,
+      "Convolution" : 2,
+      "Copy" : 16,
+      "Gather" : 8,
+      "InnerProduct" : 25,
+      "Multiply" : 12,
+      "Squeeze" : 9,
+      "ActivationReLU" : 2,
+      "Transpose" : 3,
+      "Add" : 24,
+      "Reverse" : 4,
+      "ActivationSigmoid" : 8,
+      "ActivationTanh" : 4,
+      "LoadConstantND" : 16,
+      "ExpandDims" : 5,
+      "Scatter" : 4,
+      "Loop" : 4,
+      "BatchNorm" : 1,
+      "Slice" : 4,
+      "LessThan" : 4,
+      "ActivationLinear" : 4
+    },
+    "method" : "predict"
+  }
+]

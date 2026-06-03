@@ -1,0 +1,4150 @@
+{
+  "layers" : [
+    {
+      "bottom" : "bothchroma",
+      "size_of_axes" : 1,
+      "axes_0" : 1,
+      "weights" : {
+
+      },
+      "nd_axis" : 0,
+      "debug_info" : "input.1",
+      "top" : "input.1",
+      "type" : "expand_dims",
+      "name" : "input.1",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "name" : "input.3",
+      "bottom" : "input.1",
+      "weights" : {
+
+      },
+      "debug_info" : "input.3",
+      "top" : "input.3",
+      "C" : 1,
+      "blob_batchnorm_params" : 1,
+      "type" : "batchnorm"
+    },
+    {
+      "pad_r" : 2,
+      "fused_relu" : 1,
+      "fused_tanh" : 0,
+      "debug_info" : "input.5",
+      "pad_fill_mode" : 0,
+      "pad_b" : 2,
+      "pad_l" : 2,
+      "top" : "input.7",
+      "blob_weights" : 5,
+      "K" : 1,
+      "blob_biases" : 3,
+      "name" : "input.5",
+      "has_batch_norm" : 0,
+      "type" : "convolution",
+      "n_groups" : 1,
+      "pad_t" : 2,
+      "has_biases" : 1,
+      "C" : 1,
+      "bottom" : "input.3",
+      "weights" : {
+
+      },
+      "Nx" : 5,
+      "pad_mode" : 0,
+      "pad_value" : 0,
+      "Ny" : 5,
+      "n_parallel" : 1
+    },
+    {
+      "pad_r" : 0,
+      "fused_relu" : 1,
+      "fused_tanh" : 0,
+      "debug_info" : "input.9",
+      "pad_fill_mode" : 0,
+      "pad_b" : 0,
+      "pad_l" : 0,
+      "top" : "x",
+      "blob_weights" : 9,
+      "K" : 1,
+      "blob_biases" : 7,
+      "name" : "input.9",
+      "has_batch_norm" : 0,
+      "type" : "convolution",
+      "n_groups" : 1,
+      "pad_t" : 0,
+      "has_biases" : 1,
+      "C" : 36,
+      "bottom" : "input.7",
+      "weights" : {
+
+      },
+      "Nx" : 24,
+      "pad_mode" : 0,
+      "pad_value" : 0,
+      "Ny" : 1,
+      "n_parallel" : 1
+    },
+    {
+      "size_of_axes" : 1,
+      "bottom" : "x",
+      "axes_0" : -1,
+      "weights" : {
+
+      },
+      "nd_axis" : 0,
+      "debug_info" : "39",
+      "version" : 1,
+      "top" : "39",
+      "type" : "squeeze",
+      "name" : "39"
+    },
+    {
+      "axis_h" : 0,
+      "axis_w" : 1,
+      "bottom" : "39",
+      "axis_k" : 2,
+      "axis_n" : 3,
+      "axis_seq" : 4,
+      "weights" : {
+
+      },
+      "debug_info" : "transpose_3",
+      "top" : "transpose_3",
+      "type" : "transpose",
+      "name" : "transpose_3"
+    },
+    {
+      "axis_h" : 2,
+      "axis_w" : 0,
+      "bottom" : "transpose_3",
+      "axis_k" : 1,
+      "axis_n" : 3,
+      "axis_seq" : 4,
+      "weights" : {
+
+      },
+      "debug_info" : "transpose_2",
+      "top" : "transpose_2",
+      "type" : "transpose",
+      "name" : "transpose_2"
+    },
+    {
+      "top" : "while_loop_0_loop_vars0_0",
+      "w" : 1,
+      "h" : 1,
+      "weights" : {
+
+      },
+      "nd_rank" : 1,
+      "type" : "load_constant",
+      "k" : 1,
+      "attributes" : {
+        "constant_if_condition" : 10
+      },
+      "bottom" : "",
+      "debug_info" : "while_loop_0_loop_vars0_0",
+      "n" : 1,
+      "name" : "while_loop_0_loop_vars0_0",
+      "constant_blob" : 11
+    },
+    {
+      "bottom" : "while_loop_0_loop_vars0_0",
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_0_0_input_copy",
+      "top" : "while_loop_0_0",
+      "type" : "copy",
+      "name" : "while_loop_0_0_input_copy",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "top" : "concat_1",
+      "w" : 128,
+      "h" : 1,
+      "name" : "concat_1",
+      "nd_rank" : 3,
+      "type" : "load_constant",
+      "k" : 321,
+      "bottom" : "",
+      "debug_info" : "concat_1",
+      "n" : 1,
+      "weights" : {
+
+      },
+      "constant_blob" : 13
+    },
+    {
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_0_1_input_copy",
+      "top" : "while_loop_0_1",
+      "type" : "copy",
+      "name" : "while_loop_0_1_input_copy",
+      "bottom" : "concat_1"
+    },
+    {
+      "bottom" : "while_loop_0_0,while_loop_0_0_@ssa_version_1",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_0_0_@ssa_version_2",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_0_0_@ssa_version_2",
+      "attributes" : {
+        "constant_if_condition" : 10,
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_0",
+      "top" : "",
+      "type" : "cf_loop",
+      "name" : "while_loop_0_loop_start",
+      "bottom" : ""
+    },
+    {
+      "top" : "slice_by_index_1",
+      "w" : 1,
+      "h" : 1,
+      "weights" : {
+
+      },
+      "nd_rank" : 1,
+      "type" : "load_constant",
+      "k" : 1,
+      "attributes" : {
+        "constant_if_condition" : 10
+      },
+      "bottom" : "",
+      "debug_info" : "slice_by_index_1",
+      "n" : 1,
+      "name" : "slice_by_index_1",
+      "constant_blob" : 15
+    },
+    {
+      "bottom" : "while_loop_0_0_@ssa_version_2,slice_by_index_1",
+      "alpha" : 1,
+      "operation" : 103,
+      "beta" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "less_1",
+      "top" : "less_1",
+      "type" : "elementwise",
+      "name" : "less_1",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "bottom" : "less_1",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_if",
+      "name" : "while_loop_0_if",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "bottom" : "while_loop_0_1,while_loop_0_1_@ssa_version_1",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_0_1_@ssa_version_2",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_0_1_@ssa_version_2",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "while_loop_0_0,while_loop_0_0_@ssa_version_1,while_loop_0_0_@ssa_version_2",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_0_0_@ssa_version_3",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_0_0_@ssa_version_3",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "bottom" : "transpose_2,while_loop_0_0_@ssa_version_3",
+      "validate_indices" : true,
+      "allow_negative_indices" : true,
+      "mode" : 0,
+      "weights" : {
+
+      },
+      "debug_info" : "gather_2",
+      "axis" : 0,
+      "top" : "gather_2",
+      "type" : "gather_nd",
+      "name" : "gather_2",
+      "batch_dims" : 0
+    },
+    {
+      "bottom" : "while_loop_0_1_@ssa_version_2,while_loop_0_0_@ssa_version_3",
+      "validate_indices" : true,
+      "allow_negative_indices" : true,
+      "mode" : 0,
+      "weights" : {
+
+      },
+      "debug_info" : "gather_3",
+      "axis" : 0,
+      "top" : "gather_3",
+      "type" : "gather_nd",
+      "name" : "gather_3",
+      "batch_dims" : 0
+    },
+    {
+      "size_of_axes" : 1,
+      "bottom" : "gather_2",
+      "axes_0" : 0,
+      "weights" : {
+
+      },
+      "nd_axis" : 0,
+      "debug_info" : "squeeze_2",
+      "version" : 1,
+      "top" : "squeeze_2",
+      "type" : "squeeze",
+      "name" : "squeeze_2"
+    },
+    {
+      "size_of_axes" : 1,
+      "bottom" : "gather_3",
+      "axes_0" : 0,
+      "weights" : {
+
+      },
+      "nd_axis" : 0,
+      "debug_info" : "squeeze_3",
+      "version" : 1,
+      "top" : "squeeze_3",
+      "type" : "squeeze",
+      "name" : "squeeze_3"
+    },
+    {
+      "nB" : 36,
+      "top" : "linear_6",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 19,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_2",
+      "blob_biases" : 17,
+      "has_tanh" : 0,
+      "debug_info" : "linear_6",
+      "name" : "linear_6",
+      "has_prelu" : 0
+    },
+    {
+      "nB" : 128,
+      "top" : "linear_7",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 23,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_3",
+      "blob_biases" : 21,
+      "has_tanh" : 0,
+      "debug_info" : "linear_7",
+      "name" : "linear_7",
+      "has_prelu" : 0
+    },
+    {
+      "bottom" : "linear_6,linear_7",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_5",
+      "top" : "add_5",
+      "type" : "elementwise",
+      "name" : "add_5",
+      "beta" : 0
+    },
+    {
+      "bottom" : "add_5",
+      "weights" : {
+
+      },
+      "mode" : 3,
+      "debug_info" : "sigmoid_2",
+      "top" : "sigmoid_2",
+      "type" : "activation",
+      "name" : "sigmoid_2"
+    },
+    {
+      "nB" : 36,
+      "top" : "linear_8",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 27,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_2",
+      "blob_biases" : 25,
+      "has_tanh" : 0,
+      "debug_info" : "linear_8",
+      "name" : "linear_8",
+      "has_prelu" : 0
+    },
+    {
+      "nB" : 128,
+      "top" : "linear_9",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 31,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_3",
+      "blob_biases" : 29,
+      "has_tanh" : 0,
+      "debug_info" : "linear_9",
+      "name" : "linear_9",
+      "has_prelu" : 0
+    },
+    {
+      "bottom" : "linear_8,linear_9",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_6",
+      "top" : "add_6",
+      "type" : "elementwise",
+      "name" : "add_6",
+      "beta" : 0
+    },
+    {
+      "bottom" : "add_6",
+      "weights" : {
+
+      },
+      "mode" : 3,
+      "debug_info" : "sigmoid_3",
+      "top" : "sigmoid_3",
+      "type" : "activation",
+      "name" : "sigmoid_3"
+    },
+    {
+      "nB" : 36,
+      "top" : "linear_10",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 35,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_2",
+      "blob_biases" : 33,
+      "has_tanh" : 0,
+      "debug_info" : "linear_10",
+      "name" : "linear_10",
+      "has_prelu" : 0
+    },
+    {
+      "nB" : 128,
+      "top" : "linear_11",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 39,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_3",
+      "blob_biases" : 37,
+      "has_tanh" : 0,
+      "debug_info" : "linear_11",
+      "name" : "linear_11",
+      "has_prelu" : 0
+    },
+    {
+      "bottom" : "sigmoid_2,linear_11",
+      "alpha" : 1,
+      "operation" : 1,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "mul_3",
+      "top" : "mul_3",
+      "type" : "elementwise",
+      "name" : "mul_3",
+      "beta" : 0
+    },
+    {
+      "bottom" : "linear_10,mul_3",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_7",
+      "top" : "add_7",
+      "type" : "elementwise",
+      "name" : "add_7",
+      "beta" : 0
+    },
+    {
+      "bottom" : "add_7",
+      "weights" : {
+
+      },
+      "mode" : 1,
+      "debug_info" : "tanh_1",
+      "top" : "tanh_1",
+      "type" : "activation",
+      "name" : "tanh_1"
+    },
+    {
+      "top" : "sub_1_x_0",
+      "w" : 1,
+      "h" : 1,
+      "name" : "sub_1_x_0",
+      "nd_rank" : 1,
+      "type" : "load_constant",
+      "k" : 1,
+      "bottom" : "",
+      "debug_info" : "sub_1_x_0",
+      "n" : 1,
+      "weights" : {
+
+      },
+      "constant_blob" : 41
+    },
+    {
+      "alpha" : -1,
+      "bottom" : "sigmoid_3",
+      "weights" : {
+
+      },
+      "mode" : 6,
+      "debug_info" : "_neg_y_sub_1",
+      "top" : "_neg_y_sub_1",
+      "type" : "activation",
+      "name" : "_neg_y_sub_1",
+      "beta" : 0
+    },
+    {
+      "bottom" : "_neg_y_sub_1,sub_1_x_0",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "sub_1",
+      "top" : "sub_1",
+      "type" : "elementwise",
+      "name" : "sub_1",
+      "beta" : 0
+    },
+    {
+      "bottom" : "sub_1,tanh_1",
+      "alpha" : 1,
+      "operation" : 1,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "mul_4",
+      "top" : "mul_4",
+      "type" : "elementwise",
+      "name" : "mul_4",
+      "beta" : 0
+    },
+    {
+      "bottom" : "sigmoid_3,squeeze_3",
+      "alpha" : 1,
+      "operation" : 1,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "mul_5",
+      "top" : "mul_5",
+      "type" : "elementwise",
+      "name" : "mul_5",
+      "beta" : 0
+    },
+    {
+      "bottom" : "mul_4,mul_5",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_8",
+      "top" : "add_8",
+      "type" : "elementwise",
+      "name" : "add_8",
+      "beta" : 0
+    },
+    {
+      "bottom" : "while_loop_0_0_@ssa_version_3",
+      "alpha" : 1,
+      "operation" : 0,
+      "beta" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_9",
+      "top" : "add_9",
+      "type" : "elementwise",
+      "name" : "add_9",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "size_of_axes" : 1,
+      "bottom" : "add_8",
+      "axes_0" : 0,
+      "weights" : {
+
+      },
+      "nd_axis" : 0,
+      "debug_info" : "expand_dims_1",
+      "top" : "expand_dims_1",
+      "type" : "expand_dims",
+      "name" : "expand_dims_1"
+    },
+    {
+      "bottom" : "while_loop_0_1_@ssa_version_2,add_9,expand_dims_1",
+      "validate_indices" : true,
+      "allow_negative_indices" : true,
+      "mode" : 0,
+      "weights" : {
+
+      },
+      "debug_info" : "scatter_1",
+      "axis" : 0,
+      "top" : "scatter_1",
+      "type" : "scatter_nd",
+      "name" : "scatter_1",
+      "accumulation_mode" : 1
+    },
+    {
+      "bottom" : "add_9",
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_0_0_ret_copy",
+      "top" : "while_loop_0_0_@ssa_version_1",
+      "type" : "copy",
+      "name" : "while_loop_0_0_ret_copy",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_0_1_ret_copy",
+      "top" : "while_loop_0_1_@ssa_version_1",
+      "type" : "copy",
+      "name" : "while_loop_0_1_ret_copy",
+      "bottom" : "scatter_1"
+    },
+    {
+      "bottom" : "",
+      "weights" : {
+
+      },
+      "cf_stack_depth" : 1,
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_jump",
+      "name" : "while_loop_0_jump"
+    },
+    {
+      "bottom" : "",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_end",
+      "name" : "while_loop_0_end_loop_if",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_end",
+      "name" : "while_loop_0_end_loop",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "while_loop_0_1,while_loop_0_1_@ssa_version_1",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_0_1_@ssa_version_3",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_0_1_@ssa_version_3",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "while_loop_0_1_@ssa_version_3",
+      "end" : 321,
+      "start" : 1,
+      "weights" : {
+
+      },
+      "axis" : 2,
+      "debug_info" : "input_layer_0_tmp_forward",
+      "top" : "input_layer_0_tmp_forward",
+      "type" : "slice",
+      "name" : "input_layer_0_tmp_forward"
+    },
+    {
+      "begin_n" : 0,
+      "static_sizes_k" : 0,
+      "end_mask_h" : true,
+      "end_w" : 1,
+      "end_h" : 1,
+      "begin_h" : 0,
+      "stride_n" : 1,
+      "end_seq" : 1,
+      "begin_mask_seq" : false,
+      "begin_mask_h" : true,
+      "squeeze_mask_h" : false,
+      "stride_k" : 1,
+      "type" : "general_slice",
+      "begin_mask_k" : true,
+      "static_sizes_w" : 0,
+      "begin_w" : 0,
+      "end_mask_k" : true,
+      "use_static_sizes" : false,
+      "stride_h" : 1,
+      "static_sizes_n" : 0,
+      "begin_mask_n" : false,
+      "weights" : {
+
+      },
+      "name" : "reverse_0",
+      "stride_seq" : 1,
+      "end_k" : 1,
+      "static_sizes_seq" : 0,
+      "top" : "reverse_0",
+      "begin_seq" : 0,
+      "squeeze_mask_k" : false,
+      "begin_k" : 0,
+      "end_mask_w" : true,
+      "end_mask_seq" : false,
+      "end_mask_n" : false,
+      "debug_info" : "reverse_0",
+      "stride_w" : -1,
+      "squeeze_mask_seq" : false,
+      "static_sizes_h" : 0,
+      "begin_mask_w" : true,
+      "bottom" : "transpose_2",
+      "end_n" : 1,
+      "squeeze_mask_w" : false,
+      "squeeze_mask_n" : false
+    },
+    {
+      "top" : "while_loop_1_loop_vars0_0",
+      "w" : 1,
+      "h" : 1,
+      "weights" : {
+
+      },
+      "nd_rank" : 1,
+      "type" : "load_constant",
+      "k" : 1,
+      "attributes" : {
+        "constant_if_condition" : 10
+      },
+      "bottom" : "",
+      "debug_info" : "while_loop_1_loop_vars0_0",
+      "n" : 1,
+      "name" : "while_loop_1_loop_vars0_0",
+      "constant_blob" : 43
+    },
+    {
+      "bottom" : "while_loop_1_loop_vars0_0",
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_1_0_input_copy",
+      "top" : "while_loop_1_0",
+      "type" : "copy",
+      "name" : "while_loop_1_0_input_copy",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "top" : "concat_3",
+      "w" : 128,
+      "h" : 1,
+      "name" : "concat_3",
+      "nd_rank" : 3,
+      "type" : "load_constant",
+      "k" : 321,
+      "bottom" : "",
+      "debug_info" : "concat_3",
+      "n" : 1,
+      "weights" : {
+
+      },
+      "constant_blob" : 45
+    },
+    {
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_1_1_input_copy",
+      "top" : "while_loop_1_1",
+      "type" : "copy",
+      "name" : "while_loop_1_1_input_copy",
+      "bottom" : "concat_3"
+    },
+    {
+      "bottom" : "while_loop_1_0,while_loop_1_0_@ssa_version_1",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_1_0_@ssa_version_2",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_1_0_@ssa_version_2",
+      "attributes" : {
+        "constant_if_condition" : 10,
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_1",
+      "top" : "",
+      "type" : "cf_loop",
+      "name" : "while_loop_1_loop_start",
+      "bottom" : ""
+    },
+    {
+      "top" : "slice_by_index_4",
+      "w" : 1,
+      "h" : 1,
+      "weights" : {
+
+      },
+      "nd_rank" : 1,
+      "type" : "load_constant",
+      "k" : 1,
+      "attributes" : {
+        "constant_if_condition" : 10
+      },
+      "bottom" : "",
+      "debug_info" : "slice_by_index_4",
+      "n" : 1,
+      "name" : "slice_by_index_4",
+      "constant_blob" : 47
+    },
+    {
+      "bottom" : "while_loop_1_0_@ssa_version_2,slice_by_index_4",
+      "alpha" : 1,
+      "operation" : 103,
+      "beta" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "less_3",
+      "top" : "less_3",
+      "type" : "elementwise",
+      "name" : "less_3",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "bottom" : "less_3",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_if",
+      "name" : "while_loop_1_if",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "bottom" : "while_loop_1_1,while_loop_1_1_@ssa_version_1",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_1_1_@ssa_version_2",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_1_1_@ssa_version_2",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "while_loop_1_0,while_loop_1_0_@ssa_version_1,while_loop_1_0_@ssa_version_2",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_1_0_@ssa_version_3",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_1_0_@ssa_version_3",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "bottom" : "reverse_0,while_loop_1_0_@ssa_version_3",
+      "validate_indices" : true,
+      "allow_negative_indices" : true,
+      "mode" : 0,
+      "weights" : {
+
+      },
+      "debug_info" : "gather_6",
+      "axis" : 0,
+      "top" : "gather_6",
+      "type" : "gather_nd",
+      "name" : "gather_6",
+      "batch_dims" : 0
+    },
+    {
+      "bottom" : "while_loop_1_1_@ssa_version_2,while_loop_1_0_@ssa_version_3",
+      "validate_indices" : true,
+      "allow_negative_indices" : true,
+      "mode" : 0,
+      "weights" : {
+
+      },
+      "debug_info" : "gather_7",
+      "axis" : 0,
+      "top" : "gather_7",
+      "type" : "gather_nd",
+      "name" : "gather_7",
+      "batch_dims" : 0
+    },
+    {
+      "size_of_axes" : 1,
+      "bottom" : "gather_6",
+      "axes_0" : 0,
+      "weights" : {
+
+      },
+      "nd_axis" : 0,
+      "debug_info" : "squeeze_6",
+      "version" : 1,
+      "top" : "squeeze_6",
+      "type" : "squeeze",
+      "name" : "squeeze_6"
+    },
+    {
+      "size_of_axes" : 1,
+      "bottom" : "gather_7",
+      "axes_0" : 0,
+      "weights" : {
+
+      },
+      "nd_axis" : 0,
+      "debug_info" : "squeeze_7",
+      "version" : 1,
+      "top" : "squeeze_7",
+      "type" : "squeeze",
+      "name" : "squeeze_7"
+    },
+    {
+      "nB" : 36,
+      "top" : "linear_18",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 51,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_6",
+      "blob_biases" : 49,
+      "has_tanh" : 0,
+      "debug_info" : "linear_18",
+      "name" : "linear_18",
+      "has_prelu" : 0
+    },
+    {
+      "nB" : 128,
+      "top" : "linear_19",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 55,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_7",
+      "blob_biases" : 53,
+      "has_tanh" : 0,
+      "debug_info" : "linear_19",
+      "name" : "linear_19",
+      "has_prelu" : 0
+    },
+    {
+      "bottom" : "linear_18,linear_19",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_15",
+      "top" : "add_15",
+      "type" : "elementwise",
+      "name" : "add_15",
+      "beta" : 0
+    },
+    {
+      "bottom" : "add_15",
+      "weights" : {
+
+      },
+      "mode" : 3,
+      "debug_info" : "sigmoid_6",
+      "top" : "sigmoid_6",
+      "type" : "activation",
+      "name" : "sigmoid_6"
+    },
+    {
+      "nB" : 36,
+      "top" : "linear_20",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 59,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_6",
+      "blob_biases" : 57,
+      "has_tanh" : 0,
+      "debug_info" : "linear_20",
+      "name" : "linear_20",
+      "has_prelu" : 0
+    },
+    {
+      "nB" : 128,
+      "top" : "linear_21",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 63,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_7",
+      "blob_biases" : 61,
+      "has_tanh" : 0,
+      "debug_info" : "linear_21",
+      "name" : "linear_21",
+      "has_prelu" : 0
+    },
+    {
+      "bottom" : "linear_20,linear_21",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_16",
+      "top" : "add_16",
+      "type" : "elementwise",
+      "name" : "add_16",
+      "beta" : 0
+    },
+    {
+      "bottom" : "add_16",
+      "weights" : {
+
+      },
+      "mode" : 3,
+      "debug_info" : "sigmoid_7",
+      "top" : "sigmoid_7",
+      "type" : "activation",
+      "name" : "sigmoid_7"
+    },
+    {
+      "nB" : 36,
+      "top" : "linear_22",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 67,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_6",
+      "blob_biases" : 65,
+      "has_tanh" : 0,
+      "debug_info" : "linear_22",
+      "name" : "linear_22",
+      "has_prelu" : 0
+    },
+    {
+      "nB" : 128,
+      "top" : "linear_23",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 71,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_7",
+      "blob_biases" : 69,
+      "has_tanh" : 0,
+      "debug_info" : "linear_23",
+      "name" : "linear_23",
+      "has_prelu" : 0
+    },
+    {
+      "bottom" : "sigmoid_6,linear_23",
+      "alpha" : 1,
+      "operation" : 1,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "mul_9",
+      "top" : "mul_9",
+      "type" : "elementwise",
+      "name" : "mul_9",
+      "beta" : 0
+    },
+    {
+      "bottom" : "linear_22,mul_9",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_17",
+      "top" : "add_17",
+      "type" : "elementwise",
+      "name" : "add_17",
+      "beta" : 0
+    },
+    {
+      "bottom" : "add_17",
+      "weights" : {
+
+      },
+      "mode" : 1,
+      "debug_info" : "tanh_3",
+      "top" : "tanh_3",
+      "type" : "activation",
+      "name" : "tanh_3"
+    },
+    {
+      "top" : "sub_3_x_0",
+      "w" : 1,
+      "h" : 1,
+      "name" : "sub_3_x_0",
+      "nd_rank" : 1,
+      "type" : "load_constant",
+      "k" : 1,
+      "bottom" : "",
+      "debug_info" : "sub_3_x_0",
+      "n" : 1,
+      "weights" : {
+
+      },
+      "constant_blob" : 73
+    },
+    {
+      "alpha" : -1,
+      "bottom" : "sigmoid_7",
+      "weights" : {
+
+      },
+      "mode" : 6,
+      "debug_info" : "_neg_y_sub_3",
+      "top" : "_neg_y_sub_3",
+      "type" : "activation",
+      "name" : "_neg_y_sub_3",
+      "beta" : 0
+    },
+    {
+      "bottom" : "_neg_y_sub_3,sub_3_x_0",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "sub_3",
+      "top" : "sub_3",
+      "type" : "elementwise",
+      "name" : "sub_3",
+      "beta" : 0
+    },
+    {
+      "bottom" : "sub_3,tanh_3",
+      "alpha" : 1,
+      "operation" : 1,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "mul_10",
+      "top" : "mul_10",
+      "type" : "elementwise",
+      "name" : "mul_10",
+      "beta" : 0
+    },
+    {
+      "bottom" : "sigmoid_7,squeeze_7",
+      "alpha" : 1,
+      "operation" : 1,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "mul_11",
+      "top" : "mul_11",
+      "type" : "elementwise",
+      "name" : "mul_11",
+      "beta" : 0
+    },
+    {
+      "bottom" : "mul_10,mul_11",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_18",
+      "top" : "add_18",
+      "type" : "elementwise",
+      "name" : "add_18",
+      "beta" : 0
+    },
+    {
+      "bottom" : "while_loop_1_0_@ssa_version_3",
+      "alpha" : 1,
+      "operation" : 0,
+      "beta" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_19",
+      "top" : "add_19",
+      "type" : "elementwise",
+      "name" : "add_19",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "size_of_axes" : 1,
+      "bottom" : "add_18",
+      "axes_0" : 0,
+      "weights" : {
+
+      },
+      "nd_axis" : 0,
+      "debug_info" : "expand_dims_3",
+      "top" : "expand_dims_3",
+      "type" : "expand_dims",
+      "name" : "expand_dims_3"
+    },
+    {
+      "bottom" : "while_loop_1_1_@ssa_version_2,add_19,expand_dims_3",
+      "validate_indices" : true,
+      "allow_negative_indices" : true,
+      "mode" : 0,
+      "weights" : {
+
+      },
+      "debug_info" : "scatter_3",
+      "axis" : 0,
+      "top" : "scatter_3",
+      "type" : "scatter_nd",
+      "name" : "scatter_3",
+      "accumulation_mode" : 1
+    },
+    {
+      "bottom" : "add_19",
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_1_0_ret_copy",
+      "top" : "while_loop_1_0_@ssa_version_1",
+      "type" : "copy",
+      "name" : "while_loop_1_0_ret_copy",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_1_1_ret_copy",
+      "top" : "while_loop_1_1_@ssa_version_1",
+      "type" : "copy",
+      "name" : "while_loop_1_1_ret_copy",
+      "bottom" : "scatter_3"
+    },
+    {
+      "bottom" : "",
+      "weights" : {
+
+      },
+      "cf_stack_depth" : 1,
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_jump",
+      "name" : "while_loop_1_jump"
+    },
+    {
+      "bottom" : "",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_end",
+      "name" : "while_loop_1_end_loop_if",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_end",
+      "name" : "while_loop_1_end_loop",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "while_loop_1_1,while_loop_1_1_@ssa_version_1",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_1_1_@ssa_version_3",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_1_1_@ssa_version_3",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "while_loop_1_1_@ssa_version_3",
+      "end" : 321,
+      "start" : 1,
+      "weights" : {
+
+      },
+      "axis" : 2,
+      "debug_info" : "input_layer_0_tmp_backward_reverse",
+      "top" : "input_layer_0_tmp_backward_reverse",
+      "type" : "slice",
+      "name" : "input_layer_0_tmp_backward_reverse"
+    },
+    {
+      "begin_n" : 0,
+      "static_sizes_k" : 0,
+      "end_mask_h" : true,
+      "end_w" : 1,
+      "end_h" : 1,
+      "begin_h" : 0,
+      "stride_n" : 1,
+      "end_seq" : 1,
+      "begin_mask_seq" : false,
+      "begin_mask_h" : true,
+      "squeeze_mask_h" : false,
+      "stride_k" : 1,
+      "type" : "general_slice",
+      "begin_mask_k" : true,
+      "static_sizes_w" : 0,
+      "begin_w" : 0,
+      "end_mask_k" : true,
+      "use_static_sizes" : false,
+      "stride_h" : 1,
+      "static_sizes_n" : 0,
+      "begin_mask_n" : false,
+      "weights" : {
+
+      },
+      "name" : "input_layer_0_tmp_backward",
+      "stride_seq" : 1,
+      "end_k" : 1,
+      "static_sizes_seq" : 0,
+      "top" : "input_layer_0_tmp_backward",
+      "begin_seq" : 0,
+      "squeeze_mask_k" : false,
+      "begin_k" : 0,
+      "end_mask_w" : true,
+      "end_mask_seq" : false,
+      "end_mask_n" : false,
+      "debug_info" : "input_layer_0_tmp_backward",
+      "stride_w" : -1,
+      "squeeze_mask_seq" : false,
+      "static_sizes_h" : 0,
+      "begin_mask_w" : true,
+      "bottom" : "input_layer_0_tmp_backward_reverse",
+      "end_n" : 1,
+      "squeeze_mask_w" : false,
+      "squeeze_mask_n" : false
+    },
+    {
+      "bottom" : "input_layer_0_tmp_forward,input_layer_0_tmp_backward",
+      "weights" : {
+
+      },
+      "nd_mode" : true,
+      "axis" : 2,
+      "debug_info" : "input_layer_0_tmp",
+      "top" : "input_layer_0_tmp",
+      "type" : "general_concat",
+      "name" : "input_layer_0_tmp"
+    },
+    {
+      "top" : "while_loop_2_loop_vars0_0",
+      "w" : 1,
+      "h" : 1,
+      "weights" : {
+
+      },
+      "nd_rank" : 1,
+      "type" : "load_constant",
+      "k" : 1,
+      "attributes" : {
+        "constant_if_condition" : 10
+      },
+      "bottom" : "",
+      "debug_info" : "while_loop_2_loop_vars0_0",
+      "n" : 1,
+      "name" : "while_loop_2_loop_vars0_0",
+      "constant_blob" : 75
+    },
+    {
+      "bottom" : "while_loop_2_loop_vars0_0",
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_2_0_input_copy",
+      "top" : "while_loop_2_0",
+      "type" : "copy",
+      "name" : "while_loop_2_0_input_copy",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "top" : "concat_5",
+      "w" : 128,
+      "h" : 1,
+      "name" : "concat_5",
+      "nd_rank" : 3,
+      "type" : "load_constant",
+      "k" : 321,
+      "bottom" : "",
+      "debug_info" : "concat_5",
+      "n" : 1,
+      "weights" : {
+
+      },
+      "constant_blob" : 77
+    },
+    {
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_2_1_input_copy",
+      "top" : "while_loop_2_1",
+      "type" : "copy",
+      "name" : "while_loop_2_1_input_copy",
+      "bottom" : "concat_5"
+    },
+    {
+      "bottom" : "while_loop_2_0,while_loop_2_0_@ssa_version_1",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_2_0_@ssa_version_2",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_2_0_@ssa_version_2",
+      "attributes" : {
+        "constant_if_condition" : 10,
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_2",
+      "top" : "",
+      "type" : "cf_loop",
+      "name" : "while_loop_2_loop_start",
+      "bottom" : ""
+    },
+    {
+      "top" : "slice_by_index_7",
+      "w" : 1,
+      "h" : 1,
+      "weights" : {
+
+      },
+      "nd_rank" : 1,
+      "type" : "load_constant",
+      "k" : 1,
+      "attributes" : {
+        "constant_if_condition" : 10
+      },
+      "bottom" : "",
+      "debug_info" : "slice_by_index_7",
+      "n" : 1,
+      "name" : "slice_by_index_7",
+      "constant_blob" : 79
+    },
+    {
+      "bottom" : "while_loop_2_0_@ssa_version_2,slice_by_index_7",
+      "alpha" : 1,
+      "operation" : 103,
+      "beta" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "less_5",
+      "top" : "less_5",
+      "type" : "elementwise",
+      "name" : "less_5",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "bottom" : "less_5",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_if",
+      "name" : "while_loop_2_if",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "bottom" : "while_loop_2_1,while_loop_2_1_@ssa_version_1",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_2_1_@ssa_version_2",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_2_1_@ssa_version_2",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "while_loop_2_0,while_loop_2_0_@ssa_version_1,while_loop_2_0_@ssa_version_2",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_2_0_@ssa_version_3",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_2_0_@ssa_version_3",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "bottom" : "input_layer_0_tmp,while_loop_2_0_@ssa_version_3",
+      "validate_indices" : true,
+      "allow_negative_indices" : true,
+      "mode" : 0,
+      "weights" : {
+
+      },
+      "debug_info" : "gather_10",
+      "axis" : 0,
+      "top" : "gather_10",
+      "type" : "gather_nd",
+      "name" : "gather_10",
+      "batch_dims" : 0
+    },
+    {
+      "bottom" : "while_loop_2_1_@ssa_version_2,while_loop_2_0_@ssa_version_3",
+      "validate_indices" : true,
+      "allow_negative_indices" : true,
+      "mode" : 0,
+      "weights" : {
+
+      },
+      "debug_info" : "gather_11",
+      "axis" : 0,
+      "top" : "gather_11",
+      "type" : "gather_nd",
+      "name" : "gather_11",
+      "batch_dims" : 0
+    },
+    {
+      "size_of_axes" : 1,
+      "bottom" : "gather_10",
+      "axes_0" : 0,
+      "weights" : {
+
+      },
+      "nd_axis" : 0,
+      "debug_info" : "squeeze_10",
+      "version" : 1,
+      "top" : "squeeze_10",
+      "type" : "squeeze",
+      "name" : "squeeze_10"
+    },
+    {
+      "size_of_axes" : 1,
+      "bottom" : "gather_11",
+      "axes_0" : 0,
+      "weights" : {
+
+      },
+      "nd_axis" : 0,
+      "debug_info" : "squeeze_11",
+      "version" : 1,
+      "top" : "squeeze_11",
+      "type" : "squeeze",
+      "name" : "squeeze_11"
+    },
+    {
+      "nB" : 256,
+      "top" : "linear_30",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 83,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_10",
+      "blob_biases" : 81,
+      "has_tanh" : 0,
+      "debug_info" : "linear_30",
+      "name" : "linear_30",
+      "has_prelu" : 0
+    },
+    {
+      "nB" : 128,
+      "top" : "linear_31",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 87,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_11",
+      "blob_biases" : 85,
+      "has_tanh" : 0,
+      "debug_info" : "linear_31",
+      "name" : "linear_31",
+      "has_prelu" : 0
+    },
+    {
+      "bottom" : "linear_30,linear_31",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_25",
+      "top" : "add_25",
+      "type" : "elementwise",
+      "name" : "add_25",
+      "beta" : 0
+    },
+    {
+      "bottom" : "add_25",
+      "weights" : {
+
+      },
+      "mode" : 3,
+      "debug_info" : "sigmoid_10",
+      "top" : "sigmoid_10",
+      "type" : "activation",
+      "name" : "sigmoid_10"
+    },
+    {
+      "nB" : 256,
+      "top" : "linear_32",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 91,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_10",
+      "blob_biases" : 89,
+      "has_tanh" : 0,
+      "debug_info" : "linear_32",
+      "name" : "linear_32",
+      "has_prelu" : 0
+    },
+    {
+      "nB" : 128,
+      "top" : "linear_33",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 95,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_11",
+      "blob_biases" : 93,
+      "has_tanh" : 0,
+      "debug_info" : "linear_33",
+      "name" : "linear_33",
+      "has_prelu" : 0
+    },
+    {
+      "bottom" : "linear_32,linear_33",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_26",
+      "top" : "add_26",
+      "type" : "elementwise",
+      "name" : "add_26",
+      "beta" : 0
+    },
+    {
+      "bottom" : "add_26",
+      "weights" : {
+
+      },
+      "mode" : 3,
+      "debug_info" : "sigmoid_11",
+      "top" : "sigmoid_11",
+      "type" : "activation",
+      "name" : "sigmoid_11"
+    },
+    {
+      "nB" : 256,
+      "top" : "linear_34",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 99,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_10",
+      "blob_biases" : 97,
+      "has_tanh" : 0,
+      "debug_info" : "linear_34",
+      "name" : "linear_34",
+      "has_prelu" : 0
+    },
+    {
+      "nB" : 128,
+      "top" : "linear_35",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 103,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_11",
+      "blob_biases" : 101,
+      "has_tanh" : 0,
+      "debug_info" : "linear_35",
+      "name" : "linear_35",
+      "has_prelu" : 0
+    },
+    {
+      "bottom" : "sigmoid_10,linear_35",
+      "alpha" : 1,
+      "operation" : 1,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "mul_15",
+      "top" : "mul_15",
+      "type" : "elementwise",
+      "name" : "mul_15",
+      "beta" : 0
+    },
+    {
+      "bottom" : "linear_34,mul_15",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_27",
+      "top" : "add_27",
+      "type" : "elementwise",
+      "name" : "add_27",
+      "beta" : 0
+    },
+    {
+      "bottom" : "add_27",
+      "weights" : {
+
+      },
+      "mode" : 1,
+      "debug_info" : "tanh_5",
+      "top" : "tanh_5",
+      "type" : "activation",
+      "name" : "tanh_5"
+    },
+    {
+      "top" : "sub_5_x_0",
+      "w" : 1,
+      "h" : 1,
+      "name" : "sub_5_x_0",
+      "nd_rank" : 1,
+      "type" : "load_constant",
+      "k" : 1,
+      "bottom" : "",
+      "debug_info" : "sub_5_x_0",
+      "n" : 1,
+      "weights" : {
+
+      },
+      "constant_blob" : 105
+    },
+    {
+      "alpha" : -1,
+      "bottom" : "sigmoid_11",
+      "weights" : {
+
+      },
+      "mode" : 6,
+      "debug_info" : "_neg_y_sub_5",
+      "top" : "_neg_y_sub_5",
+      "type" : "activation",
+      "name" : "_neg_y_sub_5",
+      "beta" : 0
+    },
+    {
+      "bottom" : "_neg_y_sub_5,sub_5_x_0",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "sub_5",
+      "top" : "sub_5",
+      "type" : "elementwise",
+      "name" : "sub_5",
+      "beta" : 0
+    },
+    {
+      "bottom" : "sub_5,tanh_5",
+      "alpha" : 1,
+      "operation" : 1,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "mul_16",
+      "top" : "mul_16",
+      "type" : "elementwise",
+      "name" : "mul_16",
+      "beta" : 0
+    },
+    {
+      "bottom" : "sigmoid_11,squeeze_11",
+      "alpha" : 1,
+      "operation" : 1,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "mul_17",
+      "top" : "mul_17",
+      "type" : "elementwise",
+      "name" : "mul_17",
+      "beta" : 0
+    },
+    {
+      "bottom" : "mul_16,mul_17",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_28",
+      "top" : "add_28",
+      "type" : "elementwise",
+      "name" : "add_28",
+      "beta" : 0
+    },
+    {
+      "bottom" : "while_loop_2_0_@ssa_version_3",
+      "alpha" : 1,
+      "operation" : 0,
+      "beta" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_29",
+      "top" : "add_29",
+      "type" : "elementwise",
+      "name" : "add_29",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "size_of_axes" : 1,
+      "bottom" : "add_28",
+      "axes_0" : 0,
+      "weights" : {
+
+      },
+      "nd_axis" : 0,
+      "debug_info" : "expand_dims_5",
+      "top" : "expand_dims_5",
+      "type" : "expand_dims",
+      "name" : "expand_dims_5"
+    },
+    {
+      "bottom" : "while_loop_2_1_@ssa_version_2,add_29,expand_dims_5",
+      "validate_indices" : true,
+      "allow_negative_indices" : true,
+      "mode" : 0,
+      "weights" : {
+
+      },
+      "debug_info" : "scatter_5",
+      "axis" : 0,
+      "top" : "scatter_5",
+      "type" : "scatter_nd",
+      "name" : "scatter_5",
+      "accumulation_mode" : 1
+    },
+    {
+      "bottom" : "add_29",
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_2_0_ret_copy",
+      "top" : "while_loop_2_0_@ssa_version_1",
+      "type" : "copy",
+      "name" : "while_loop_2_0_ret_copy",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_2_1_ret_copy",
+      "top" : "while_loop_2_1_@ssa_version_1",
+      "type" : "copy",
+      "name" : "while_loop_2_1_ret_copy",
+      "bottom" : "scatter_5"
+    },
+    {
+      "bottom" : "",
+      "weights" : {
+
+      },
+      "cf_stack_depth" : 1,
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_jump",
+      "name" : "while_loop_2_jump"
+    },
+    {
+      "bottom" : "",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_end",
+      "name" : "while_loop_2_end_loop_if",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_end",
+      "name" : "while_loop_2_end_loop",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "while_loop_2_1,while_loop_2_1_@ssa_version_1",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_2_1_@ssa_version_3",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_2_1_@ssa_version_3",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "while_loop_2_1_@ssa_version_3",
+      "end" : 321,
+      "start" : 1,
+      "weights" : {
+
+      },
+      "axis" : 2,
+      "debug_info" : "input_tmp_forward",
+      "top" : "input_tmp_forward",
+      "type" : "slice",
+      "name" : "input_tmp_forward"
+    },
+    {
+      "begin_n" : 0,
+      "static_sizes_k" : 0,
+      "end_mask_h" : true,
+      "end_w" : 1,
+      "end_h" : 1,
+      "begin_h" : 0,
+      "stride_n" : 1,
+      "end_seq" : 1,
+      "begin_mask_seq" : false,
+      "begin_mask_h" : true,
+      "squeeze_mask_h" : false,
+      "stride_k" : 1,
+      "type" : "general_slice",
+      "begin_mask_k" : true,
+      "static_sizes_w" : 0,
+      "begin_w" : 0,
+      "end_mask_k" : true,
+      "use_static_sizes" : false,
+      "stride_h" : 1,
+      "static_sizes_n" : 0,
+      "begin_mask_n" : false,
+      "weights" : {
+
+      },
+      "name" : "reverse_1",
+      "stride_seq" : 1,
+      "end_k" : 1,
+      "static_sizes_seq" : 0,
+      "top" : "reverse_1",
+      "begin_seq" : 0,
+      "squeeze_mask_k" : false,
+      "begin_k" : 0,
+      "end_mask_w" : true,
+      "end_mask_seq" : false,
+      "end_mask_n" : false,
+      "debug_info" : "reverse_1",
+      "stride_w" : -1,
+      "squeeze_mask_seq" : false,
+      "static_sizes_h" : 0,
+      "begin_mask_w" : true,
+      "bottom" : "input_layer_0_tmp",
+      "end_n" : 1,
+      "squeeze_mask_w" : false,
+      "squeeze_mask_n" : false
+    },
+    {
+      "top" : "while_loop_3_loop_vars0_0",
+      "w" : 1,
+      "h" : 1,
+      "weights" : {
+
+      },
+      "nd_rank" : 1,
+      "type" : "load_constant",
+      "k" : 1,
+      "attributes" : {
+        "constant_if_condition" : 10
+      },
+      "bottom" : "",
+      "debug_info" : "while_loop_3_loop_vars0_0",
+      "n" : 1,
+      "name" : "while_loop_3_loop_vars0_0",
+      "constant_blob" : 107
+    },
+    {
+      "bottom" : "while_loop_3_loop_vars0_0",
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_3_0_input_copy",
+      "top" : "while_loop_3_0",
+      "type" : "copy",
+      "name" : "while_loop_3_0_input_copy",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "top" : "concat_7",
+      "w" : 128,
+      "h" : 1,
+      "name" : "concat_7",
+      "nd_rank" : 3,
+      "type" : "load_constant",
+      "k" : 321,
+      "bottom" : "",
+      "debug_info" : "concat_7",
+      "n" : 1,
+      "weights" : {
+
+      },
+      "constant_blob" : 109
+    },
+    {
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_3_1_input_copy",
+      "top" : "while_loop_3_1",
+      "type" : "copy",
+      "name" : "while_loop_3_1_input_copy",
+      "bottom" : "concat_7"
+    },
+    {
+      "bottom" : "while_loop_3_0,while_loop_3_0_@ssa_version_1",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_3_0_@ssa_version_2",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_3_0_@ssa_version_2",
+      "attributes" : {
+        "constant_if_condition" : 10,
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_3",
+      "top" : "",
+      "type" : "cf_loop",
+      "name" : "while_loop_3_loop_start",
+      "bottom" : ""
+    },
+    {
+      "top" : "slice_by_index_10",
+      "w" : 1,
+      "h" : 1,
+      "weights" : {
+
+      },
+      "nd_rank" : 1,
+      "type" : "load_constant",
+      "k" : 1,
+      "attributes" : {
+        "constant_if_condition" : 10
+      },
+      "bottom" : "",
+      "debug_info" : "slice_by_index_10",
+      "n" : 1,
+      "name" : "slice_by_index_10",
+      "constant_blob" : 111
+    },
+    {
+      "bottom" : "while_loop_3_0_@ssa_version_2,slice_by_index_10",
+      "alpha" : 1,
+      "operation" : 103,
+      "beta" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "less_7",
+      "top" : "less_7",
+      "type" : "elementwise",
+      "name" : "less_7",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "bottom" : "less_7",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_if",
+      "name" : "while_loop_3_if",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "bottom" : "while_loop_3_1,while_loop_3_1_@ssa_version_1",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_3_1_@ssa_version_2",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_3_1_@ssa_version_2",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "while_loop_3_0,while_loop_3_0_@ssa_version_1,while_loop_3_0_@ssa_version_2",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_3_0_@ssa_version_3",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_3_0_@ssa_version_3",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "bottom" : "reverse_1,while_loop_3_0_@ssa_version_3",
+      "validate_indices" : true,
+      "allow_negative_indices" : true,
+      "mode" : 0,
+      "weights" : {
+
+      },
+      "debug_info" : "gather_14",
+      "axis" : 0,
+      "top" : "gather_14",
+      "type" : "gather_nd",
+      "name" : "gather_14",
+      "batch_dims" : 0
+    },
+    {
+      "bottom" : "while_loop_3_1_@ssa_version_2,while_loop_3_0_@ssa_version_3",
+      "validate_indices" : true,
+      "allow_negative_indices" : true,
+      "mode" : 0,
+      "weights" : {
+
+      },
+      "debug_info" : "gather_15",
+      "axis" : 0,
+      "top" : "gather_15",
+      "type" : "gather_nd",
+      "name" : "gather_15",
+      "batch_dims" : 0
+    },
+    {
+      "size_of_axes" : 1,
+      "bottom" : "gather_14",
+      "axes_0" : 0,
+      "weights" : {
+
+      },
+      "nd_axis" : 0,
+      "debug_info" : "squeeze_14",
+      "version" : 1,
+      "top" : "squeeze_14",
+      "type" : "squeeze",
+      "name" : "squeeze_14"
+    },
+    {
+      "size_of_axes" : 1,
+      "bottom" : "gather_15",
+      "axes_0" : 0,
+      "weights" : {
+
+      },
+      "nd_axis" : 0,
+      "debug_info" : "squeeze_15",
+      "version" : 1,
+      "top" : "squeeze_15",
+      "type" : "squeeze",
+      "name" : "squeeze_15"
+    },
+    {
+      "nB" : 256,
+      "top" : "linear_42",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 115,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_14",
+      "blob_biases" : 113,
+      "has_tanh" : 0,
+      "debug_info" : "linear_42",
+      "name" : "linear_42",
+      "has_prelu" : 0
+    },
+    {
+      "nB" : 128,
+      "top" : "linear_43",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 119,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_15",
+      "blob_biases" : 117,
+      "has_tanh" : 0,
+      "debug_info" : "linear_43",
+      "name" : "linear_43",
+      "has_prelu" : 0
+    },
+    {
+      "bottom" : "linear_42,linear_43",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_35",
+      "top" : "add_35",
+      "type" : "elementwise",
+      "name" : "add_35",
+      "beta" : 0
+    },
+    {
+      "bottom" : "add_35",
+      "weights" : {
+
+      },
+      "mode" : 3,
+      "debug_info" : "sigmoid_14",
+      "top" : "sigmoid_14",
+      "type" : "activation",
+      "name" : "sigmoid_14"
+    },
+    {
+      "nB" : 256,
+      "top" : "linear_44",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 123,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_14",
+      "blob_biases" : 121,
+      "has_tanh" : 0,
+      "debug_info" : "linear_44",
+      "name" : "linear_44",
+      "has_prelu" : 0
+    },
+    {
+      "nB" : 128,
+      "top" : "linear_45",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 127,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_15",
+      "blob_biases" : 125,
+      "has_tanh" : 0,
+      "debug_info" : "linear_45",
+      "name" : "linear_45",
+      "has_prelu" : 0
+    },
+    {
+      "bottom" : "linear_44,linear_45",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_36",
+      "top" : "add_36",
+      "type" : "elementwise",
+      "name" : "add_36",
+      "beta" : 0
+    },
+    {
+      "bottom" : "add_36",
+      "weights" : {
+
+      },
+      "mode" : 3,
+      "debug_info" : "sigmoid_15",
+      "top" : "sigmoid_15",
+      "type" : "activation",
+      "name" : "sigmoid_15"
+    },
+    {
+      "nB" : 256,
+      "top" : "linear_46",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 131,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_14",
+      "blob_biases" : 129,
+      "has_tanh" : 0,
+      "debug_info" : "linear_46",
+      "name" : "linear_46",
+      "has_prelu" : 0
+    },
+    {
+      "nB" : 128,
+      "top" : "linear_47",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 128,
+      "blob_weights" : 135,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "bottom" : "squeeze_15",
+      "blob_biases" : 133,
+      "has_tanh" : 0,
+      "debug_info" : "linear_47",
+      "name" : "linear_47",
+      "has_prelu" : 0
+    },
+    {
+      "bottom" : "sigmoid_14,linear_47",
+      "alpha" : 1,
+      "operation" : 1,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "mul_21",
+      "top" : "mul_21",
+      "type" : "elementwise",
+      "name" : "mul_21",
+      "beta" : 0
+    },
+    {
+      "bottom" : "linear_46,mul_21",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_37",
+      "top" : "add_37",
+      "type" : "elementwise",
+      "name" : "add_37",
+      "beta" : 0
+    },
+    {
+      "bottom" : "add_37",
+      "weights" : {
+
+      },
+      "mode" : 1,
+      "debug_info" : "tanh_7",
+      "top" : "tanh_7",
+      "type" : "activation",
+      "name" : "tanh_7"
+    },
+    {
+      "top" : "sub_7_x_0",
+      "w" : 1,
+      "h" : 1,
+      "name" : "sub_7_x_0",
+      "nd_rank" : 1,
+      "type" : "load_constant",
+      "k" : 1,
+      "bottom" : "",
+      "debug_info" : "sub_7_x_0",
+      "n" : 1,
+      "weights" : {
+
+      },
+      "constant_blob" : 137
+    },
+    {
+      "alpha" : -1,
+      "bottom" : "sigmoid_15",
+      "weights" : {
+
+      },
+      "mode" : 6,
+      "debug_info" : "_neg_y_sub_7",
+      "top" : "_neg_y_sub_7",
+      "type" : "activation",
+      "name" : "_neg_y_sub_7",
+      "beta" : 0
+    },
+    {
+      "bottom" : "_neg_y_sub_7,sub_7_x_0",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "sub_7",
+      "top" : "sub_7",
+      "type" : "elementwise",
+      "name" : "sub_7",
+      "beta" : 0
+    },
+    {
+      "bottom" : "sub_7,tanh_7",
+      "alpha" : 1,
+      "operation" : 1,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "mul_22",
+      "top" : "mul_22",
+      "type" : "elementwise",
+      "name" : "mul_22",
+      "beta" : 0
+    },
+    {
+      "bottom" : "sigmoid_15,squeeze_15",
+      "alpha" : 1,
+      "operation" : 1,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "mul_23",
+      "top" : "mul_23",
+      "type" : "elementwise",
+      "name" : "mul_23",
+      "beta" : 0
+    },
+    {
+      "bottom" : "mul_22,mul_23",
+      "alpha" : 1,
+      "operation" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_38",
+      "top" : "add_38",
+      "type" : "elementwise",
+      "name" : "add_38",
+      "beta" : 0
+    },
+    {
+      "bottom" : "while_loop_3_0_@ssa_version_3",
+      "alpha" : 1,
+      "operation" : 0,
+      "beta" : 0,
+      "weights" : {
+
+      },
+      "fused_relu" : 0,
+      "debug_info" : "add_39",
+      "top" : "add_39",
+      "type" : "elementwise",
+      "name" : "add_39",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "size_of_axes" : 1,
+      "bottom" : "add_38",
+      "axes_0" : 0,
+      "weights" : {
+
+      },
+      "nd_axis" : 0,
+      "debug_info" : "expand_dims_7",
+      "top" : "expand_dims_7",
+      "type" : "expand_dims",
+      "name" : "expand_dims_7"
+    },
+    {
+      "bottom" : "while_loop_3_1_@ssa_version_2,add_39,expand_dims_7",
+      "validate_indices" : true,
+      "allow_negative_indices" : true,
+      "mode" : 0,
+      "weights" : {
+
+      },
+      "debug_info" : "scatter_7",
+      "axis" : 0,
+      "top" : "scatter_7",
+      "type" : "scatter_nd",
+      "name" : "scatter_7",
+      "accumulation_mode" : 1
+    },
+    {
+      "bottom" : "add_39",
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_3_0_ret_copy",
+      "top" : "while_loop_3_0_@ssa_version_1",
+      "type" : "copy",
+      "name" : "while_loop_3_0_ret_copy",
+      "attributes" : {
+        "constant_if_condition" : 10
+      }
+    },
+    {
+      "weights" : {
+
+      },
+      "debug_info" : "while_loop_3_1_ret_copy",
+      "top" : "while_loop_3_1_@ssa_version_1",
+      "type" : "copy",
+      "name" : "while_loop_3_1_ret_copy",
+      "bottom" : "scatter_7"
+    },
+    {
+      "bottom" : "",
+      "weights" : {
+
+      },
+      "cf_stack_depth" : 1,
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_jump",
+      "name" : "while_loop_3_jump"
+    },
+    {
+      "bottom" : "",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_end",
+      "name" : "while_loop_3_end_loop_if",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "",
+      "type" : "cf_end",
+      "name" : "while_loop_3_end_loop",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "while_loop_3_1,while_loop_3_1_@ssa_version_1",
+      "weights" : {
+
+      },
+      "debug_info" : "",
+      "top" : "while_loop_3_1_@ssa_version_3",
+      "type" : "phi_virtual",
+      "name" : "phi_while_loop_3_1_@ssa_version_3",
+      "attributes" : {
+        "basic_block_head" : 1
+      }
+    },
+    {
+      "bottom" : "while_loop_3_1_@ssa_version_3",
+      "end" : 321,
+      "start" : 1,
+      "weights" : {
+
+      },
+      "axis" : 2,
+      "debug_info" : "input_tmp_backward_reverse",
+      "top" : "input_tmp_backward_reverse",
+      "type" : "slice",
+      "name" : "input_tmp_backward_reverse"
+    },
+    {
+      "begin_n" : 0,
+      "static_sizes_k" : 0,
+      "end_mask_h" : true,
+      "end_w" : 1,
+      "end_h" : 1,
+      "begin_h" : 0,
+      "stride_n" : 1,
+      "end_seq" : 1,
+      "begin_mask_seq" : false,
+      "begin_mask_h" : true,
+      "squeeze_mask_h" : false,
+      "stride_k" : 1,
+      "type" : "general_slice",
+      "begin_mask_k" : true,
+      "static_sizes_w" : 0,
+      "begin_w" : 0,
+      "end_mask_k" : true,
+      "use_static_sizes" : false,
+      "stride_h" : 1,
+      "static_sizes_n" : 0,
+      "begin_mask_n" : false,
+      "weights" : {
+
+      },
+      "name" : "input_tmp_backward",
+      "stride_seq" : 1,
+      "end_k" : 1,
+      "static_sizes_seq" : 0,
+      "top" : "input_tmp_backward",
+      "begin_seq" : 0,
+      "squeeze_mask_k" : false,
+      "begin_k" : 0,
+      "end_mask_w" : true,
+      "end_mask_seq" : false,
+      "end_mask_n" : false,
+      "debug_info" : "input_tmp_backward",
+      "stride_w" : -1,
+      "squeeze_mask_seq" : false,
+      "static_sizes_h" : 0,
+      "begin_mask_w" : true,
+      "bottom" : "input_tmp_backward_reverse",
+      "end_n" : 1,
+      "squeeze_mask_w" : false,
+      "squeeze_mask_n" : false
+    },
+    {
+      "bottom" : "input_tmp_forward,input_tmp_backward",
+      "weights" : {
+
+      },
+      "nd_mode" : true,
+      "axis" : 2,
+      "debug_info" : "input_tmp",
+      "top" : "input_tmp",
+      "type" : "general_concat",
+      "name" : "input_tmp"
+    },
+    {
+      "axis_h" : 2,
+      "axis_w" : 0,
+      "bottom" : "input_tmp",
+      "axis_k" : 1,
+      "axis_n" : 3,
+      "axis_seq" : 4,
+      "weights" : {
+
+      },
+      "debug_info" : "transpose_1",
+      "top" : "transpose_1",
+      "type" : "transpose",
+      "name" : "transpose_1"
+    },
+    {
+      "has_prelu" : 0,
+      "top" : "logits",
+      "has_biases" : 1,
+      "weights" : {
+
+      },
+      "nC" : 170,
+      "blob_weights" : 141,
+      "type" : "inner_product",
+      "has_relu" : 0,
+      "attributes" : {
+        "is_output" : 1
+      },
+      "bottom" : "transpose_1",
+      "debug_info" : "79",
+      "has_tanh" : 0,
+      "blob_biases" : 139,
+      "name" : "79",
+      "nB" : 256
+    }
+  ],
+  "storage" : "model.espresso.weights",
+  "metadata_in_weights" : [
+
+  ],
+  "analyses" : {
+    "N8Espresso34pass_constant_if_conditions_resultE" : {
+      "constant_blobs" : {
+        "while_loop_0_0_@ssa_version_3" : 10,
+        "slice_by_index_4" : 10,
+        "while_loop_1_0" : 10,
+        "less_5" : 10,
+        "add_39" : 10,
+        "add_19" : 10,
+        "while_loop_2_loop_vars0_0" : 10,
+        "while_loop_0_loop_vars0_0" : 10,
+        "slice_by_index_10" : 10,
+        "less_7" : 10,
+        "while_loop_0_0" : 10,
+        "while_loop_1_0_@ssa_version_1" : 10,
+        "while_loop_1_0_@ssa_version_3" : 10,
+        "while_loop_3_0_@ssa_version_2" : 10,
+        "slice_by_index_7" : 10,
+        "while_loop_2_0_@ssa_version_1" : 10,
+        "while_loop_2_0_@ssa_version_3" : 10,
+        "while_loop_3_0" : 10,
+        "while_loop_0_0_@ssa_version_2" : 10,
+        "while_loop_1_loop_vars0_0" : 10,
+        "slice_by_index_1" : 10,
+        "add_29" : 10,
+        "while_loop_3_0_@ssa_version_1" : 10,
+        "while_loop_3_0_@ssa_version_3" : 10,
+        "while_loop_1_0_@ssa_version_2" : 10,
+        "less_1" : 10,
+        "add_9" : 10,
+        "while_loop_2_0" : 10,
+        "while_loop_3_loop_vars0_0" : 10,
+        "less_3" : 10,
+        "while_loop_2_0_@ssa_version_2" : 10,
+        "while_loop_0_0_@ssa_version_1" : 10
+      }
+    }
+  },
+  "properties" : {
+
+  },
+  "format_version" : 300,
+  "shape" : {
+    "layer_shapes" : {
+      "input.3" : {
+        "k" : 1,
+        "w" : 24,
+        "n" : 1,
+        "_rank" : 4,
+        "h" : 320
+      },
+      "while_loop_0_0_@ssa_version_1" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "tanh_3" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "add_16" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "mul_15" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "concat_3" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "while_loop_2_0_@ssa_version_2" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "input_tmp_forward" : {
+        "k" : 320,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "linear_11" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_3_1" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "add_9" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "sigmoid_10" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "_neg_y_sub_1" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "mul_4" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_1_1_@ssa_version_1" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "linear_42" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "add_35" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "linear_6" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_1_loop_vars0_0" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "while_loop_3_1_@ssa_version_2" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "while_loop_0_0" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "linear_45" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "linear_9" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_1_0_@ssa_version_3" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "mul_22" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "squeeze_10" : {
+        "k" : 1,
+        "w" : 256,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "squeeze_2" : {
+        "k" : 1,
+        "w" : 36,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "add_29" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "while_loop_1_0" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "mul_5" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "slice_by_index_4" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "while_loop_0_1_@ssa_version_2" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "linear_30" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "mul_10" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_2_1_@ssa_version_3" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "linear_33" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "sub_1" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "add_17" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "mul_16" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "sub_3_x_0" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "less_3" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "gather_2" : {
+        "k" : 1,
+        "w" : 36,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "while_loop_2_0" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "gather_10" : {
+        "k" : 1,
+        "w" : 256,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "transpose_2" : {
+        "k" : 320,
+        "w" : 36,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "_neg_y_sub_7" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "expand_dims_7" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "bothchroma" : {
+        "k" : 1,
+        "w" : 24,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 320
+      },
+      "scatter_1" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "add_36" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_3_0" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "linear_21" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "sigmoid_2" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "scatter_7" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "while_loop_2_0_@ssa_version_1" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "mul_23" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "input.1" : {
+        "k" : 1,
+        "w" : 24,
+        "n" : 1,
+        "_rank" : 4,
+        "h" : 320
+      },
+      "mul_11" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "tanh_5" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "add_18" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "input.7" : {
+        "k" : 1,
+        "w" : 24,
+        "n" : 1,
+        "_rank" : 4,
+        "h" : 320
+      },
+      "mul_17" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "sub_3" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "concat_5" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "while_loop_3_1_@ssa_version_1" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "39" : {
+        "k" : 1,
+        "w" : 320,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 36
+      },
+      "while_loop_1_0_@ssa_version_2" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "while_loop_3_0_@ssa_version_3" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "input_layer_0_tmp_backward_reverse" : {
+        "k" : 320,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "input_tmp_backward_reverse" : {
+        "k" : 320,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "linear_18" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "linear_43" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "add_37" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "linear_8" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "sigmoid_15" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "linear_46" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_0_1_@ssa_version_1" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "_neg_y_sub_3" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_2_1_@ssa_version_2" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "expand_dims_5" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "add_25" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_0_0_@ssa_version_3" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "squeeze_3" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "input_layer_0_tmp_forward" : {
+        "k" : 320,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "squeeze_6" : {
+        "k" : 1,
+        "w" : 36,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "mul_9" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "slice_by_index_7" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "linear_31" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "reverse_0" : {
+        "k" : 320,
+        "w" : 36,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "squeeze_15" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "sub_5_x_0" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "linear_34" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "add_19" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "sub_5" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "logits" : {
+        "k" : 1,
+        "w" : 170,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 320
+      },
+      "while_loop_1_1_@ssa_version_3" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "input_layer_0_tmp" : {
+        "k" : 320,
+        "w" : 256,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "less_5" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "gather_11" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "gather_7" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "transpose_3" : {
+        "k" : 1,
+        "w" : 36,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 320
+      },
+      "gather_14" : {
+        "k" : 1,
+        "w" : 256,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "add_38" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_0_loop_vars0_0" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "linear_22" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "scatter_5" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "sigmoid_3" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "input_tmp" : {
+        "k" : 320,
+        "w" : 256,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "sigmoid_6" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "add_26" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_1_0_@ssa_version_1" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "while_loop_3_0_@ssa_version_2" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "expand_dims_3" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "tanh_1" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "concat_1" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "tanh_7" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "linear_10" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "sub_7" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "add_5" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "concat_7" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "while_loop_2_1_@ssa_version_1" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "sigmoid_11" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_0_0_@ssa_version_2" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "sigmoid_14" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "linear_19" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_2_0_@ssa_version_3" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "linear_7" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "linear_44" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "add_39" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "linear_47" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_3_loop_vars0_0" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "add_6" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "slice_by_index_10" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "add_27" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "squeeze_11" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_1_1_@ssa_version_2" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "slice_by_index_1" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "while_loop_3_1_@ssa_version_3" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "squeeze_14" : {
+        "k" : 1,
+        "w" : 256,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "squeeze_7" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "_neg_y_sub_5" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "linear_32" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "reverse_1" : {
+        "k" : 320,
+        "w" : 256,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "sub_1_x_0" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "add_15" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "less_1" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "sub_7_x_0" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "linear_35" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "transpose_1" : {
+        "k" : 1,
+        "w" : 256,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 320
+      },
+      "gather_3" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "less_7" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "while_loop_0_1" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "add_7" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "input_tmp_backward" : {
+        "k" : 320,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "gather_6" : {
+        "k" : 1,
+        "w" : 36,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "expand_dims_1" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "while_loop_0_1_@ssa_version_3" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "gather_15" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "while_loop_1_1" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "linear_20" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "scatter_3" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "while_loop_2_loop_vars0_0" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "while_loop_3_0_@ssa_version_1" : {
+        "k" : 1,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 1,
+        "h" : 1
+      },
+      "linear_23" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "mul_21" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "x" : {
+        "k" : 36,
+        "w" : 1,
+        "n" : 1,
+        "_rank" : 4,
+        "h" : 320
+      },
+      "add_8" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "sigmoid_7" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "input_layer_0_tmp_backward" : {
+        "k" : 320,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      },
+      "add_28" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "mul_3" : {
+        "k" : 1,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 2,
+        "h" : 1
+      },
+      "while_loop_2_1" : {
+        "k" : 321,
+        "w" : 128,
+        "n" : 1,
+        "_rank" : 3,
+        "h" : 1
+      }
+    },
+    "global_shapes" : {
+
+    }
+  },
+  "subnetworks" : {
+
+  }
+}

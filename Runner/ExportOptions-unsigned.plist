@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>destination</key>
+	<string>generic/platform=ios</string>
+	<key>distributionBundleIdentifier</key>
+	<string>com.musicx.native</string>
+	<key>exportMethod</key>
+	<string>ad-hoc</string>
+	<key>iCloudContainerEnvironment</key>
+	<string>Production</string>
+	<key>method</key>
+	<string>ad-hoc</string>
+	<key>provisioningProfileMapping</key>
+	<dict/>
+	<key>signingCertificate</key>
+	<string>iOS Distribution</string>
+	<key>stripSwiftSymbols</key>
+	<true/>
+	<key>teamID</key>
+	<string></string>
+	<key>thinning</key>
+	<string>&lt;none&gt;</string>
+	<key>uploadBitcode</key>
+	<false/>
+	<key>useAppThinning</key>
+	<false/>
+</dict>
+</plist>

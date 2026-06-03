@@ -1,0 +1,125 @@
+[
+  {
+    "shortDescription" : "\nDUN-TFC-TDF-W : spectrogram-based dense U-Net with time-distributed FCs\n\nArchitectural specifications :\n- W-variant from vanilla DUN-TFC-TDF : shared channels into one U-Net instead of stem-wise U-Nets\n- 9 blocks of 3 internal layers with identity as last activation (CaC configuration)\n- First and last convolutional blocks are pointwise blocks (do not handle the last frequency bin anymore)\n- 6 stems prediction\n- Activation is ReLU in TFC-TDF blocks with bias enabled\n- All other parameters are default\n\nTraining specifications :\nThe model has been trained on the full Yousing dataset (sr=44100Hz).\nBatches of size 4 of 3s audio clips randomly mixed with Adam optimizer.\nTwo phases : from scratch with L2 on spectrogram, then fine-tuning with L1 on spectrogram.\n\nInference tips :\n1. Load stereo waveform\n2. Generate STFT and stack real and imaginary channels\n3. Feed in the model\n4. Do the iSTFT\n\nAn overlap may be needed for small slices where outer bins are discarded.\n",
+    "metadataOutputVersion" : "3.0",
+    "outputSchema" : [
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32 1 × 4 × 32 × 2048)",
+        "shortDescription" : "Output raw STFT chunk for drums",
+        "shape" : "[1, 4, 32, 2048]",
+        "name" : "drums",
+        "type" : "MultiArray"
+      },
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32 1 × 4 × 32 × 2048)",
+        "shortDescription" : "Output raw STFT chunk for bass",
+        "shape" : "[1, 4, 32, 2048]",
+        "name" : "bass",
+        "type" : "MultiArray"
+      },
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32 1 × 4 × 32 × 2048)",
+        "shortDescription" : "Output raw STFT chunk for other",
+        "shape" : "[1, 4, 32, 2048]",
+        "name" : "other",
+        "type" : "MultiArray"
+      },
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32 1 × 4 × 32 × 2048)",
+        "shortDescription" : "Output raw STFT chunk for vocals",
+        "shape" : "[1, 4, 32, 2048]",
+        "name" : "vocals",
+        "type" : "MultiArray"
+      },
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32 1 × 4 × 32 × 2048)",
+        "shortDescription" : "Output raw STFT chunk for piano",
+        "shape" : "[1, 4, 32, 2048]",
+        "name" : "piano",
+        "type" : "MultiArray"
+      },
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32 1 × 4 × 32 × 2048)",
+        "shortDescription" : "Output raw STFT chunk for guitar",
+        "shape" : "[1, 4, 32, 2048]",
+        "name" : "guitar",
+        "type" : "MultiArray"
+      }
+    ],
+    "version" : "2.0.1",
+    "modelParameters" : [
+
+    ],
+    "author" : "Clément Tabary",
+    "specificationVersion" : 4,
+    "storagePrecision" : "Float32",
+    "license" : "MWM",
+    "computePrecision" : "Float16",
+    "stateSchema" : [
+
+    ],
+    "isUpdatable" : "0",
+    "availability" : {
+      "macOS" : "10.15",
+      "tvOS" : "13.0",
+      "visionOS" : "1.0",
+      "watchOS" : "6.0",
+      "iOS" : "13.0",
+      "macCatalyst" : "13.0"
+    },
+    "modelType" : {
+      "name" : "MLModelType_neuralNetwork"
+    },
+    "inputSchema" : [
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32 1 × 4 × 32 × 2048)",
+        "shortDescription" : "Input audio chunk",
+        "shape" : "[1, 4, 32, 2048]",
+        "name" : "mixture",
+        "type" : "MultiArray"
+      }
+    ],
+    "userDefinedMetadata" : {
+      "com.github.apple.coremltools.version" : "5.2.0",
+      "n_fft" : "4096",
+      "gain" : "1",
+      "model_type" : "dune",
+      "com.github.apple.coremltools.source" : "torch==1.11.0",
+      "hop_size" : "1024"
+    },
+    "generatedClassName" : "dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2_0_1",
+    "neuralNetworkLayerTypeHistogram" : {
+      "Concat" : 22,
+      "ActivationReLU" : 54,
+      "ReshapeStatic" : 37,
+      "Add" : 9,
+      "SliceStatic" : 6,
+      "Deconvolution" : 4,
+      "BatchNorm" : 18,
+      "Convolution" : 33,
+      "InnerProduct" : 18
+    },
+    "method" : "predict"
+  }
+]
