@@ -51,6 +51,9 @@ class PBXProjGenerator:
         for ext in ['json', 'm4a', 'caf', 'wav', 'mp3']:
             for resource in self.runner_dir.rglob(f"*.{ext}"):
                 rel_path = resource.relative_to(self.project_root).as_posix()
+                # Exclude files inside .mlmodelc folders or .xcassets to avoid multiple commands producing conflicts
+                if ".mlmodelc/" in rel_path or ".xcassets/" in rel_path:
+                    continue
                 self.resource_files.append({
                     'path': rel_path,
                     'name': resource.name,

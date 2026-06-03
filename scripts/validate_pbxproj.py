@@ -52,6 +52,8 @@ def scan_actual_files(runner_dir):
     for ext in ['json', 'm4a', 'caf', 'wav', 'mp3']:
         for f in Path(runner_dir).rglob(f'*.{ext}'):
             rel_path = f.relative_to(Path(runner_dir).parent).as_posix()
+            if ".mlmodelc/" in rel_path or ".xcassets/" in rel_path:
+                continue
             resource_files.add(rel_path)
     
     # CoreML models (folders)

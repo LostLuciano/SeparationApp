@@ -83,7 +83,6 @@
 
 	/* Resource Files */
 		3B36063D0F4EAA4753CA5C61 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Runner/Assets.xcassets"; sourceTree = SOURCE_ROOT; };
-		E3C3D24A37744E8FD25A33B7 /* Contents.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Runner/Assets.xcassets/AppIcon.appiconset/Contents.json"; sourceTree = SOURCE_ROOT; };
 		4FBAE564BC0F2708901763B4 /* Drums.m4a */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "Runner/Resources/Audio/Drums.m4a"; sourceTree = SOURCE_ROOT; };
 		8480B03829A2A8A146897111 /* Guitar.m4a */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "Runner/Resources/Audio/Guitar.m4a"; sourceTree = SOURCE_ROOT; };
 		E7647C5C342EB3110B37C70F /* Others.m4a */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "Runner/Resources/Audio/Others.m4a"; sourceTree = SOURCE_ROOT; };
@@ -125,13 +124,9 @@
 		7032CA7F67C6D5FE2E90C450 /* trap-analysis-data.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Runner/Resources/DemoAnalysis/trap-analysis-data.json"; sourceTree = SOURCE_ROOT; };
 		984DD8AB7900A1B1962C89EE /* trap-lyrics.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Runner/Resources/DemoAnalysis/trap-lyrics.json"; sourceTree = SOURCE_ROOT; };
 		B6FF09BB4B75C70D19AC2893 /* Chordcrnn.mlmodelc */ = {isa = PBXFileReference; lastKnownFileType = folder.mlmodelc; path = "Runner/Resources/Models/Chordcrnn.mlmodelc"; sourceTree = SOURCE_ROOT; };
-		0E758BD6AB2E76A075934600 /* metadata.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Runner/Resources/Models/Chordcrnn.mlmodelc/metadata.json"; sourceTree = SOURCE_ROOT; };
 		477B940E919B8B46BE92306A /* convtcn20_2048_fp16.mlmodelc */ = {isa = PBXFileReference; lastKnownFileType = folder.mlmodelc; path = "Runner/Resources/Models/convtcn20_2048_fp16.mlmodelc"; sourceTree = SOURCE_ROOT; };
-		C9C4DEFFB2D9A264514E69F4 /* metadata.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Runner/Resources/Models/convtcn20_2048_fp16.mlmodelc/metadata.json"; sourceTree = SOURCE_ROOT; };
 		AF88E533E2CAA990CB65BD66 /* dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1.mlmodelc */ = {isa = PBXFileReference; lastKnownFileType = folder.mlmodelc; path = "Runner/Resources/Models/dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1.mlmodelc"; sourceTree = SOURCE_ROOT; };
-		AC0FA069834E7482828B4F01 /* metadata.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Runner/Resources/Models/dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1.mlmodelc/metadata.json"; sourceTree = SOURCE_ROOT; };
 		516D8047CFD83F47C50EFB8C /* dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0.mlmodelc */ = {isa = PBXFileReference; lastKnownFileType = folder.mlmodelc; path = "Runner/Resources/Models/dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0.mlmodelc"; sourceTree = SOURCE_ROOT; };
-		2C33F89D2D6806B6B223C2FD /* metadata.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Runner/Resources/Models/dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0.mlmodelc/metadata.json"; sourceTree = SOURCE_ROOT; };
 
 	/* Configuration Files */
 		D3B79DBC97D7260662B70705 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Runner/Info.plist"; sourceTree = SOURCE_ROOT; };
@@ -213,7 +208,6 @@
 
 	/* PBXBuildFile - Resources */
 		45213F1CF0878654F62F6C37 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3B36063D0F4EAA4753CA5C61; };
-		EE2CF4FDCA6271D577A09EA5 /* Contents.json in Resources */ = {isa = PBXBuildFile; fileRef = E3C3D24A37744E8FD25A33B7; };
 		00AEA81F3AEC0741A8FC881F /* Drums.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 4FBAE564BC0F2708901763B4; };
 		A9BB1E62F742A7F57D3F5535 /* Guitar.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 8480B03829A2A8A146897111; };
 		15B51366D17206E9146942B4 /* Others.m4a in Resources */ = {isa = PBXBuildFile; fileRef = E7647C5C342EB3110B37C70F; };
@@ -255,13 +249,9 @@
 		B2953A17815E9FDCCEC8E1FB /* trap-analysis-data.json in Resources */ = {isa = PBXBuildFile; fileRef = 7032CA7F67C6D5FE2E90C450; };
 		F3BBE2453D956BCDDC55476D /* trap-lyrics.json in Resources */ = {isa = PBXBuildFile; fileRef = 984DD8AB7900A1B1962C89EE; };
 		D48C620A00B55CD6D701E396 /* Chordcrnn.mlmodelc in Resources */ = {isa = PBXBuildFile; fileRef = B6FF09BB4B75C70D19AC2893; };
-		850E94E77EA08CB1F10BB5F8 /* metadata.json in Resources */ = {isa = PBXBuildFile; fileRef = 0E758BD6AB2E76A075934600; };
 		3507DAA699F3B077915EC494 /* convtcn20_2048_fp16.mlmodelc in Resources */ = {isa = PBXBuildFile; fileRef = 477B940E919B8B46BE92306A; };
-		059F08318AAB6867474D8313 /* metadata.json in Resources */ = {isa = PBXBuildFile; fileRef = C9C4DEFFB2D9A264514E69F4; };
 		F4A8E62A2535CEB7300FA3B2 /* dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1.mlmodelc in Resources */ = {isa = PBXBuildFile; fileRef = AF88E533E2CAA990CB65BD66; };
-		ADEEE37F6C97E271612C6C05 /* metadata.json in Resources */ = {isa = PBXBuildFile; fileRef = AC0FA069834E7482828B4F01; };
 		980D6E4D7A96B18AD9FD94F6 /* dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0.mlmodelc in Resources */ = {isa = PBXBuildFile; fileRef = 516D8047CFD83F47C50EFB8C; };
-		FA96D985FE6C41E40E1B82D0 /* metadata.json in Resources */ = {isa = PBXBuildFile; fileRef = 2C33F89D2D6806B6B223C2FD; };
 
 	/* Products */
 		4CB1B68FB1FB6DF0BED8838F /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -354,7 +344,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				45213F1CF0878654F62F6C37 /* Assets.xcassets in Resources */,
-				EE2CF4FDCA6271D577A09EA5 /* Contents.json in Resources */,
 				00AEA81F3AEC0741A8FC881F /* Drums.m4a in Resources */,
 				A9BB1E62F742A7F57D3F5535 /* Guitar.m4a in Resources */,
 				15B51366D17206E9146942B4 /* Others.m4a in Resources */,
@@ -396,13 +385,9 @@
 				B2953A17815E9FDCCEC8E1FB /* trap-analysis-data.json in Resources */,
 				F3BBE2453D956BCDDC55476D /* trap-lyrics.json in Resources */,
 				D48C620A00B55CD6D701E396 /* Chordcrnn.mlmodelc in Resources */,
-				850E94E77EA08CB1F10BB5F8 /* metadata.json in Resources */,
 				3507DAA699F3B077915EC494 /* convtcn20_2048_fp16.mlmodelc in Resources */,
-				059F08318AAB6867474D8313 /* metadata.json in Resources */,
 				F4A8E62A2535CEB7300FA3B2 /* dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1.mlmodelc in Resources */,
-				ADEEE37F6C97E271612C6C05 /* metadata.json in Resources */,
 				980D6E4D7A96B18AD9FD94F6 /* dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0.mlmodelc in Resources */,
-				FA96D985FE6C41E40E1B82D0 /* metadata.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
