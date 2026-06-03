@@ -59,7 +59,6 @@
 		E9ADA0050CC1B3DE99870446 /* BeatDetectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9B35E4B189C357BA798CA /* BeatDetectionManager.swift */; };
 		E9AC2E8C4A1F8977C6665F21 /* ChordDetectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A4D489A8228108CFF7AEA1 /* ChordDetectionManager.swift */; };
 		E9A37049C039559402BDFFFA /* CoreMLStemSeparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A141164607CAE032198FB4 /* CoreMLStemSeparator.swift */; };
-		E9A3790A11C8E44543D84CD8 /* FlutterMethodChannelBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A2D65C4E1D48679272514D /* FlutterMethodChannelBridge.swift */; };
 		E9A263F4CAE53D06CAD5A708 /* StemMixerChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A7A771603BF9F07F2D5047 /* StemMixerChannel.swift */; };
 		E9A24BD2EE83FE3C14D1D8D5 /* dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1.mlmodelc in Resources */ = {isa = PBXBuildFile; fileRef = E9AFF4B791520A6A39325AD4 /* dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1.mlmodelc */; };
 		E9AB638DE37AE389B22FB698 /* dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0.mlmodelc in Resources */ = {isa = PBXBuildFile; fileRef = E9A14538E8A838B746512516 /* dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0.mlmodelc */; };
@@ -75,9 +74,7 @@
 		E9A98EC43E2BFDD0B427F9ED /* trap-analysis-data.json in Resources */ = {isa = PBXBuildFile; fileRef = E9A549B86BA18249CAA460F1 /* trap-analysis-data.json */; };
 		E9AEE24808A28DFA97FC92B6 /* edm.caf in Resources */ = {isa = PBXBuildFile; fileRef = E9A994E86E1B78284FA0E164 /* edm.caf */; };
 		E9ABFE4D0F2885CE8111237A /* edm-analysis-data.json in Resources */ = {isa = PBXBuildFile; fileRef = E9A27A17194AC7EF8BE6290D /* edm-analysis-data.json */; };
-		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
-		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		7884E8682EC3CC0700C636F2 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
@@ -161,7 +158,6 @@
 		E9A9B35E4B189C357BA798CA /* BeatDetectionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeatDetectionManager.swift; sourceTree = "<group>"; };
 		E9A4D489A8228108CFF7AEA1 /* ChordDetectionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChordDetectionManager.swift; sourceTree = "<group>"; };
 		E9A141164607CAE032198FB4 /* CoreMLStemSeparator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreMLStemSeparator.swift; sourceTree = "<group>"; };
-		E9A2D65C4E1D48679272514D /* FlutterMethodChannelBridge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlutterMethodChannelBridge.swift; sourceTree = "<group>"; };
 		E9A7A771603BF9F07F2D5047 /* StemMixerChannel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StemMixerChannel.swift; sourceTree = "<group>"; };
 		E9AFF4B791520A6A39325AD4 /* dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1.mlmodelc */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1.mlmodelc; sourceTree = "<group>"; };
 		E9A14538E8A838B746512516 /* dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0.mlmodelc */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0.mlmodelc; sourceTree = "<group>"; };
@@ -177,17 +173,11 @@
 		E9A549B86BA18249CAA460F1 /* trap-analysis-data.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = trap-analysis-data.json; sourceTree = "<group>"; };
 		E9A994E86E1B78284FA0E164 /* edm.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = edm.caf; sourceTree = "<group>"; };
 		E9A27A17194AC7EF8BE6290D /* edm-analysis-data.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = edm-analysis-data.json; sourceTree = "<group>"; };
-		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
-		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
-		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
-		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		97C146FB1CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -240,10 +230,6 @@
 		9740EEB11CF90186004384FC /* Flutter */ = {
 			isa = PBXGroup;
 			children = (
-				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,
-				9740EEB21CF90195004384FC /* Debug.xcconfig */,
-				7AFA3C8E1D35360C0083082E /* Release.xcconfig */,
-				9740EEB31CF90195004384FC /* Generated.xcconfig */,
 			);
 			name = Flutter;
 			sourceTree = "<group>";
@@ -309,7 +295,6 @@
 				E9A9B35E4B189C357BA798CA /* BeatDetectionManager.swift */,
 				E9A4D489A8228108CFF7AEA1 /* ChordDetectionManager.swift */,
 				E9A141164607CAE032198FB4 /* CoreMLStemSeparator.swift */,
-				E9A2D65C4E1D48679272514D /* FlutterMethodChannelBridge.swift */,
 				E9A7A771603BF9F07F2D5047 /* StemMixerChannel.swift */,
 				E9AFF4B791520A6A39325AD4 /* dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1.mlmodelc */,
 				E9A14538E8A838B746512516 /* dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0.mlmodelc */,
@@ -328,8 +313,6 @@
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
 				97C147021CF9000F007C117D /* Info.plist */,
-				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
-				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
@@ -361,12 +344,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
 			buildPhases = (
-				9740EEB61CF901F6004384FC /* Run Script */,
 				97C146EA1CF9000F007C117D /* Sources */,
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
-				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 			);
 			buildRules = (
 			);
@@ -473,7 +454,6 @@
 				E9A98EC43E2BFDD0B427F9ED /* trap-analysis-data.json in Resources */,
 				E9AEE24808A28DFA97FC92B6 /* edm.caf in Resources */,
 				E9ABFE4D0F2885CE8111237A /* edm-analysis-data.json in Resources */,97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
-				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
 			);
@@ -482,37 +462,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}",
-			);
-			name = "Thin Binary";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
-		};
-		9740EEB61CF901F6004384FC /* Run Script */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Run Script";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -551,9 +500,7 @@
 				E9ADA0050CC1B3DE99870446 /* BeatDetectionManager.swift in Sources */,
 				E9AC2E8C4A1F8977C6665F21 /* ChordDetectionManager.swift in Sources */,
 				E9A37049C039559402BDFFFA /* CoreMLStemSeparator.swift in Sources */,
-				E9A3790A11C8E44543D84CD8 /* FlutterMethodChannelBridge.swift in Sources */,
 				E9A263F4CAE53D06CAD5A708 /* StemMixerChannel.swift in Sources */,74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
-				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				7884E8682EC3CC0700C636F2 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -642,7 +589,6 @@
 		};
 		249021D4217E4FDB00AE95B9 /* Profile */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -821,7 +767,6 @@
 		};
 		97C147061CF9000F007C117D /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -843,7 +788,6 @@
 		};
 		97C147071CF9000F007C117D /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
