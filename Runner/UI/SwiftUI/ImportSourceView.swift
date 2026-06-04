@@ -78,7 +78,7 @@ struct ImportSourceView: View {
         .navigationBarBackButtonHidden()
         .fileImporter(
             isPresented: $isFileImporterPresented,
-            allowedContentTypes: activeSource?.allowedTypes ?? [.audio, .movie],
+            allowedContentTypes: [.item],
             allowsMultipleSelection: false
         ) { result in
             handleImportResult(result)
