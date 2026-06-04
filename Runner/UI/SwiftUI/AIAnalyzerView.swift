@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct AIAnalyzerView: View {
+    var project: StemProject?
+
     @Environment(\.dismiss) private var dismiss
     @State private var selectedAnalyzerTab: Int = 0 // 0 = Chords, 1 = Beat
     
@@ -10,6 +12,14 @@ struct AIAnalyzerView: View {
     
     // Instantiate real MetronomeManager from Runner audio package
     private let metronome = MetronomeManager()
+
+    private var chordSegments: [ChordSegment] {
+        project?.chordSegments ?? []
+    }
+
+    private var beatResult: BeatTempoResult? {
+        project?.beatResult
+    }
     
     var body: some View {
         ZStack {
@@ -63,6 +73,11 @@ struct AIAnalyzerView: View {
         .onDisappear {
             metronome.stop()
         }
+        .onAppear {
+            if let bpm = project?.bpm {
+                bpmCount = max(40, min(240, Int(bpm.rounded())))
+            }
+        }
         .onChange(of: isMetronomeActive) { _, active in
             if active {
                 metronome.start(bpm: Double(bpmCount))
@@ -114,11 +129,13 @@ struct AIAnalyzerView: View {
                             .foregroundColor(DesignSystem.SoftRed)
                             .tracking(1.5)
                         
-                        Text("G Major")
+                        Text(project?.key ?? "Not analyzed")
                             .font(.system(size: 34, weight: .bold))
                             .foregroundColor(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.62)
                         
-                        Text("Scale: Ionian (G, A, B, C, D, E, F#)")
+                        Text(project == nil ? "Select a project to view analysis." : "Generated from this project's real audio analysis.")
                             .font(.system(size: 13))
                             .foregroundColor(DesignSystem.TextSecondary)
                     }
@@ -133,16 +150,16 @@ struct AIAnalyzerView: View {
                                 .frame(width: 60, height: 60)
                             
                             Circle()
-                                .trim(from: 0.0, to: 0.98)
+                                .trim(from: 0.0, to: min(Double(chordSegments.count) / 24.0, 1.0))
                                 .stroke(DesignSystem.AccentRed, style: StrokeStyle(lineWidth: 6, lineCap: .round))
                                 .frame(width: 60, height: 60)
                                 .rotationEffect(Angle(degrees: -90))
                             
-                            Text("98%")
+                            Text("\(chordSegments.count)")
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.white)
                         }
-                        Text("Confidence")
+                        Text("Chords")
                             .font(.system(size: 10))
                             .foregroundColor(DesignSystem.TextSecondary)
                     }
@@ -167,30 +184,40 @@ struct AIAnalyzerView: View {
                     GridItem(.flexible(), spacing: 12)
                 ]
                 
-                LazyVGrid(columns: chordGridColumns, spacing: 12) {
-                    let segments = PreviewData.projects[0].chordSegments
-                    ForEach(0..<12, id: \.self) { index in
-                        let chord = !segments.isEmpty ? segments[index % segments.count].name : "C:maj"
-                        VStack(spacing: 8) {
-                            Text("Bar \(index + 1)")
-                                .font(.system(size: 10))
-                                .foregroundColor(DesignSystem.TextMuted)
-                            
-                            Text(chord)
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(index == 0 || index == 4 ? DesignSystem.SoftRed : .white)
-                        }
-                        .padding(.vertical, 14)
-                        .background(DesignSystem.SurfaceGlass)
-                        .background(index == 0 || index == 4 ? DesignSystem.AccentRed.opacity(0.1) : Color.clear)
-                        .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.medium))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: DesignSystem.Radius.medium)
-                                .stroke(index == 0 || index == 4 ? DesignSystem.AccentRed.opacity(0.4) : DesignSystem.BorderGlass, lineWidth: 1)
-                        )
+                if chordSegments.isEmpty {
+                    GlassCard(cornerRadius: DesignSystem.Radius.medium, padding: 16) {
+                        Text("No chord timeline is available for this project yet.")
+                            .font(.system(size: 13))
+                            .foregroundColor(DesignSystem.TextSecondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
+                    .padding(.horizontal, 20)
+                } else {
+                    LazyVGrid(columns: chordGridColumns, spacing: 12) {
+                        ForEach(Array(chordSegments.prefix(16).enumerated()), id: \.offset) { index, segment in
+                            VStack(spacing: 8) {
+                                Text(formatTime(segment.startTime))
+                                    .font(.system(size: 10))
+                                    .foregroundColor(DesignSystem.TextMuted)
+
+                                Text(segment.name)
+                                    .font(.system(size: 18, weight: .bold))
+                                    .foregroundColor(index == 0 ? DesignSystem.SoftRed : .white)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.75)
+                            }
+                            .padding(.vertical, 14)
+                            .background(DesignSystem.SurfaceGlass)
+                            .background(index == 0 ? DesignSystem.AccentRed.opacity(0.1) : Color.clear)
+                            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.medium))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: DesignSystem.Radius.medium)
+                                    .stroke(index == 0 ? DesignSystem.AccentRed.opacity(0.4) : DesignSystem.BorderGlass, lineWidth: 1)
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 20)
                 }
-                .padding(.horizontal, 20)
             }
             
             // Detail Stats Card
@@ -202,11 +229,11 @@ struct AIAnalyzerView: View {
                 
                 GlassCard(cornerRadius: DesignSystem.Radius.medium, padding: 16) {
                     VStack(spacing: 12) {
-                        metricRow(title: "Total Chords", value: "42")
+                        metricRow(title: "Total Chords", value: "\(chordSegments.count)")
                         Divider().background(DesignSystem.BorderGlass)
-                        metricRow(title: "Unique Chords", value: "12")
+                        metricRow(title: "Unique Chords", value: "\(Set(chordSegments.map(\.name)).count)")
                         Divider().background(DesignSystem.BorderGlass)
-                        metricRow(title: "Suggested Key signature", value: "G Major (1 Sharp)")
+                        metricRow(title: "Suggested Key", value: project?.key ?? "Not analyzed")
                     }
                 }
                 .padding(.horizontal, 20)
@@ -254,7 +281,7 @@ struct AIAnalyzerView: View {
                             .tracking(1.5)
                         
                         HStack(alignment: .firstTextBaseline, spacing: 4) {
-                            Text("\(bpmCount)")
+                            Text(project?.bpm == nil ? "--" : "\(Int((project?.bpm ?? 0).rounded()))")
                                 .font(.system(size: 48, weight: .bold))
                                 .foregroundColor(.white)
                             Text("BPM")
@@ -262,7 +289,7 @@ struct AIAnalyzerView: View {
                                 .foregroundColor(DesignSystem.AccentRed)
                         }
                         
-                        Text("Time Signature: 4/4")
+                        Text("Time Signature: \(beatResult?.timeSignature ?? "Not analyzed")")
                             .font(.system(size: 13))
                             .foregroundColor(DesignSystem.TextSecondary)
                     }
@@ -270,15 +297,15 @@ struct AIAnalyzerView: View {
                     Spacer()
                     
                     VStack(spacing: 8) {
-                        Text("96% Confidence")
+                        Text(beatResult.map { "\(Int($0.confidence * 100))% Confidence" } ?? "No beat data")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(DesignSystem.SuccessGreen)
+                            .foregroundColor(beatResult == nil ? DesignSystem.TextMuted : DesignSystem.SuccessGreen)
                             .padding(.vertical, 4)
                             .padding(.horizontal, 8)
-                            .background(DesignSystem.SuccessGreen.opacity(0.1))
+                            .background((beatResult == nil ? DesignSystem.TextMuted : DesignSystem.SuccessGreen).opacity(0.1))
                             .clipShape(Capsule())
                         
-                        Text("Stable beatgrid")
+                        Text("\(beatResult?.beatTimings.count ?? 0) beat markers")
                             .font(.system(size: 11))
                             .foregroundColor(DesignSystem.TextMuted)
                     }
@@ -338,7 +365,6 @@ struct AIAnalyzerView: View {
                 
                 GlassCard(cornerRadius: DesignSystem.Radius.medium, padding: 16) {
                     VStack(alignment: .leading, spacing: 12) {
-                        // Simulated beat grid lines + Waveform
                         ZStack(alignment: .center) {
                             // Vertical Beat Grid Indicators
                             HStack(spacing: 0) {
@@ -383,9 +409,9 @@ struct AIAnalyzerView: View {
                 
                 GlassCard(cornerRadius: DesignSystem.Radius.medium, padding: 16) {
                     VStack(spacing: 12) {
-                        metricRow(title: "Time Signature", value: "4/4")
+                        metricRow(title: "Time Signature", value: beatResult?.timeSignature ?? "Not analyzed")
                         Divider().background(DesignSystem.BorderGlass)
-                        metricRow(title: "Grid Subdivision", value: "1/16 Note")
+                        metricRow(title: "Beat Markers", value: "\(beatResult?.beatTimings.count ?? 0)")
                         Divider().background(DesignSystem.BorderGlass)
                         metricRow(title: "Metronome Sound", value: "Woodblock")
                     }
@@ -409,8 +435,14 @@ struct AIAnalyzerView: View {
                 .foregroundColor(.white)
         }
     }
+
+    private func formatTime(_ seconds: Double) -> String {
+        let mins = Int(seconds) / 60
+        let secs = Int(seconds) % 60
+        return String(format: "%02d:%02d", mins, secs)
+    }
 }
 
 #Preview {
-    AIAnalyzerView()
+    AIAnalyzerView(project: nil)
 }

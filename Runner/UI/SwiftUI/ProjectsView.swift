@@ -1,15 +1,16 @@
 import SwiftUI
 
 struct ProjectsView: View {
+    var projects: [StemProject]
     var onCreateProject: () -> Void = {}
-    var onProjectSelected: (String) -> Void
+    var onProjectSelected: (StemProject) -> Void
     
     @State private var searchText: String = ""
     @State private var selectedFilterIndex: Int = 0
     private let filters = ["All", "Songs", "Sessions", "Imported"]
     
     var filteredProjects: [StemProject] {
-        var list = PreviewData.projects
+        var list = projects
         
         if selectedFilterIndex == 1 { // Songs
             list = list.filter { $0.stemPaths.count > 2 }
@@ -98,11 +99,11 @@ struct ProjectsView: View {
                             .foregroundColor(DesignSystem.AccentRed)
                             .tracking(1.5)
                         
-                        Text("Ocean Waves")
+                        Text(projects.first?.name ?? "No Active Project")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.white)
                         
-                        Text("Ready to mix · 6 stems separated")
+                        Text(projects.first.map { "\($0.stemPaths.count) stems - \($0.status.rawValue)" } ?? "Create a project from real audio")
                             .font(.system(size: 12))
                             .foregroundColor(DesignSystem.TextSecondary)
                     }
@@ -179,7 +180,7 @@ struct ProjectsView: View {
                     VStack(spacing: 10) {
                         ForEach(filteredProjects) { project in
                             GlassListRow(action: {
-                                onProjectSelected(project.name)
+                                onProjectSelected(project)
                             }) {
                                 HStack(spacing: 16) {
                                     // Artwork/Icon
@@ -214,13 +215,13 @@ struct ProjectsView: View {
                                                 .foregroundColor(DesignSystem.SoftRed)
                                                 .font(.system(size: 12, weight: .medium))
                                             
-                                            Text("•")
+                                            Text("-")
                                                 .foregroundColor(DesignSystem.TextMuted)
                                             
                                             Text(project.displayDuration)
                                                 .foregroundColor(DesignSystem.TextMuted)
                                             
-                                            Text("•")
+                                            Text("-")
                                                 .foregroundColor(DesignSystem.TextMuted)
                                             
                                             Text(formatDate(project.createdAt))
@@ -263,6 +264,6 @@ struct ProjectsView: View {
 #Preview {
     ZStack {
         Color.black.ignoresSafeArea()
-        ProjectsView(onProjectSelected: { _ in })
+        ProjectsView(projects: [], onProjectSelected: { _ in })
     }
 }

@@ -3,63 +3,49 @@ import CoreML
 import AVFoundation
 import Accelerate
 
-/// Production on-device 6-stem source separation using CoreML Dense U-Net.
-///
-/// Model: dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1
-///   Input:  "mixture"  [1, 4, 32, 2048]  — stereo STFT (Re_L, Im_L, Re_R, Im_R) × 32 time-frames × 2048 freq-bins
-///   Output: 6 stems, each [1, 4, 32, 2048] — raw STFT per stem
-///
-/// Pipeline: Load audio → stereo resample 44100 → STFT → chunk → CoreML → iSTFT → write M4A
+/// On-device 6-stem source separation using the bundled CoreML Dense U-Net models.
 public class CoreMLStemSeparator {
 
     private var nFFT = 4096
     private var hopSize = 1024
-    private var nBins = 2048           // nFFT / 2
-    private var chunkFrames = 32       // model time-axis size
+    private var nBins = 2048
+    private var chunkFrames = 32
     private let targetSampleRate: Double = 44100.0
     private let stemNames = ["vocals", "drums", "bass", "guitar", "piano", "other"]
 
     private let featureExtractor = AudioFeatureExtractor()
 
-    public init() {}
+    private struct ModelCandidate {
+        let name: String
+        let nFFT: Int
+        let hopSize: Int
+        let chunkFrames: Int
+    }
 
-    // MARK: - Public API
+    private struct LoadedStemModel {
+        let model: MLModel
+        let name: String
+        let nFFT: Int
+        let hopSize: Int
+        let nBins: Int
+        let chunkFrames: Int
+    }
 
-    /// Separates a local mixture audio file into six separate stem tracks using CoreML inference.
-    /// Falls back to bundle demo assets if the model is not available or inference fails.
-    private func transcodeToWavIfNeeded(url: URL) async throws -> URL {
-        do {
-            let _ = try AVAudioFile(forReading: url)
-            print("[StemSeparator] Input file is readable natively.")
-            return url
-        } catch {
-            print("[StemSeparator] Native read failed: \(error.localizedDescription). Attempting transcoding...")
-        }
+    private final class StemSTFTBuffer {
+        var realL: [[Float]]
+        var imagL: [[Float]]
+        var realR: [[Float]]
+        var imagR: [[Float]]
 
-        let asset = AVAsset(url: url)
-        
-        let tempDir = FileManager.default.temporaryDirectory
-        let tempM4aURL = tempDir.appendingPathComponent("transcoded_\(UUID().uuidString).m4a")
-        
-        guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetAppleM4A) else {
-            throw NSError(domain: "CoreMLStemSeparator", code: 500,
-                          userInfo: [NSLocalizedDescriptionKey: "Gagal membuat sesi transcode audio."])
-        }
-        
-        exportSession.outputURL = tempM4aURL
-        exportSession.outputFileType = .m4a
-        
-        await exportSession.export()
-        
-        if exportSession.status == .completed {
-            print("[StemSeparator] Transcoded successfully to: \(tempM4aURL.lastPathComponent)")
-            return tempM4aURL
-        } else {
-            let exportError = exportSession.error ?? NSError(domain: "CoreMLStemSeparator", code: 500,
-                                                            userInfo: [NSLocalizedDescriptionKey: "Gagal melakukan transcoding audio."])
-            throw exportError
+        init(frameCount: Int, binCount: Int) {
+            realL = [[Float]](repeating: [Float](repeating: 0, count: binCount), count: frameCount)
+            imagL = [[Float]](repeating: [Float](repeating: 0, count: binCount), count: frameCount)
+            realR = [[Float]](repeating: [Float](repeating: 0, count: binCount), count: frameCount)
+            imagR = [[Float]](repeating: [Float](repeating: 0, count: binCount), count: frameCount)
         }
     }
+
+    public init() {}
 
     public func separate(
         audioURL: URL,
@@ -68,176 +54,280 @@ public class CoreMLStemSeparator {
         onProgress: @escaping (String, Double) -> Void
     ) async throws -> [String: URL] {
         guard FileManager.default.fileExists(atPath: audioURL.path) else {
-            throw NSError(domain: "CoreMLStemSeparator", code: 404,
-                          userInfo: [NSLocalizedDescriptionKey: "Input mixture file not found at \(audioURL.path)"])
-        }
-
-        onProgress("Memulai pemisahan stem...", 0.02)
-        print("[StemSeparator] Starting separation on: \(audioURL.lastPathComponent)")
-
-        // 1. Transcode if needed
-        onProgress("Memeriksa format file audio...", 0.04)
-        let readableURL = try await transcodeToWavIfNeeded(url: audioURL)
-
-        do {
-            let result = try await runRealInference(audioURL: readableURL, processingMode: processingMode, modelQuality: modelQuality, onProgress: onProgress)
-            onProgress("Proses pemisahan stem berhasil diselesaikan!", 1.0)
-            print("[StemSeparator] ✅ Real CoreML separation succeeded.")
-            
-            // Clean up temporary transcoded file if created
-            if readableURL != audioURL {
-                try? FileManager.default.removeItem(at: readableURL)
-            }
-            return result
-        } catch {
-            print("[StemSeparator] ⚠️ CoreML separation failed: \(error.localizedDescription). Falling back to high-fidelity pre-bundled stems...")
-            
-            // Clean up temporary transcoded file if created
-            if readableURL != audioURL {
-                try? FileManager.default.removeItem(at: readableURL)
-            }
-            
-            do {
-                let fallbackStems = try copyBundleFallback(audioURL: audioURL)
-                onProgress("Inference tidak didukung perangkat. Menggunakan file demo kualitas tinggi bawaan.", 0.95)
-                return fallbackStems
-            } catch let fallbackError {
-                print("[StemSeparator] ❌ Fallback failed too: \(fallbackError.localizedDescription)")
-                throw error
-            }
-        }
-    }
-
-    // MARK: - Real CoreML Inference Pipeline
-
-    private func runRealInference(
-        audioURL: URL,
-        processingMode: String?,
-        modelQuality: String?,
-        onProgress: @escaping (String, Double) -> Void
-    ) async throws -> [String: URL] {
-        // 1. Load CoreML model
-        onProgress("Memuat model CoreML...", 0.05)
-        let model = try loadModel(processingMode: processingMode, modelQuality: modelQuality)
-
-        // 2. Decode audio to stereo PCM @ 44100 Hz
-        onProgress("Melakukan decoding format audio campuran...", 0.1)
-        let (leftChannel, rightChannel) = try loadStereoAudio(url: audioURL)
-        print("[StemSeparator] Audio loaded: \(leftChannel.count) samples per channel")
-
-        // 3. Compute STFT for both channels
-        onProgress("Menghitung analisis frekuensi (STFT)...", 0.2)
-        let leftSTFT = computeChannelSTFT(samples: leftChannel)
-        let rightSTFT = computeChannelSTFT(samples: rightChannel)
-        let totalFrames = leftSTFT.real.count
-        print("[StemSeparator] STFT computed: \(totalFrames) frames × \(nBins) bins")
-
-        guard totalFrames > 0 else {
-            throw NSError(domain: "CoreMLStemSeparator", code: 500,
-                          userInfo: [NSLocalizedDescriptionKey: "STFT produced zero frames"])
-        }
-
-        // 4. Chunk, run inference, collect output STFT per stem
-        var stemSTFTs: [String: (realL: [[Float]], imagL: [[Float]], realR: [[Float]], imagR: [[Float]])] = [:]
-        for name in stemNames {
-            stemSTFTs[name] = (
-                realL: [[Float]](repeating: [Float](repeating: 0, count: nBins), count: totalFrames),
-                imagL: [[Float]](repeating: [Float](repeating: 0, count: nBins), count: totalFrames),
-                realR: [[Float]](repeating: [Float](repeating: 0, count: nBins), count: totalFrames),
-                imagR: [[Float]](repeating: [Float](repeating: 0, count: nBins), count: totalFrames)
+            throw NSError(
+                domain: "CoreMLStemSeparator",
+                code: 404,
+                userInfo: [NSLocalizedDescriptionKey: "Input mixture file not found at \(audioURL.path)"]
             )
         }
 
-        // Process in chunks
-        let step = 16
-        var chunkStart = 0
-        var chunkCount = 0
-        let totalChunks = Int(ceil(Double(totalFrames) / Double(step)))
-        onProgress("Menjalankan inferensi neural network (\(totalChunks) chunks)...", 0.3)
+        onProgress("Memulai pemisahan stem...", 0.02)
+        onProgress("Memeriksa format file audio...", 0.04)
 
-        while chunkStart < totalFrames {
-            let chunkEnd = min(chunkStart + chunkFrames, totalFrames)
-            let actualFrames = chunkEnd - chunkStart
-            chunkStart += step
-            chunkCount += 1
-            
-            await Task.yield()
-            let currentProgress = 0.3 + (Double(chunkCount) / Double(totalChunks)) * 0.5
-            if chunkCount % 5 == 0 || chunkStart >= totalFrames {
-                onProgress("Processing chunk \(chunkCount)/\(totalChunks)", currentProgress)
+        let readableURL = try await transcodeToM4AIfNeeded(url: audioURL)
+        defer {
+            if readableURL != audioURL {
+                try? FileManager.default.removeItem(at: readableURL)
             }
         }
 
-        print("[StemSeparator] Inference complete: \(chunkCount) chunks processed")
-        onProgress("Inference selesai. Rekonstruksi gelombang audio stereo (iSTFT)...", 0.8)
+        do {
+            let result = try await runInference(
+                audioURL: readableURL,
+                modelQuality: modelQuality,
+                onProgress: onProgress
+            )
+            onProgress("Proses pemisahan stem berhasil diselesaikan!", 1.0)
+            return result
+        } catch {
+            print("[StemSeparator] CoreML separation failed: \(error.localizedDescription)")
+            throw error
+        }
+    }
 
-        // 5. iSTFT each stem → write M4A
-        let outputDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("stem_output_\(UUID().uuidString)")
-        try FileManager.default.createDirectory(at: outputDir, withIntermediateDirectories: true)
+    private func transcodeToM4AIfNeeded(url: URL) async throws -> URL {
+        do {
+            _ = try AVAudioFile(forReading: url)
+            return url
+        } catch {
+            print("[StemSeparator] Native read failed: \(error.localizedDescription). Attempting transcode.")
+        }
 
-        var outputPaths: [String: URL] = [:]
-        for (idx, name) in stemNames.enumerated() {
-            let writeProgress = 0.8 + (Double(idx) / Double(stemNames.count)) * 0.18
-            onProgress("Menulis file audio untuk stem: \(name.uppercased())", writeProgress)
-            
-            let stemData = stemSTFTs[name]!
-            guard let pcmBuffer = featureExtractor.computeISTFTStereo(
-                realL: stemData.realL, imagL: stemData.imagL,
-                realR: stemData.realR, imagR: stemData.imagR,
-                nFFT: nFFT, hopSize: hopSize, sampleRate: targetSampleRate
-            ) else {
-                print("[StemSeparator] ⚠️ iSTFT failed for \(name), skipping")
+        let asset = AVAsset(url: url)
+        let outputURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("transcoded-\(UUID().uuidString).m4a")
+
+        guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetAppleM4A) else {
+            throw NSError(
+                domain: "CoreMLStemSeparator",
+                code: 500,
+                userInfo: [NSLocalizedDescriptionKey: "Gagal membuat sesi transcode audio."]
+            )
+        }
+
+        exportSession.outputURL = outputURL
+        exportSession.outputFileType = .m4a
+
+        await exportSession.export()
+
+        guard exportSession.status == .completed else {
+            throw exportSession.error ?? NSError(
+                domain: "CoreMLStemSeparator",
+                code: 500,
+                userInfo: [NSLocalizedDescriptionKey: "Gagal melakukan transcoding audio."]
+            )
+        }
+
+        return outputURL
+    }
+
+    private func runInference(
+        audioURL: URL,
+        modelQuality: String?,
+        onProgress: @escaping (String, Double) -> Void
+    ) async throws -> [String: URL] {
+        onProgress("Memuat model CoreML...", 0.05)
+        let loadedModel = try loadModel(modelQuality: modelQuality)
+        nFFT = loadedModel.nFFT
+        hopSize = loadedModel.hopSize
+        nBins = loadedModel.nBins
+        chunkFrames = loadedModel.chunkFrames
+
+        onProgress("Melakukan decoding audio...", 0.1)
+        let (leftChannel, rightChannel) = try loadStereoAudio(url: audioURL)
+
+        onProgress("Menghitung STFT audio...", 0.2)
+        let leftSTFT = computeChannelSTFT(samples: leftChannel)
+        let rightSTFT = computeChannelSTFT(samples: rightChannel)
+        let totalFrames = min(leftSTFT.real.count, rightSTFT.real.count)
+
+        guard totalFrames > 0 else {
+            throw NSError(
+                domain: "CoreMLStemSeparator",
+                code: 500,
+                userInfo: [NSLocalizedDescriptionKey: "STFT produced zero frames."]
+            )
+        }
+
+        var stemSTFTs: [String: StemSTFTBuffer] = [:]
+        for stem in stemNames {
+            stemSTFTs[stem] = StemSTFTBuffer(frameCount: totalFrames, binCount: nBins)
+        }
+
+        let totalChunks = Int(ceil(Double(totalFrames) / Double(chunkFrames)))
+        onProgress("Menjalankan inferensi neural network (\(totalChunks) chunks)...", 0.3)
+
+        var chunkStart = 0
+        var chunkCount = 0
+
+        while chunkStart < totalFrames {
+            try Task.checkCancellation()
+
+            let actualFrames = min(chunkFrames, totalFrames - chunkStart)
+            let inputArray = try makeInputArray(
+                leftSTFT: leftSTFT,
+                rightSTFT: rightSTFT,
+                startFrame: chunkStart,
+                actualFrames: actualFrames
+            )
+
+            let provider = try MLDictionaryFeatureProvider(dictionary: [
+                "mixture": MLFeatureValue(multiArray: inputArray)
+            ])
+            let prediction = try loadedModel.model.prediction(from: provider)
+
+            for stem in stemNames {
+                guard let outputArray = prediction.featureValue(for: stem)?.multiArrayValue,
+                      let buffer = stemSTFTs[stem] else {
+                    throw NSError(
+                        domain: "CoreMLStemSeparator",
+                        code: 500,
+                        userInfo: [NSLocalizedDescriptionKey: "Model output missing stem: \(stem)"]
+                    )
+                }
+
+                try copyOutputArray(
+                    outputArray,
+                    into: buffer,
+                    startFrame: chunkStart,
+                    actualFrames: actualFrames
+                )
+            }
+
+            chunkStart += chunkFrames
+            chunkCount += 1
+
+            let currentProgress = 0.3 + (Double(chunkCount) / Double(totalChunks)) * 0.48
+            onProgress("Processing chunk \(chunkCount)/\(totalChunks)", currentProgress)
+            await Task.yield()
+        }
+
+        onProgress("Rekonstruksi waveform stereo...", 0.82)
+        return try writeStemOutputs(from: stemSTFTs, onProgress: onProgress)
+    }
+
+    private func loadModel(modelQuality: String?) throws -> LoadedStemModel {
+        let highQuality = ModelCandidate(
+            name: "dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1",
+            nFFT: 4096,
+            hopSize: 1024,
+            chunkFrames: 32
+        )
+        let lightQuality = ModelCandidate(
+            name: "dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0",
+            nFFT: 2048,
+            hopSize: 1024,
+            chunkFrames: 64
+        )
+
+        let orderedCandidates: [ModelCandidate]
+        if modelQuality == "Model Ringan" {
+            orderedCandidates = [lightQuality, highQuality]
+        } else {
+            orderedCandidates = [highQuality, lightQuality]
+        }
+
+        for candidate in orderedCandidates {
+            guard let modelURL = Bundle.main.url(forResource: candidate.name, withExtension: "mlmodelc") else {
                 continue
             }
 
-            let outputURL = outputDir.appendingPathComponent("\(name).m4a")
-            try writeAudioBuffer(pcmBuffer, to: outputURL)
-            outputPaths[name] = outputURL
-            print("[StemSeparator] Wrote stereo \(name).m4a")
+            let config = MLModelConfiguration()
+            config.computeUnits = .all
+            let model = try MLModel(contentsOf: modelURL, configuration: config)
+            print("[StemSeparator] Loaded CoreML model: \(candidate.name)")
+            return LoadedStemModel(
+                model: model,
+                name: candidate.name,
+                nFFT: candidate.nFFT,
+                hopSize: candidate.hopSize,
+                nBins: candidate.nFFT / 2,
+                chunkFrames: candidate.chunkFrames
+            )
         }
 
-        return outputPaths
+        throw NSError(
+            domain: "CoreMLStemSeparator",
+            code: 404,
+            userInfo: [NSLocalizedDescriptionKey: "No stem separation CoreML model found in bundle."]
+        )
     }
 
-    // MARK: - Model Loading
+    private func makeInputArray(
+        leftSTFT: (real: [[Float]], imag: [[Float]]),
+        rightSTFT: (real: [[Float]], imag: [[Float]]),
+        startFrame: Int,
+        actualFrames: Int
+    ) throws -> MLMultiArray {
+        let input = try MLMultiArray(
+            shape: [NSNumber(value: 1), NSNumber(value: 4), NSNumber(value: chunkFrames), NSNumber(value: nBins)],
+            dataType: .float32
+        )
 
-    private func loadModel(processingMode: String?, modelQuality: String?) throws -> MLModel {
-        let preferredNames: [String]
-        if let quality = modelQuality {
-            if quality == "Model Ringan" {
-                preferredNames = [
-                    "dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0",
-                    "dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1"
-                ]
-            } else {
-                preferredNames = [
-                    "dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1",
-                    "dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0"
-                ]
-            }
-        } else {
-            preferredNames = [
-                "dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0",
-                "dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1"
-            ]
+        guard input.dataType == .float32 else {
+            throw NSError(
+                domain: "CoreMLStemSeparator",
+                code: 500,
+                userInfo: [NSLocalizedDescriptionKey: "Unexpected CoreML input array type."]
+            )
         }
 
-        for modelName in preferredNames {
-            if let modelURL = Bundle.main.url(forResource: modelName, withExtension: "mlmodelc") {
-                let config = MLModelConfiguration()
-                config.computeUnits = .all
-                let model = try MLModel(contentsOf: modelURL, configuration: config)
-                print("[StemSeparator] Loaded CoreML model: \(modelName)")
-                return model
+        let pointer = input.dataPointer.bindMemory(to: Float.self, capacity: input.count)
+        for index in 0..<input.count {
+            pointer[index] = 0
+        }
+
+        let strides = input.strides.map { $0.intValue }
+        func offset(channel: Int, frame: Int, bin: Int) -> Int {
+            channel * strides[1] + frame * strides[2] + bin * strides[3]
+        }
+
+        for frame in 0..<actualFrames {
+            let sourceFrame = startFrame + frame
+            for bin in 0..<nBins {
+                pointer[offset(channel: 0, frame: frame, bin: bin)] = leftSTFT.real[sourceFrame][bin]
+                pointer[offset(channel: 1, frame: frame, bin: bin)] = leftSTFT.imag[sourceFrame][bin]
+                pointer[offset(channel: 2, frame: frame, bin: bin)] = rightSTFT.real[sourceFrame][bin]
+                pointer[offset(channel: 3, frame: frame, bin: bin)] = rightSTFT.imag[sourceFrame][bin]
             }
         }
 
-        throw NSError(domain: "CoreMLStemSeparator", code: 404,
-                      userInfo: [NSLocalizedDescriptionKey: "No stem separation CoreML model found in bundle"])
+        return input
     }
 
-    // MARK: - Audio Loading (Stereo)
+    private func copyOutputArray(
+        _ output: MLMultiArray,
+        into buffer: StemSTFTBuffer,
+        startFrame: Int,
+        actualFrames: Int
+    ) throws {
+        guard output.dataType == .float32 else {
+            throw NSError(
+                domain: "CoreMLStemSeparator",
+                code: 500,
+                userInfo: [NSLocalizedDescriptionKey: "Unexpected CoreML output array type."]
+            )
+        }
+
+        let pointer = output.dataPointer.bindMemory(to: Float.self, capacity: output.count)
+        let strides = output.strides.map { $0.intValue }
+        let outputFrames = min(actualFrames, output.shape[2].intValue)
+        let outputBins = min(nBins, output.shape[3].intValue)
+
+        func offset(channel: Int, frame: Int, bin: Int) -> Int {
+            channel * strides[1] + frame * strides[2] + bin * strides[3]
+        }
+
+        for frame in 0..<outputFrames {
+            let targetFrame = startFrame + frame
+            for bin in 0..<outputBins {
+                buffer.realL[targetFrame][bin] = pointer[offset(channel: 0, frame: frame, bin: bin)]
+                buffer.imagL[targetFrame][bin] = pointer[offset(channel: 1, frame: frame, bin: bin)]
+                buffer.realR[targetFrame][bin] = pointer[offset(channel: 2, frame: frame, bin: bin)]
+                buffer.imagR[targetFrame][bin] = pointer[offset(channel: 3, frame: frame, bin: bin)]
+            }
+        }
+    }
 
     private func loadStereoAudio(url: URL) throws -> (left: [Float], right: [Float]) {
         let audioFile = try AVAudioFile(forReading: url)
@@ -249,33 +339,41 @@ public class CoreMLStemSeparator {
             channels: 2,
             interleaved: false
         ) else {
-            throw NSError(domain: "CoreMLStemSeparator", code: 500,
-                          userInfo: [NSLocalizedDescriptionKey: "Failed to create target audio format"])
+            throw NSError(
+                domain: "CoreMLStemSeparator",
+                code: 500,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to create target audio format."]
+            )
         }
 
         let frameCount = AVAudioFrameCount(audioFile.length)
         guard let readBuffer = AVAudioPCMBuffer(pcmFormat: audioFile.processingFormat, frameCapacity: frameCount) else {
-            throw NSError(domain: "CoreMLStemSeparator", code: 500,
-                          userInfo: [NSLocalizedDescriptionKey: "Failed to create read buffer"])
+            throw NSError(
+                domain: "CoreMLStemSeparator",
+                code: 500,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to create read buffer."]
+            )
         }
 
         try audioFile.read(into: readBuffer)
 
-        // Resample if needed
         let outputBuffer: AVAudioPCMBuffer
         if originalFormat.sampleRate != targetSampleRate || originalFormat.channelCount != 2 {
             let ratio = targetSampleRate / originalFormat.sampleRate
             let estimatedFrames = AVAudioFrameCount(Double(readBuffer.frameLength) * ratio) + 1024
 
-            guard let outBuf = AVAudioPCMBuffer(pcmFormat: targetFormat, frameCapacity: estimatedFrames),
+            guard let convertedBuffer = AVAudioPCMBuffer(pcmFormat: targetFormat, frameCapacity: estimatedFrames),
                   let converter = AVAudioConverter(from: originalFormat, to: targetFormat) else {
-                throw NSError(domain: "CoreMLStemSeparator", code: 500,
-                              userInfo: [NSLocalizedDescriptionKey: "Failed to create audio converter"])
+                throw NSError(
+                    domain: "CoreMLStemSeparator",
+                    code: 500,
+                    userInfo: [NSLocalizedDescriptionKey: "Failed to create audio converter."]
+                )
             }
 
             var error: NSError?
             var consumed = false
-            converter.convert(to: outBuf, error: &error) { _, outStatus in
+            converter.convert(to: convertedBuffer, error: &error) { _, outStatus in
                 if consumed {
                     outStatus.pointee = .endOfStream
                     return nil
@@ -284,31 +382,31 @@ public class CoreMLStemSeparator {
                 outStatus.pointee = .haveData
                 return readBuffer
             }
-            if let err = error { throw err }
-            outputBuffer = outBuf
+
+            if let error {
+                throw error
+            }
+            outputBuffer = convertedBuffer
         } else {
             outputBuffer = readBuffer
         }
 
         guard let channelData = outputBuffer.floatChannelData else {
-            throw NSError(domain: "CoreMLStemSeparator", code: 500,
-                          userInfo: [NSLocalizedDescriptionKey: "No float channel data in buffer"])
+            throw NSError(
+                domain: "CoreMLStemSeparator",
+                code: 500,
+                userInfo: [NSLocalizedDescriptionKey: "No float channel data in audio buffer."]
+            )
         }
 
         let length = Int(outputBuffer.frameLength)
         let leftChannel = Array(UnsafeBufferPointer(start: channelData[0], count: length))
-
-        let rightChannel: [Float]
-        if outputBuffer.format.channelCount >= 2 {
-            rightChannel = Array(UnsafeBufferPointer(start: channelData[1], count: length))
-        } else {
-            rightChannel = leftChannel
-        }
+        let rightChannel = outputBuffer.format.channelCount >= 2
+            ? Array(UnsafeBufferPointer(start: channelData[1], count: length))
+            : leftChannel
 
         return (leftChannel, rightChannel)
     }
-
-    // MARK: - STFT (per channel)
 
     private func computeChannelSTFT(samples: [Float]) -> (real: [[Float]], imag: [[Float]]) {
         let log2n = vDSP_Length(log2(Double(nFFT)))
@@ -331,12 +429,15 @@ public class CoreMLStemSeparator {
             var realPart = [Float](repeating: 0, count: halfN)
             var imagPart = [Float](repeating: 0, count: halfN)
 
-            windowed.withUnsafeMutableBufferPointer { ptr in
-                realPart.withUnsafeMutableBufferPointer { rBuf in
-                    imagPart.withUnsafeMutableBufferPointer { iBuf in
-                        var splitComplex = DSPSplitComplex(realp: rBuf.baseAddress!, imagp: iBuf.baseAddress!)
-                        ptr.baseAddress!.withMemoryRebound(to: DSPComplex.self, capacity: halfN) { complexPtr in
-                            vDSP_ctoz(complexPtr, 2, &splitComplex, 1, vDSP_Length(halfN))
+            windowed.withUnsafeMutableBufferPointer { windowPointer in
+                realPart.withUnsafeMutableBufferPointer { realPointer in
+                    imagPart.withUnsafeMutableBufferPointer { imagPointer in
+                        var splitComplex = DSPSplitComplex(
+                            realp: realPointer.baseAddress!,
+                            imagp: imagPointer.baseAddress!
+                        )
+                        windowPointer.baseAddress!.withMemoryRebound(to: DSPComplex.self, capacity: halfN) { complexPointer in
+                            vDSP_ctoz(complexPointer, 2, &splitComplex, 1, vDSP_Length(halfN))
                         }
                         vDSP_fft_zrip(fftSetup, &splitComplex, 1, log2n, FFTDirection(FFT_FORWARD))
                     }
@@ -351,11 +452,47 @@ public class CoreMLStemSeparator {
         return (realFrames, imagFrames)
     }
 
-    // MARK: - Audio Writing
+    private func writeStemOutputs(
+        from stemSTFTs: [String: StemSTFTBuffer],
+        onProgress: @escaping (String, Double) -> Void
+    ) throws -> [String: URL] {
+        let outputDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("stem-output-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: outputDirectory, withIntermediateDirectories: true)
+
+        var outputPaths: [String: URL] = [:]
+        for (index, stem) in stemNames.enumerated() {
+            guard let stemData = stemSTFTs[stem] else { continue }
+
+            let progress = 0.82 + (Double(index) / Double(stemNames.count)) * 0.16
+            onProgress("Menulis file stem: \(stem)", progress)
+
+            guard let pcmBuffer = featureExtractor.computeISTFTStereo(
+                realL: stemData.realL,
+                imagL: stemData.imagL,
+                realR: stemData.realR,
+                imagR: stemData.imagR,
+                nFFT: nFFT,
+                hopSize: hopSize,
+                sampleRate: targetSampleRate
+            ) else {
+                throw NSError(
+                    domain: "CoreMLStemSeparator",
+                    code: 500,
+                    userInfo: [NSLocalizedDescriptionKey: "Failed to reconstruct stem: \(stem)"]
+                )
+            }
+
+            let outputURL = outputDirectory.appendingPathComponent("\(stem).m4a")
+            try writeAudioBuffer(pcmBuffer, to: outputURL)
+            outputPaths[stem] = outputURL
+        }
+
+        return outputPaths
+    }
 
     private func writeAudioBuffer(_ buffer: AVAudioPCMBuffer, to url: URL) throws {
         let channelCount = Int(buffer.format.channelCount)
-
         let settings: [String: Any] = [
             AVFormatIDKey: kAudioFormatMPEG4AAC,
             AVSampleRateKey: targetSampleRate,
@@ -365,48 +502,10 @@ public class CoreMLStemSeparator {
         ]
 
         if FileManager.default.fileExists(atPath: url.path) {
-            try? FileManager.default.removeItem(at: url)
+            try FileManager.default.removeItem(at: url)
         }
 
         let audioFile = try AVAudioFile(forWriting: url, settings: settings)
         try audioFile.write(from: buffer)
-    }
-
-    // MARK: - Bundle Fallback
-
-    private func copyBundleFallback(audioURL: URL) throws -> [String: URL] {
-        let tempDir = FileManager.default.temporaryDirectory
-        var outputDictionary: [String: URL] = [:]
-        let bundle = Bundle.main
-
-        for stem in stemNames {
-            var resourceName = stem.capitalized
-            if stem == "bass" || stem == "piano" || stem == "other" {
-                resourceName = "Others"
-            }
-
-            let stemURL = tempDir.appendingPathComponent("\(stem).m4a")
-
-            if let bundleURL = bundle.url(forResource: resourceName, withExtension: "m4a") {
-                if FileManager.default.fileExists(atPath: stemURL.path) {
-                    try? FileManager.default.removeItem(at: stemURL)
-                }
-                do {
-                    try FileManager.default.copyItem(at: bundleURL, to: stemURL)
-                    outputDictionary[stem] = stemURL
-                } catch {
-                    print("[StemSeparator] Error copying bundle asset \(resourceName).m4a: \(error.localizedDescription)")
-                    outputDictionary[stem] = stemURL
-                }
-            } else {
-                if FileManager.default.fileExists(atPath: stemURL.path) {
-                    try? FileManager.default.removeItem(at: stemURL)
-                }
-                try? FileManager.default.copyItem(at: audioURL, to: stemURL)
-                outputDictionary[stem] = stemURL
-            }
-        }
-
-        return outputDictionary
     }
 }

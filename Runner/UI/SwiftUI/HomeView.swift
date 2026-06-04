@@ -1,8 +1,9 @@
 import SwiftUI
 
 struct HomeView: View {
+    var projects: [StemProject]
     var onNavigateToTool: (String) -> Void
-    var onProjectSelected: (String) -> Void
+    var onProjectSelected: (StemProject) -> Void
 
     private let quickActionColumns = [
         GridItem(.flexible(), spacing: 12),
@@ -155,10 +156,13 @@ struct HomeView: View {
                 }
             }
 
-            VStack(spacing: 10) {
-                ForEach(PreviewData.projects.prefix(3)) { project in
+            if projects.isEmpty {
+                emptyRecentProjects
+            } else {
+                VStack(spacing: 10) {
+                    ForEach(projects.prefix(3)) { project in
                     GlassListRow(action: {
-                        onProjectSelected(project.name)
+                        onProjectSelected(project)
                     }) {
                         HStack(spacing: 12) {
                             ZStack {
@@ -198,6 +202,33 @@ struct HomeView: View {
                         }
                     }
                 }
+                }
+            }
+        }
+    }
+
+    private var emptyRecentProjects: some View {
+        GlassCard(cornerRadius: DesignSystem.Radius.medium, padding: 16) {
+            HStack(spacing: 12) {
+                Image(systemName: "tray")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(DesignSystem.TextMuted)
+                    .frame(width: 42, height: 42)
+                    .background(Color.white.opacity(0.05))
+                    .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.small))
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("No projects yet")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.white)
+
+                    Text("Import or record audio to create your first real project.")
+                        .font(.system(size: 12))
+                        .foregroundColor(DesignSystem.TextMuted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer()
             }
         }
     }
@@ -266,6 +297,6 @@ struct HomeView: View {
 #Preview {
     ZStack {
         Color.black.ignoresSafeArea()
-        HomeView(onNavigateToTool: { _ in }, onProjectSelected: { _ in })
+        HomeView(projects: [], onNavigateToTool: { _ in }, onProjectSelected: { _ in })
     }
 }

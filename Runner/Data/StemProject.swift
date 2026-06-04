@@ -54,7 +54,7 @@ public struct StemProject: Codable, Identifiable {
     
     public var projectDirectory: URL {
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        return documentsPath.appendingPathComponent("Projects/\(id.uuidString)")
+        return documentsPath.appendingPathComponent("MusicXNA_Projects/\(id.uuidString)")
     }
     
     public var stemDirectory: URL {
@@ -75,7 +75,7 @@ public struct StemProject: Codable, Identifiable {
     }
     
     public func allStemsAvailable() -> Bool {
-        let requiredStems = ["vocals", "drums", "bass", "guitar", "piano", "others"]
+        let requiredStems = ["vocals", "drums", "bass", "guitar", "piano", "other"]
         return requiredStems.allSatisfy { stemPaths[$0] != nil }
     }
 }

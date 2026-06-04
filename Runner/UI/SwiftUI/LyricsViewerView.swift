@@ -1,11 +1,14 @@
 import SwiftUI
 
 struct LyricsViewerView: View {
+    var project: StemProject?
+
     @Environment(\.dismiss) private var dismiss
 
-    @State private var lyricsList: [LyricLine] = PreviewData.lyricLines
-    @State private var highlightedIndex: Int = 5
+    @State private var lyricsList: [LyricLine] = []
+    @State private var highlightedIndex: Int = 0
     @State private var isPlaying: Bool = false
+    @State private var loadMessage: String?
 
     private let timer = Timer.publish(every: 2.0, on: .main, in: .common).autoconnect()
 
@@ -16,16 +19,25 @@ struct LyricsViewerView: View {
             VStack(spacing: 18) {
                 headerBar
                 trackInfoHeader
-                lyricsListView
+                if lyricsList.isEmpty {
+                    emptyLyricsState
+                } else {
+                    lyricsListView
+                }
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            playbackControls
+            if !lyricsList.isEmpty {
+                playbackControls
+            }
         }
         .navigationBarBackButtonHidden()
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            loadProjectLyrics()
+        }
         .onReceive(timer) { _ in
-            guard isPlaying else { return }
+            guard isPlaying, !lyricsList.isEmpty else { return }
             highlightedIndex = highlightedIndex < lyricsList.count - 1 ? highlightedIndex + 1 : 0
         }
     }
@@ -77,21 +89,42 @@ struct LyricsViewerView: View {
                 )
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Ocean Waves (Lyrics Mode)")
+                Text(project?.name ?? "No Project Selected")
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(.white)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
-                Text("AI Transcribed - Sync Lock Active")
+                Text(loadMessage ?? "Lyrics are loaded from the selected project.")
                     .font(.system(size: 11))
                     .foregroundColor(DesignSystem.TextMuted)
-                    .lineLimit(1)
+                    .lineLimit(2)
                     .minimumScaleFactor(0.8)
             }
 
             Spacer()
         }
         .padding(.horizontal, 20)
+    }
+
+    private var emptyLyricsState: some View {
+        Spacer()
+            .overlay(
+                VStack(spacing: 12) {
+                    Image(systemName: "text.quote")
+                        .font(.system(size: 44, weight: .semibold))
+                        .foregroundColor(DesignSystem.TextMuted)
+
+                    Text("No lyrics yet")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+
+                    Text(project == nil ? "Select a project first." : "This project does not have a real transcription file yet.")
+                        .font(.system(size: 13))
+                        .foregroundColor(DesignSystem.TextSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 36)
+                }
+            )
     }
 
     private var lyricsListView: some View {
@@ -107,11 +140,6 @@ struct LyricsViewerView: View {
                 .padding(.bottom, 12)
                 .onAppear {
                     proxy.scrollTo(highlightedIndex, anchor: .center)
-                    PermissionManager.shared.requestSpeechRecognitionPermission { granted in
-                        if !granted {
-                            PermissionManager.shared.showPermissionDeniedAlert(for: .speechRecognition)
-                        }
-                    }
                 }
                 .onChange(of: highlightedIndex) { _, newIndex in
                     withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
@@ -187,9 +215,10 @@ struct LyricsViewerView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
-        .background(isHighlighted ?
-                    LinearGradient(colors: [DesignSystem.AccentRed.opacity(0.35), DesignSystem.PrimaryRed.opacity(0.1)], startPoint: .leading, endPoint: .trailing) :
-                    LinearGradient(colors: [DesignSystem.SurfaceGlass, Color.clear], startPoint: .leading, endPoint: .trailing)
+        .background(
+            isHighlighted
+            ? LinearGradient(colors: [DesignSystem.AccentRed.opacity(0.35), DesignSystem.PrimaryRed.opacity(0.1)], startPoint: .leading, endPoint: .trailing)
+            : LinearGradient(colors: [DesignSystem.SurfaceGlass, Color.clear], startPoint: .leading, endPoint: .trailing)
         )
         .background(.thinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.medium))
@@ -202,6 +231,35 @@ struct LyricsViewerView: View {
         .shadow(color: isHighlighted ? DesignSystem.AccentRed.opacity(0.15) : Color.clear, radius: 8)
     }
 
+    private func loadProjectLyrics() {
+        guard let lyricsPath = project?.lyricsPath else {
+            lyricsList = []
+            loadMessage = "No transcription file in this project."
+            return
+        }
+
+        do {
+            let data = try Data(contentsOf: lyricsPath)
+            if let decoded = try? JSONDecoder().decode([LyricLine].self, from: data) {
+                lyricsList = decoded
+            } else {
+                let object = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                let rawLines = object?["lyrics"] as? [[String: Any]] ?? []
+                lyricsList = rawLines.compactMap { item in
+                    guard let start = item["startTime"] as? Double,
+                          let end = item["endTime"] as? Double,
+                          let text = item["text"] as? String else { return nil }
+                    return LyricLine(startTime: start, endTime: end, text: text)
+                }
+            }
+
+            loadMessage = lyricsList.isEmpty ? "Lyrics file was empty." : "\(lyricsList.count) synced lines loaded."
+        } catch {
+            lyricsList = []
+            loadMessage = error.localizedDescription
+        }
+    }
+
     private func formatTime(_ seconds: Double) -> String {
         let mins = Int(seconds) / 60
         let secs = Int(seconds) % 60
@@ -210,5 +268,5 @@ struct LyricsViewerView: View {
 }
 
 #Preview {
-    LyricsViewerView()
+    LyricsViewerView(project: nil)
 }

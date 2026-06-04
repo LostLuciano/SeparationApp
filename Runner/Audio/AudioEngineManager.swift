@@ -380,21 +380,6 @@ public class AudioEngineManager {
     /// Loads stems from a StemProject - compatibility method for ExportManager
     /// - Parameter project: StemProject containing stem data and URLs
     public func loadProject(_ project: StemProject) throws {
-        // Map project stems to URLs
-        var stemURLs: [String: URL] = [:]
-        
-        if let vocalsURL = project.vocalsURL {
-            stemURLs["vocals"] = vocalsURL
-        }
-        if let drumsURL = project.drumsURL {
-            stemURLs["drums"] = drumsURL
-        }
-        if let bassURL = project.bassURL {
-            stemURLs["bass"] = bassURL
-        }
-        // Add other stems as available in StemProject
-        
-        // Load using existing loadStemFiles
-        try loadStemFiles(stemURLs)
+        try loadStemFiles(project.stemPaths)
     }
 }

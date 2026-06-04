@@ -1,13 +1,15 @@
 import SwiftUI
 
 struct RecordingView: View {
-    var onRecordFinished: () -> Void
+    var onRecordFinished: (URL) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var isRecording: Bool = false
     @State private var secondsElapsed: Int = 0
     @State private var inputSource: String = "Internal Microphone"
     @State private var isMetronomeOn: Bool = false
+    @State private var currentRecordingURL: URL?
+    @State private var errorMessage: String?
 
     private let recorder = RecordingManager()
     private let timer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
@@ -31,6 +33,9 @@ struct RecordingView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 22) {
                     headerBar
+                    if let errorMessage {
+                        errorBanner(errorMessage)
+                    }
                     waveformPanel
                     timerPanel
                 }
@@ -136,6 +141,23 @@ struct RecordingView: View {
         }
     }
 
+    private func errorBanner(_ message: String) -> some View {
+        Text(message)
+            .font(.system(size: 12, weight: .medium))
+            .foregroundColor(DesignSystem.RecordRed)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity)
+            .background(Color.white.opacity(0.06))
+            .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.medium))
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignSystem.Radius.medium)
+                    .stroke(DesignSystem.RecordRed.opacity(0.35), lineWidth: 1)
+            )
+            .padding(.horizontal, 20)
+    }
+
     private var timerPanel: some View {
         VStack(spacing: 4) {
             Text(timeString)
@@ -223,6 +245,7 @@ struct RecordingView: View {
                 isRecording = false
             }
             secondsElapsed = 0
+            currentRecordingURL = nil
         }) {
             Image(systemName: "arrow.counterclockwise")
                 .font(.system(size: 18, weight: .semibold))
@@ -261,7 +284,12 @@ struct RecordingView: View {
                 recorder.stopRecording()
                 isRecording = false
             }
-            onRecordFinished()
+            guard let currentRecordingURL,
+                  FileManager.default.fileExists(atPath: currentRecordingURL.path) else {
+                errorMessage = "No recording file was created yet."
+                return
+            }
+            onRecordFinished(currentRecordingURL)
         }) {
             Image(systemName: "checkmark")
                 .font(.system(size: 18, weight: .bold))
@@ -275,16 +303,30 @@ struct RecordingView: View {
     }
 
     private func toggleRecording() {
-        isRecording.toggle()
+        errorMessage = nil
+
         if isRecording {
-            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("temp_recording.wav")
-            try? recorder.startRecording(to: tempURL)
-        } else {
             recorder.stopRecording()
+            isRecording = false
+        } else {
+            do {
+                let recordingsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                    .appendingPathComponent("MusicXNA_Recordings")
+                try FileManager.default.createDirectory(at: recordingsDirectory, withIntermediateDirectories: true)
+
+                let outputURL = recordingsDirectory.appendingPathComponent("recording-\(Int(Date().timeIntervalSince1970)).wav")
+                try recorder.startRecording(to: outputURL)
+                currentRecordingURL = outputURL
+                secondsElapsed = 0
+                isRecording = true
+            } catch {
+                isRecording = false
+                errorMessage = error.localizedDescription
+            }
         }
     }
 }
 
 #Preview {
-    RecordingView(onRecordFinished: {})
+    RecordingView(onRecordFinished: { _ in })
 }

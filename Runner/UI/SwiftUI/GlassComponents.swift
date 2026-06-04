@@ -518,10 +518,10 @@ struct MixerFader: View {
 
 // MARK: - Mini Player Card
 struct MiniPlayerCard: View {
-    var projectName: String = "Ocean Waves"
-    var duration: String = "03:24"
+    var projectName: String = "Untitled Project"
+    var duration: String = "00:00"
     @State private var isPlaying = false
-    @State private var playProgress: Double = 0.35 // Simulation
+    @State private var playProgress: Double = 0.0
     
     var body: some View {
         GlassCard(padding: 12) {
@@ -549,7 +549,6 @@ struct MiniPlayerCard: View {
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white)
                     
-                    // Simulated progress bar
                     GeometryReader { geo in
                         ZStack(alignment: .leading) {
                             RoundedRectangle(cornerRadius: 2)

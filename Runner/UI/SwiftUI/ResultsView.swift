@@ -1,13 +1,20 @@
 import SwiftUI
+import AVFoundation
 
 struct ResultsView: View {
-    var projectName: String
+    var project: StemProject
     var onOpenMixer: () -> Void
     var onOpenAnalyzer: () -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var playingStemId: UUID? = nil
-    @State private var stemsList: [Stem] = PreviewData.stems
+    @State private var audioPlayer: AVAudioPlayer?
+    @State private var isExporting = false
+    @State private var exportStatus: String?
+
+    private var stemsList: [Stem] {
+        project.displayStems
+    }
 
     var body: some View {
         ZStack {
@@ -25,6 +32,9 @@ struct ResultsView: View {
         }
         .navigationBarBackButtonHidden()
         .toolbar(.hidden, for: .navigationBar)
+        .onDisappear {
+            audioPlayer?.stop()
+        }
     }
 
     private var backgroundGradient: some View {
@@ -83,7 +93,7 @@ struct ResultsView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.82)
 
-                    Text(projectName)
+                    Text(project.name)
                         .font(.system(size: 12))
                         .foregroundColor(DesignSystem.TextSecondary)
                         .lineLimit(1)
@@ -101,7 +111,7 @@ struct ResultsView: View {
                 .font(.system(size: 16, weight: .bold))
                 .foregroundColor(.white)
             Spacer()
-            Text("Duration: 03:24")
+            Text("Duration: \(project.displayDuration)")
                 .font(.system(size: 12))
                 .foregroundColor(DesignSystem.TextMuted)
                 .lineLimit(1)
@@ -117,7 +127,7 @@ struct ResultsView: View {
                         stem: stem,
                         isPlaying: playingStemId == stem.id,
                         onPlayToggle: {
-                            playingStemId = playingStemId == stem.id ? nil : stem.id
+                            toggleStemPlayback(stem)
                         }
                     )
                 }
@@ -129,14 +139,26 @@ struct ResultsView: View {
 
     private var actionBar: some View {
         VStack(spacing: 12) {
+            if let exportStatus {
+                Text(exportStatus)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(DesignSystem.TextMuted)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+            }
+
             HStack(spacing: 12) {
                 GlassButton(title: "Open Mixer", icon: "slider.horizontal.3", isAccented: true, action: onOpenMixer)
                 GlassButton(title: "AI Analyzer", icon: "waveform.path", isAccented: false, action: onOpenAnalyzer)
             }
 
             HStack(spacing: 12) {
-                secondaryAction(title: "Export Stems", icon: "square.and.arrow.up", action: {})
-                secondaryAction(title: "Save Project", icon: "folder.badge.plus", action: {})
+                secondaryAction(
+                    title: isExporting ? "Exporting" : "Export Stems",
+                    icon: isExporting ? "hourglass" : "square.and.arrow.up",
+                    action: exportStems
+                )
+                secondaryAction(title: "Saved", icon: "checkmark.circle", action: {})
             }
         }
         .padding(.horizontal, 20)
@@ -165,8 +187,75 @@ struct ResultsView: View {
             )
         }
     }
+
+    private func toggleStemPlayback(_ stem: Stem) {
+        if playingStemId == stem.id {
+            audioPlayer?.stop()
+            audioPlayer = nil
+            playingStemId = nil
+            return
+        }
+
+        do {
+            audioPlayer?.stop()
+            let player = try AVAudioPlayer(contentsOf: stem.url)
+            player.prepareToPlay()
+            player.play()
+            audioPlayer = player
+            playingStemId = stem.id
+        } catch {
+            print("ResultsView: Failed to play stem \(stem.name): \(error.localizedDescription)")
+            playingStemId = nil
+        }
+    }
+
+    private func exportStems() {
+        guard !isExporting else { return }
+        isExporting = true
+        exportStatus = "Exporting stems..."
+
+        ExportManager.shared.exportIndividualStems(
+            from: project,
+            format: .m4a,
+            quality: .high,
+            progress: { progress in
+                exportStatus = "Exporting stems \(Int(progress * 100))%"
+            },
+            completion: { result in
+                isExporting = false
+                switch result {
+                case .success(let urls):
+                    exportStatus = "Exported \(urls.count) stems to app export cache."
+                case .failure(let error):
+                    exportStatus = error.localizedDescription
+                }
+            }
+        )
+    }
 }
 
 #Preview {
-    ResultsView(projectName: "Ocean Waves", onOpenMixer: {}, onOpenAnalyzer: {})
+    ResultsView(
+        project: StemProject(
+            id: UUID(),
+            name: "Preview",
+            title: "Preview",
+            createdAt: Date(),
+            originalAudioURL: URL(fileURLWithPath: "/tmp/input.m4a"),
+            importedFileName: "input.m4a",
+            duration: 0,
+            format: "M4A",
+            sampleRate: 44100,
+            bpm: nil,
+            key: nil,
+            status: .separated,
+            stemPaths: [:],
+            chordSegments: [],
+            beatResult: nil,
+            lyricsPath: nil,
+            waveformCachePath: nil
+        ),
+        onOpenMixer: {},
+        onOpenAnalyzer: {}
+    )
 }

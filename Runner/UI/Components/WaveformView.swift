@@ -48,7 +48,7 @@ class WaveformView: UIView {
         // Simplified waveform generation - would use AVAudioFile in production
         var samples: [Float] = Array(repeating: 0, count: 200)
         
-        // Generate pseudo-waveform for demo (0-1 range)
+        // Generate a placeholder waveform until a project waveform cache is available.
         for i in 0..<samples.count {
             let phase = Float(i) / Float(samples.count)
             samples[i] = abs(sin(phase * Float.pi * 2)) * 0.7 + 0.1

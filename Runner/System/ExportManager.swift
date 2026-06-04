@@ -293,6 +293,9 @@ public class ExportManager {
         // Create output file
         let outputFileName = "\(project.name)_mix.\(format.fileExtension)"
         let outputURL = tempDirectory.appendingPathComponent(outputFileName)
+        if fileManager.fileExists(atPath: outputURL.path) {
+            try fileManager.removeItem(at: outputURL)
+        }
         
         // Check available space
         let estimatedSize: Int64 = Int64(project.duration * 44100 * 4) // ~176 KB/sec stereo
@@ -358,6 +361,9 @@ public class ExportManager {
             // Copy stem file
             let outputFileName = "\(project.name)_\(stemName).\(format.fileExtension)"
             let outputURL = tempDirectory.appendingPathComponent(outputFileName)
+            if fileManager.fileExists(atPath: outputURL.path) {
+                try fileManager.removeItem(at: outputURL)
+            }
             
             try fileManager.copyItem(at: stemURL, to: outputURL)
             stemURLs[stemName] = outputURL
@@ -428,8 +434,105 @@ extension AudioEngineManager {
         into buffer: AVAudioPCMBuffer,
         project: StemProject
     ) throws {
-        // This would be implemented in AudioEngineManager
-        // to mix all loaded stems with their current volumes
-        Logger.shared.debug("Mixing \(project.stemURLs.count) stems")
+        guard let outputData = buffer.floatChannelData else {
+            throw ExportManager.ExportError.audioEngineError
+        }
+
+        let outputChannels = Int(buffer.format.channelCount)
+        let outputFrames = Int(buffer.frameCapacity)
+        buffer.frameLength = buffer.frameCapacity
+
+        for channel in 0..<outputChannels {
+            for frame in 0..<outputFrames {
+                outputData[channel][frame] = 0
+            }
+        }
+
+        guard !project.stemURLs.isEmpty else {
+            throw ExportManager.ExportError.noStemsAvailable
+        }
+
+        let gain = Float(1.0 / Double(project.stemURLs.count))
+
+        for (_, url) in project.stemURLs {
+            let file = try AVAudioFile(forReading: url)
+            guard let sourceBuffer = AVAudioPCMBuffer(
+                pcmFormat: file.processingFormat,
+                frameCapacity: AVAudioFrameCount(file.length)
+            ) else {
+                throw ExportManager.ExportError.audioEngineError
+            }
+
+            try file.read(into: sourceBuffer)
+            let mixBuffer = try convertBufferIfNeeded(sourceBuffer, to: buffer.format)
+            guard let inputData = mixBuffer.floatChannelData else { continue }
+
+            let inputChannels = Int(mixBuffer.format.channelCount)
+            let framesToMix = min(outputFrames, Int(mixBuffer.frameLength))
+
+            for channel in 0..<outputChannels {
+                let sourceChannel = min(channel, max(0, inputChannels - 1))
+                for frame in 0..<framesToMix {
+                    outputData[channel][frame] += inputData[sourceChannel][frame] * gain
+                }
+            }
+        }
+
+        normalize(buffer)
+    }
+
+    private func convertBufferIfNeeded(
+        _ sourceBuffer: AVAudioPCMBuffer,
+        to outputFormat: AVAudioFormat
+    ) throws -> AVAudioPCMBuffer {
+        if sourceBuffer.format.isEqual(outputFormat) {
+            return sourceBuffer
+        }
+
+        guard let convertedBuffer = AVAudioPCMBuffer(
+            pcmFormat: outputFormat,
+            frameCapacity: AVAudioFrameCount(sourceBuffer.frameLength)
+        ), let converter = AVAudioConverter(from: sourceBuffer.format, to: outputFormat) else {
+            throw ExportManager.ExportError.audioEngineError
+        }
+
+        var consumed = false
+        var conversionError: NSError?
+        converter.convert(to: convertedBuffer, error: &conversionError) { _, status in
+            if consumed {
+                status.pointee = .endOfStream
+                return nil
+            }
+            consumed = true
+            status.pointee = .haveData
+            return sourceBuffer
+        }
+
+        if let conversionError {
+            throw conversionError
+        }
+
+        return convertedBuffer
+    }
+
+    private func normalize(_ buffer: AVAudioPCMBuffer) {
+        guard let data = buffer.floatChannelData else { return }
+        let channels = Int(buffer.format.channelCount)
+        let frames = Int(buffer.frameLength)
+        var peak: Float = 0
+
+        for channel in 0..<channels {
+            for frame in 0..<frames {
+                peak = max(peak, abs(data[channel][frame]))
+            }
+        }
+
+        guard peak > 1.0 else { return }
+        let scale = 1.0 / peak
+        for channel in 0..<channels {
+            for frame in 0..<frames {
+                data[channel][frame] *= scale
+            }
+        }
     }
 }

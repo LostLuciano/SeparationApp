@@ -1,4 +1,5 @@
 import SwiftUI
+import AVFoundation
 
 struct ProcessingStep: Identifiable {
     let id = UUID()
@@ -10,55 +11,65 @@ enum StepStatus {
     case completed
     case inProgress
     case pending
-    
+    case failed
+
     var icon: String {
         switch self {
         case .completed: return "checkmark.circle.fill"
         case .inProgress: return "arrow.triangle.2.circlepath"
         case .pending: return "circle"
+        case .failed: return "xmark.circle.fill"
         }
     }
-    
+
     var color: Color {
         switch self {
         case .completed: return DesignSystem.SuccessGreen
         case .inProgress: return DesignSystem.AccentRed
         case .pending: return DesignSystem.TextMuted
+        case .failed: return DesignSystem.RecordRed
         }
     }
-    
+
     var text: String {
         switch self {
         case .completed: return "Completed"
         case .inProgress: return "In Progress"
         case .pending: return "Pending"
+        case .failed: return "Failed"
         }
     }
 }
 
 struct ProcessingView: View {
-    var onComplete: () -> Void
+    let audioURL: URL
+    var onComplete: (StemProject) -> Void
     var onCancel: () -> Void
-    
+
     @State private var progress: Double = 0.0
     @State private var elapsedSeconds: Int = 0
+    @State private var statusMessage: String = "Preparing audio..."
+    @State private var errorMessage: String?
+    @State private var hasStarted = false
+    @State private var isFinished = false
+    @State private var startedAt = Date()
     @State private var steps: [ProcessingStep] = [
         ProcessingStep(name: "Decode Audio", status: .inProgress),
         ProcessingStep(name: "STFT Transform", status: .pending),
         ProcessingStep(name: "AI Inference", status: .pending),
         ProcessingStep(name: "Reconstruction", status: .pending),
-        ProcessingStep(name: "Export Stems", status: .pending)
+        ProcessingStep(name: "Save Project", status: .pending)
     ]
-    
-    // Timer to simulate progress
-    let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
-    
+
+    private let elapsedTimer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
+
     var etaSeconds: Int {
-        let totalTime = 12.0 // Total simulated time in seconds
-        let remaining = totalTime - (progress * totalTime)
-        return max(0, Int(remaining))
+        guard progress > 0.02, !isFinished, errorMessage == nil else { return 0 }
+        let elapsed = Date().timeIntervalSince(startedAt)
+        let estimatedTotal = elapsed / min(progress, 0.99)
+        return max(0, Int(estimatedTotal - elapsed))
     }
-    
+
     var body: some View {
         ZStack {
             backgroundGradient
@@ -69,8 +80,13 @@ struct ProcessingView: View {
         }
         .navigationBarBackButtonHidden()
         .toolbar(.hidden, for: .navigationBar)
-        .onReceive(timer) { _ in
-            handleTimerTick()
+        .onReceive(elapsedTimer) { _ in
+            if hasStarted && !isFinished && errorMessage == nil {
+                elapsedSeconds += 1
+            }
+        }
+        .task {
+            await startProcessingIfNeeded()
         }
     }
 
@@ -88,26 +104,47 @@ struct ProcessingView: View {
             VStack(spacing: 20) {
                 headerView
                 progressRing
+                statusText
                 elapsedSummary
                 processingStepsCard
-                engineDetailsCard
+                if let errorMessage {
+                    errorCard(errorMessage)
+                } else {
+                    engineDetailsCard
+                }
             }
             .padding(.bottom, 16)
         }
     }
 
     private var headerView: some View {
-        HStack {
+        VStack(spacing: 4) {
             Text("Processing Stems")
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.white)
+
+            Text(audioURL.lastPathComponent)
+                .font(.system(size: 12))
+                .foregroundColor(DesignSystem.TextMuted)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .padding(.horizontal, 28)
         }
         .padding(.top, 16)
     }
 
     private var progressRing: some View {
-        GlassProgressRing(progress: progress, subtitle: "Separating Vocal & Instruments")
+        GlassProgressRing(progress: progress, subtitle: "Separating real audio")
             .padding(.top, 10)
+    }
+
+    private var statusText: some View {
+        Text(statusMessage)
+            .font(.system(size: 13, weight: .medium))
+            .foregroundColor(errorMessage == nil ? DesignSystem.TextSecondary : DesignSystem.RecordRed)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 28)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private var elapsedSummary: some View {
@@ -137,11 +174,31 @@ struct ProcessingView: View {
     private var engineDetailsCard: some View {
         GlassCard(cornerRadius: DesignSystem.Radius.medium, padding: 12) {
             HStack {
-                engineDetail(title: "Engine", value: "Neural Engine Core v2", alignment: .leading, valueColor: .white)
+                engineDetail(title: "Engine", value: "CoreML Dense U-Net", alignment: .leading, valueColor: .white)
 
                 Spacer()
 
-                engineDetail(title: "Mode", value: "High Quality (Hifi)", alignment: .trailing, valueColor: DesignSystem.SoftRed)
+                engineDetail(title: "Source", value: "User Audio", alignment: .trailing, valueColor: DesignSystem.SoftRed)
+            }
+        }
+        .padding(.horizontal, 20)
+    }
+
+    private func errorCard(_ message: String) -> some View {
+        GlassCard(cornerRadius: DesignSystem.Radius.medium, padding: 14) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(DesignSystem.RecordRed)
+                    Text("Processing failed")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                }
+
+                Text(message)
+                    .font(.system(size: 12))
+                    .foregroundColor(DesignSystem.TextSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(.horizontal, 20)
@@ -149,7 +206,7 @@ struct ProcessingView: View {
 
     private var cancelButton: some View {
         Button(action: onCancel) {
-            Text("Cancel Processing")
+            Text(errorMessage == nil ? "Cancel Processing" : "Back")
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(.white)
                 .padding(.vertical, 14)
@@ -214,52 +271,183 @@ struct ProcessingView: View {
                 .foregroundColor(valueColor)
         }
     }
-    
-    private func updateSteps() {
-        // Simple milestones mapping progress to stages
-        if progress >= 0.2 && steps[0].status == .inProgress {
-            steps[0].status = .completed
-            steps[1].status = .inProgress
+
+    private func startProcessingIfNeeded() async {
+        let shouldStart = await MainActor.run { () -> Bool in
+            if hasStarted { return false }
+            hasStarted = true
+            startedAt = Date()
+            return true
         }
-        if progress >= 0.45 && steps[1].status == .inProgress {
-            steps[1].status = .completed
-            steps[2].status = .inProgress
+
+        guard shouldStart else { return }
+
+        guard ProcessingGate.shared.requestOperation(.separation) else {
+            await MainActor.run {
+                failProcessing("Another processing job is already running.")
+            }
+            return
         }
-        if progress >= 0.75 && steps[2].status == .inProgress {
-            steps[2].status = .completed
-            steps[3].status = .inProgress
+
+        defer {
+            ProcessingGate.shared.completeOperation(.separation)
         }
-        if progress >= 0.9 && steps[3].status == .inProgress {
-            steps[3].status = .completed
-            steps[4].status = .inProgress
-        }
-        if progress >= 1.0 {
-            steps[4].status = .completed
+
+        do {
+            let generatedStems = try await CoreMLStemSeparatorWrapper.shared.separate(
+                audioURL: audioURL,
+                processingMode: "High Quality",
+                modelQuality: "High Quality"
+            ) { message, value in
+                Task { @MainActor in
+                    updateProgress(value, message: message)
+                }
+            }
+
+            await MainActor.run {
+                updateProgress(0.94, message: "Analyzing tempo and chords...")
+            }
+
+            let project = try await createProject(from: audioURL, generatedStems: generatedStems)
+
+            await MainActor.run {
+                progress = 1.0
+                statusMessage = "Project saved successfully."
+                isFinished = true
+                steps = steps.map { ProcessingStep(name: $0.name, status: .completed) }
+                onComplete(project)
+            }
+        } catch {
+            await MainActor.run {
+                failProcessing(error.localizedDescription)
+            }
         }
     }
-    
+
+    @MainActor
+    private func updateProgress(_ value: Double, message: String) {
+        progress = min(max(value, progress), 0.99)
+        statusMessage = message
+        updateSteps()
+    }
+
+    @MainActor
+    private func failProcessing(_ message: String) {
+        errorMessage = message
+        statusMessage = "Real processing could not finish."
+        isFinished = true
+
+        if let activeIndex = steps.firstIndex(where: { $0.status == .inProgress }) {
+            steps[activeIndex].status = .failed
+        }
+    }
+
+    private func createProject(from sourceURL: URL, generatedStems: [String: URL]) async throws -> StemProject {
+        guard !generatedStems.isEmpty else {
+            throw NSError(
+                domain: "ProcessingView",
+                code: 500,
+                userInfo: [NSLocalizedDescriptionKey: "Separation finished without any stem files."]
+            )
+        }
+
+        let metadata = await readAudioMetadata(from: sourceURL)
+        var project = StemProject(
+            id: UUID(),
+            name: sourceURL.deletingPathExtension().lastPathComponent,
+            title: sourceURL.deletingPathExtension().lastPathComponent,
+            createdAt: Date(),
+            originalAudioURL: sourceURL,
+            importedFileName: sourceURL.lastPathComponent,
+            duration: metadata.duration,
+            format: sourceURL.pathExtension.uppercased(),
+            sampleRate: metadata.sampleRate,
+            bpm: nil,
+            key: nil,
+            status: .separated,
+            stemPaths: [:],
+            chordSegments: [],
+            beatResult: nil,
+            lyricsPath: nil,
+            waveformCachePath: nil
+        )
+
+        try FileManager.default.createDirectory(at: project.stemDirectory, withIntermediateDirectories: true)
+
+        for (stem, tempURL) in generatedStems {
+            let fileExtension = tempURL.pathExtension.isEmpty ? "m4a" : tempURL.pathExtension
+            let destination = project.stemDirectory.appendingPathComponent("\(stem).\(fileExtension)")
+            if FileManager.default.fileExists(atPath: destination.path) {
+                try FileManager.default.removeItem(at: destination)
+            }
+            try FileManager.default.copyItem(at: tempURL, to: destination)
+            project.setStemPath(stem, url: destination)
+        }
+
+        do {
+            let beatResult = try await BeatDetectionManager().analyzeBeats(audioURL: sourceURL)
+            project.beatResult = beatResult
+            project.bpm = beatResult.tempo
+        } catch {
+            print("ProcessingView: Beat analysis skipped: \(error.localizedDescription)")
+        }
+
+        do {
+            let chordSegments = try await ChordDetectionManager().analyzeChords(audioURL: sourceURL)
+            project.chordSegments = chordSegments
+            project.key = inferKey(from: chordSegments)
+        } catch {
+            print("ProcessingView: Chord analysis skipped: \(error.localizedDescription)")
+        }
+
+        try ProjectStore.shared.save(project)
+        return project
+    }
+
+    private func readAudioMetadata(from url: URL) async -> (duration: Double, sampleRate: Double) {
+        let asset = AVURLAsset(url: url)
+        let duration: Double
+        if let loadedDuration = try? await asset.load(.duration) {
+            let seconds = CMTimeGetSeconds(loadedDuration)
+            duration = seconds.isFinite ? seconds : 0
+        } else {
+            duration = 0
+        }
+
+        let sampleRate = (try? AVAudioFile(forReading: url).fileFormat.sampleRate) ?? 44100.0
+        return (duration, sampleRate)
+    }
+
+    private func inferKey(from segments: [ChordSegment]) -> String? {
+        guard let firstChord = segments.first?.name else { return nil }
+        return firstChord.replacingOccurrences(of: ":", with: " ")
+    }
+
+    private func updateSteps() {
+        let milestones: [Double] = [0.12, 0.28, 0.78, 0.92, 0.98]
+
+        for index in steps.indices {
+            if progress >= milestones[index] {
+                steps[index].status = .completed
+            } else if index == 0 || progress >= milestones[index - 1] {
+                steps[index].status = .inProgress
+            } else {
+                steps[index].status = .pending
+            }
+        }
+    }
+
     private func formatTime(_ seconds: Int) -> String {
         let mins = seconds / 60
         let secs = seconds % 60
         return String(format: "%02d:%02d", mins, secs)
     }
-
-    private func handleTimerTick() {
-        if progress < 1.0 {
-            progress += 0.01
-
-            if Int(progress * 100) % 10 == 0 {
-                elapsedSeconds += 1
-            }
-
-            updateSteps()
-        } else {
-            timer.upstream.connect().cancel()
-            onComplete()
-        }
-    }
 }
 
 #Preview {
-    ProcessingView(onComplete: {}, onCancel: {})
+    ProcessingView(
+        audioURL: URL(fileURLWithPath: "/tmp/input.m4a"),
+        onComplete: { _ in },
+        onCancel: {}
+    )
 }
