@@ -6,7 +6,6 @@ public class AudioEngineManager {
     
     private let audioEngine = AVAudioEngine()
     private let mainMixer = AVAudioMixerNode()
-    private let dynamicsProcessor = AVAudioUnitDynamicsProcessor()
     private let timePitchNode = AVAudioUnitTimePitch()
     
     // Mapping of stem names to their respective player nodes
@@ -46,14 +45,12 @@ public class AudioEngineManager {
     /// Initializes player nodes, attaches them to the audio engine graph, and configures mixer routing.
     private func setupAudioEngine() {
         audioEngine.attach(mainMixer)
-        audioEngine.attach(dynamicsProcessor)
         audioEngine.attach(timePitchNode)
         
         configureMasterBus()
 
         // Route all stems through a protected master bus before playback.
-        audioEngine.connect(mainMixer, to: dynamicsProcessor, format: nil)
-        audioEngine.connect(dynamicsProcessor, to: timePitchNode, format: nil)
+        audioEngine.connect(mainMixer, to: timePitchNode, format: nil)
         audioEngine.connect(timePitchNode, to: audioEngine.outputNode, format: nil)
         
         for name in stemNames {
@@ -68,13 +65,7 @@ public class AudioEngineManager {
     }
 
     private func configureMasterBus() {
-        mainMixer.outputVolume = 1.0
-
-        dynamicsProcessor.threshold = -3.0
-        dynamicsProcessor.headRoom = 5.0
-        dynamicsProcessor.attackTime = 0.003
-        dynamicsProcessor.releaseTime = 0.08
-        dynamicsProcessor.masterGain = 0.0
+        mainMixer.outputVolume = Self.masterHeadroom
     }
     
     /// Loads isolated stem files into player buffers.
