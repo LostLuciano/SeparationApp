@@ -161,51 +161,50 @@ public class CoreMLStemSeparator {
         var chunkCount = 0
 
         while chunkStart < totalFrames {
-            // Wrap each chunk in autoreleasepool to prevent memory accumulation
-            try await autoreleasepool {
-                try Task.checkCancellation()
+            try Task.checkCancellation()
 
-                let actualFrames = min(chunkFrames, totalFrames - chunkStart)
-                let inputArray = try makeInputArray(
-                    leftSTFT: leftSTFT,
-                    rightSTFT: rightSTFT,
-                    startFrame: chunkStart,
-                    actualFrames: actualFrames
-                )
+            let actualFrames = min(chunkFrames, totalFrames - chunkStart)
+            
+            // Process chunk - memory will be managed by Swift ARC
+            let inputArray = try makeInputArray(
+                leftSTFT: leftSTFT,
+                rightSTFT: rightSTFT,
+                startFrame: chunkStart,
+                actualFrames: actualFrames
+            )
 
-                let provider = try MLDictionaryFeatureProvider(dictionary: [
-                    "mixture": MLFeatureValue(multiArray: inputArray)
-                ])
-                let prediction = try await loadedModel.model.prediction(from: provider)
+            let provider = try MLDictionaryFeatureProvider(dictionary: [
+                "mixture": MLFeatureValue(multiArray: inputArray)
+            ])
+            let prediction = try await loadedModel.model.prediction(from: provider)
 
-                for stem in stemNames {
-                    guard let outputArray = prediction.featureValue(for: stem)?.multiArrayValue,
-                          let buffer = stemSTFTs[stem] else {
-                        throw NSError(
-                            domain: "CoreMLStemSeparator",
-                            code: 500,
-                            userInfo: [NSLocalizedDescriptionKey: "Model output missing stem: \(stem)"]
-                        )
-                    }
-
-                    try copyOutputArray(
-                        outputArray,
-                        into: buffer,
-                        startFrame: chunkStart,
-                        actualFrames: actualFrames
+            for stem in stemNames {
+                guard let outputArray = prediction.featureValue(for: stem)?.multiArrayValue,
+                      let buffer = stemSTFTs[stem] else {
+                    throw NSError(
+                        domain: "CoreMLStemSeparator",
+                        code: 500,
+                        userInfo: [NSLocalizedDescriptionKey: "Model output missing stem: \(stem)"]
                     )
                 }
 
-                chunkStart += chunkFrames
-                chunkCount += 1
+                try copyOutputArray(
+                    outputArray,
+                    into: buffer,
+                    startFrame: chunkStart,
+                    actualFrames: actualFrames
+                )
+            }
 
-                let currentProgress = 0.3 + (Double(chunkCount) / Double(totalChunks)) * 0.48
-                onProgress("Processing chunk \(chunkCount)/\(totalChunks)", currentProgress)
-                
-                // Force cleanup every 50 chunks to prevent memory buildup
-                if chunkCount % 50 == 0 {
-                    await Task.yield()
-                }
+            chunkStart += chunkFrames
+            chunkCount += 1
+
+            let currentProgress = 0.3 + (Double(chunkCount) / Double(totalChunks)) * 0.48
+            onProgress("Processing chunk \(chunkCount)/\(totalChunks)", currentProgress)
+            
+            // Yield to runtime every 10 chunks to allow memory cleanup
+            if chunkCount % 10 == 0 {
+                await Task.yield()
             }
         }
 
