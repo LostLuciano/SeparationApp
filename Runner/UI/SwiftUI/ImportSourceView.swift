@@ -21,31 +21,31 @@ struct ImportSourceView: View {
     private let sources = [
         ImportSourceOption(
             title: "Import Audio",
-            subtitle: "WAV, MP3, M4A, AIFF, CAF",
+            subtitle: "WAV, MP3, M4A, AAC, AIFF, CAF, FLAC",
             icon: "music.note",
             detail: "Choose an audio file from Files",
-            allowedTypes: [.audio]
+            allowedTypes: FileImportManager.shared.getSupportedAudioUTTypes()
         ),
         ImportSourceOption(
             title: "Import Video",
-            subtitle: "Extract audio from video",
+            subtitle: "Extract audio from MOV, MP4, M4V, MKV",
             icon: "video.fill",
-            detail: "Choose MOV, MP4, or other video files",
-            allowedTypes: [.movie]
+            detail: "Choose video files to extract audio",
+            allowedTypes: FileImportManager.shared.getSupportedVideoUTTypes()
         ),
         ImportSourceOption(
             title: "Browse Files",
             subtitle: "Choose from local files",
             icon: "folder.fill",
             detail: "Select audio or video from device storage",
-            allowedTypes: [.audio, .movie]
+            allowedTypes: FileImportManager.shared.getSupportedUTTypes()
         ),
         ImportSourceOption(
             title: "From iCloud Drive",
             subtitle: "Import from iCloud",
             icon: "icloud.fill",
             detail: "Browse shared files in iCloud folders",
-            allowedTypes: [.audio, .movie]
+            allowedTypes: FileImportManager.shared.getSupportedUTTypes()
         )
     ]
 
@@ -143,7 +143,7 @@ struct ImportSourceView: View {
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(.white)
 
-                Text("WAV, MP3, M4A, AIFF, CAF, MOV, MP4")
+                Text("WAV, MP3, M4A, AAC, AIFF, CAF, FLAC, MOV, MP4, M4V, MKV")
                     .font(.system(size: 12))
                     .foregroundColor(DesignSystem.TextSecondary)
                     .lineLimit(2)
@@ -210,7 +210,7 @@ struct ImportSourceView: View {
             }
 
             guard FileImportManager.shared.isFormatSupported(selectedURL) else {
-                importErrorMessage = "Format file belum didukung. Pakai WAV, MP3, M4A, AIFF, CAF, MOV, atau MP4."
+                importErrorMessage = "Format file belum didukung. Gunakan WAV, MP3, M4A, AAC, AIFF, CAF, FLAC, MOV, MP4, M4V, atau MKV."
                 return
             }
 

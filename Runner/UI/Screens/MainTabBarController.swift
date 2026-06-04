@@ -78,6 +78,9 @@ class MainTabBarController: UITabBarController {
             importVC.onAudioSelected = { url in
                 self.startProcessing(with: url)
             }
+            importVC.onVideoSelected = { url in
+                self.startProcessing(with: url)
+            }
             let nav = UINavigationController(rootViewController: importVC)
             self.present(nav, animated: true)
         })

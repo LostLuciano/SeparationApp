@@ -2,6 +2,7 @@ import UIKit
 import Photos
 import MediaPlayer
 import AVFoundation
+import UniformTypeIdentifiers
 
 class ImportSourceViewController: UIViewController {
     private let scrollView = UIScrollView()
@@ -196,7 +197,8 @@ class ImportSourceViewController: UIViewController {
     }
     
     private func presentDocumentPicker() {
-        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.audio], asCopy: true)
+        let allowedTypes = FileImportManager.shared.getSupportedUTTypes()
+        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: allowedTypes, asCopy: true)
         documentPicker.delegate = self
         present(documentPicker, animated: true)
     }
@@ -227,7 +229,14 @@ extension ImportSourceViewController: UIDocumentPickerDelegate {
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         guard let url = urls.first else { return }
         Logger.shared.info("Document picked: \(url.lastPathComponent)")
-        onAudioSelected?(url)
+        
+        let fileExtension = url.pathExtension.lowercased()
+        let videoFormats = ["mov", "mp4", "m4v", "mkv"]
+        if videoFormats.contains(fileExtension), let onVideoSelected = onVideoSelected {
+            onVideoSelected(url)
+        } else {
+            onAudioSelected?(url)
+        }
     }
 }
 
