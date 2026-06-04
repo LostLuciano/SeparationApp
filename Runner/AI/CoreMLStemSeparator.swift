@@ -248,11 +248,6 @@ public class CoreMLStemSeparator {
             let config = MLModelConfiguration()
             config.computeUnits = .all
             
-            // Enable aggressive optimization for on-device models
-            if #available(iOS 16.0, *) {
-                config.optimizationHints = .default
-            }
-            
             // Prefer Neural Engine over GPU for faster inference
             config.preferredMetalDevice = MTLCreateSystemDefaultDevice()
             
