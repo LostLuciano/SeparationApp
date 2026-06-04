@@ -1,11 +1,13 @@
 import Foundation
 import AVFoundation
+import AudioToolbox
 
 /// Manages multi-channel stem playback, mixing, recording, and real-time DSP effects using AVAudioEngine.
 public class AudioEngineManager {
     
     private let audioEngine = AVAudioEngine()
     private let mainMixer = AVAudioMixerNode()
+    private let dynamicsProcessor = AudioEngineManager.makeDynamicsProcessor()
     private let timePitchNode = AVAudioUnitTimePitch()
     
     // Mapping of stem names to their respective player nodes
@@ -45,12 +47,14 @@ public class AudioEngineManager {
     /// Initializes player nodes, attaches them to the audio engine graph, and configures mixer routing.
     private func setupAudioEngine() {
         audioEngine.attach(mainMixer)
+        audioEngine.attach(dynamicsProcessor)
         audioEngine.attach(timePitchNode)
         
         configureMasterBus()
 
         // Route all stems through a protected master bus before playback.
-        audioEngine.connect(mainMixer, to: timePitchNode, format: nil)
+        audioEngine.connect(mainMixer, to: dynamicsProcessor, format: nil)
+        audioEngine.connect(dynamicsProcessor, to: timePitchNode, format: nil)
         audioEngine.connect(timePitchNode, to: audioEngine.outputNode, format: nil)
         
         for name in stemNames {
@@ -66,6 +70,24 @@ public class AudioEngineManager {
 
     private func configureMasterBus() {
         mainMixer.outputVolume = Self.masterHeadroom
+
+        let audioUnit = dynamicsProcessor.audioUnit
+        _ = AudioUnitSetParameter(audioUnit, kDynamicsProcessorParam_Threshold, kAudioUnitScope_Global, 0, AudioUnitParameterValue(-6.0), 0)
+        _ = AudioUnitSetParameter(audioUnit, kDynamicsProcessorParam_HeadRoom, kAudioUnitScope_Global, 0, AudioUnitParameterValue(6.0), 0)
+        _ = AudioUnitSetParameter(audioUnit, kDynamicsProcessorParam_AttackTime, kAudioUnitScope_Global, 0, AudioUnitParameterValue(0.003), 0)
+        _ = AudioUnitSetParameter(audioUnit, kDynamicsProcessorParam_ReleaseTime, kAudioUnitScope_Global, 0, AudioUnitParameterValue(0.08), 0)
+        _ = AudioUnitSetParameter(audioUnit, kDynamicsProcessorParam_OverallGain, kAudioUnitScope_Global, 0, AudioUnitParameterValue(0.0), 0)
+    }
+
+    private static func makeDynamicsProcessor() -> AVAudioUnitEffect {
+        let description = AudioComponentDescription(
+            componentType: kAudioUnitType_Effect,
+            componentSubType: kAudioUnitSubType_DynamicsProcessor,
+            componentManufacturer: kAudioUnitManufacturer_Apple,
+            componentFlags: 0,
+            componentFlagsMask: 0
+        )
+        return AVAudioUnitEffect(audioComponentDescription: description)
     }
     
     /// Loads isolated stem files into player buffers.
