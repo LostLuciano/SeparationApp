@@ -862,7 +862,7 @@ struct RecordCoverDesignView: View {
 
     private var recordControls: some View {
         HStack {
-            GlassIconButton(icon: "headphones", size: 44)
+            GlassIconButton(icon: "headphones", size: 44, action: {})
             Spacer()
             Button(action: {}) {
                 Image(systemName: "stop.fill")
@@ -873,7 +873,7 @@ struct RecordCoverDesignView: View {
                     .clipShape(Circle())
             }
             Spacer()
-            GlassIconButton(icon: "waveform", size: 44)
+            GlassIconButton(icon: "waveform", size: 44, action: {})
         }
         .padding(.horizontal, 28)
     }
@@ -1480,7 +1480,7 @@ struct RecorderOnlyDesignView: View {
                     Spacer()
                 }
                 HStack {
-                    GlassIconButton(icon: "metronome", size: 48)
+                    GlassIconButton(icon: "metronome", size: 48, action: {})
                     Spacer()
                     Button(action: {}) {
                         Image(systemName: "stop.fill")
@@ -1491,7 +1491,7 @@ struct RecorderOnlyDesignView: View {
                             .clipShape(Circle())
                     }
                     Spacer()
-                    GlassIconButton(icon: "pause.fill", size: 58)
+                    GlassIconButton(icon: "pause.fill", size: 58, action: {})
                 }
                 LevelMeter(title: "Input Level")
                 StudioMiniPlayer(context: .from(nil))
