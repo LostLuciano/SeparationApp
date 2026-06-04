@@ -6,6 +6,7 @@ public class AudioEngineManager {
     
     private let audioEngine = AVAudioEngine()
     private let mainMixer = AVAudioMixerNode()
+    private let dynamicsProcessor = AVAudioUnitDynamicsProcessor()
     private let timePitchNode = AVAudioUnitTimePitch()
     
     // Mapping of stem names to their respective player nodes
@@ -15,8 +16,16 @@ public class AudioEngineManager {
     // Track loaded AVAudioFiles to support seeking
     private var audioFiles: [String: AVAudioFile] = [:]
     private var currentPosition: Double = 0.0
+    private var rampTokens: [String: UUID] = [:]
+    private let rampLock = NSLock()
+    private var channelVolumes: [String: Float] = [:]
+    private var mutedStemKeys: Set<String> = []
+    private var soloedStemKeys: Set<String> = []
     
     private let stemNames = ["vocals", "drums", "bass", "guitar", "piano", "other"]
+    private static let nominalSliderVolume: Float = 0.85
+    private static let masterHeadroom: Float = 0.86
+    private static let maxLoudnessCompensation: Float = 1.22
     
     public init() {
         configureAudioSession()
@@ -37,10 +46,14 @@ public class AudioEngineManager {
     /// Initializes player nodes, attaches them to the audio engine graph, and configures mixer routing.
     private func setupAudioEngine() {
         audioEngine.attach(mainMixer)
+        audioEngine.attach(dynamicsProcessor)
         audioEngine.attach(timePitchNode)
         
-        // Connect mainMixer to timePitchNode, and timePitchNode to outputNode
-        audioEngine.connect(mainMixer, to: timePitchNode, format: nil)
+        configureMasterBus()
+
+        // Route all stems through a protected master bus before playback.
+        audioEngine.connect(mainMixer, to: dynamicsProcessor, format: nil)
+        audioEngine.connect(dynamicsProcessor, to: timePitchNode, format: nil)
         audioEngine.connect(timePitchNode, to: audioEngine.outputNode, format: nil)
         
         for name in stemNames {
@@ -52,6 +65,16 @@ public class AudioEngineManager {
             // format: nil lets AVAudioEngine resolve matching connections dynamically
             audioEngine.connect(player, to: mainMixer, format: nil)
         }
+    }
+
+    private func configureMasterBus() {
+        mainMixer.outputVolume = 1.0
+
+        dynamicsProcessor.threshold = -3.0
+        dynamicsProcessor.headRoom = 5.0
+        dynamicsProcessor.attackTime = 0.003
+        dynamicsProcessor.releaseTime = 0.08
+        dynamicsProcessor.masterGain = 0.0
     }
     
     /// Loads isolated stem files into player buffers.
@@ -65,6 +88,7 @@ public class AudioEngineManager {
         
         self.stemFiles = stems
         self.audioFiles.removeAll()
+        resetMixState(for: Set(stems.keys))
         
         for (name, url) in stems {
             guard let player = players[name] else { continue }
@@ -86,6 +110,15 @@ public class AudioEngineManager {
         
         // Prepare the engine
         audioEngine.prepare()
+        applyCurrentMix()
+    }
+
+    private func resetMixState(for stems: Set<String>) {
+        channelVolumes = Dictionary(uniqueKeysWithValues: stemNames.map { stem in
+            (stem, stems.contains(stem) ? Self.nominalSliderVolume : 0.0)
+        })
+        mutedStemKeys.removeAll()
+        soloedStemKeys.removeAll()
     }
     
     private func reschedulePlayers(at time: Double) {
@@ -150,14 +183,15 @@ public class AudioEngineManager {
     
     /// Implement setStemVolume as requested
     public func setStemVolume(stem: String, volume: Float) {
-        let clampedVolume = max(0.0, min(volume, 2.0))
+        let clampedVolume = max(0.0, min(volume, 1.0))
         
         let pathOnDisk = stemFiles[stem]?.lastPathComponent ?? "unknown"
         let isNodePlaying = players[stem]?.isPlaying ?? false
         let nodeExists = players[stem] != nil
         
-        if let player = players[stem] {
-            player.volume = clampedVolume
+        if players[stem] != nil {
+            channelVolumes[stem] = clampedVolume
+            applyCurrentMix()
         } else {
             print("Unknown stem volume target: \(stem)")
         }
@@ -171,6 +205,94 @@ public class AudioEngineManager {
         file path: \(pathOnDisk)
         is playing: \(isNodePlaying)
         """)
+    }
+
+    /// Applies all channel levels together so the mix stays consistent when one stem is lowered or muted.
+    public func applyBalancedMix(volumes: [String: Float], mutedStems: Set<String>, soloedStems: Set<String>) {
+        for (stem, volume) in volumes {
+            channelVolumes[stem] = max(0.0, min(volume, 1.0))
+        }
+        mutedStemKeys = mutedStems
+        soloedStemKeys = soloedStems
+        applyCurrentMix()
+    }
+
+    public static func balancedGains(
+        volumes: [String: Float],
+        mutedStems: Set<String> = [],
+        soloedStems: Set<String> = []
+    ) -> [String: Float] {
+        let stems = Array(Set(stemNamesForMixing).union(volumes.keys)).sorted()
+        let soloMode = !soloedStems.isEmpty
+        var rawGains: [String: Float] = [:]
+        var activeEnergy: Float = 0.0
+
+        for stem in stems {
+            let sliderVolume = max(0.0, min(volumes[stem] ?? nominalSliderVolume, 1.0))
+            let shouldMute = mutedStems.contains(stem) || (soloMode && !soloedStems.contains(stem))
+            let gain = shouldMute ? 0.0 : sliderVolumeToAudioGain(sliderVolume)
+            rawGains[stem] = gain
+            activeEnergy += gain * gain
+        }
+
+        let referenceGain = sliderVolumeToAudioGain(nominalSliderVolume)
+        let referenceEnergy = Float(max(stems.count, 1)) * referenceGain * referenceGain
+        let needsCompensation = rawGains.values.contains { $0 < referenceGain * 0.25 }
+        let compensation: Float
+        if needsCompensation && activeEnergy > 0.0001 {
+            compensation = min(maxLoudnessCompensation, max(1.0, sqrt(referenceEnergy / activeEnergy)))
+        } else {
+            compensation = 1.0
+        }
+
+        return rawGains.mapValues { min(1.0, $0 * compensation * masterHeadroom) }
+    }
+
+    private static var stemNamesForMixing: [String] {
+        ["vocals", "drums", "bass", "guitar", "piano", "other"]
+    }
+
+    private static func sliderVolumeToAudioGain(_ volume: Float) -> Float {
+        guard volume > 0.001 else { return 0.0 }
+        let shaped = pow(max(0.0, min(volume, 1.0)), 1.35)
+        return min(1.0, shaped)
+    }
+
+    private func applyCurrentMix() {
+        let gains = Self.balancedGains(
+            volumes: channelVolumes,
+            mutedStems: mutedStemKeys,
+            soloedStems: soloedStemKeys
+        )
+
+        for stem in stemNames {
+            guard let player = players[stem] else { continue }
+            rampVolume(for: stem, player: player, to: gains[stem] ?? 0.0)
+        }
+    }
+
+    private func rampVolume(for stem: String, player: AVAudioPlayerNode, to targetVolume: Float) {
+        let token = UUID()
+        let startVolume = player.volume
+        rampLock.lock()
+        rampTokens[stem] = token
+        rampLock.unlock()
+
+        DispatchQueue.global(qos: .userInitiated).async { [weak self, weak player] in
+            let steps: Int32 = 10
+            for step in 1...steps {
+                guard let self, let player else { return }
+                self.rampLock.lock()
+                let isCurrent = self.rampTokens[stem] == token
+                self.rampLock.unlock()
+                guard isCurrent else { return }
+
+                let amount = Float(step) / Float(steps)
+                let easedAmount = amount * amount * (3.0 - 2.0 * amount)
+                player.volume = startVolume + (targetVolume - startVolume) * easedAmount
+                usleep(4_000)
+            }
+        }
     }
     
     /// Adjusts the volume slider value for a specific stem channel.
@@ -186,24 +308,31 @@ public class AudioEngineManager {
     ///   - stem: The identifier of the stem.
     ///   - muted: True to mute, False to restore.
     public func muteStem(_ stem: String, muted: Bool) {
-        guard let player = players[stem] else { return }
-        player.volume = muted ? 0.0 : 1.0
+        guard players[stem] != nil else { return }
+        if muted {
+            mutedStemKeys.insert(stem)
+        } else {
+            mutedStemKeys.remove(stem)
+        }
+        applyCurrentMix()
         print("AVAudioEngine: \(stem) is \(muted ? "muted" : "unmuted")")
     }
     
     /// Solos a specific stem by muting all other active channels.
     /// - Parameter stem: The identifier of the stem to isolate.
     public func soloStem(_ stem: String) {
+        setSoloStem(stem, soloed: true)
+    }
+
+    public func setSoloStem(_ stem: String, soloed: Bool) {
         guard players[stem] != nil else { return }
-        
-        for (name, player) in players {
-            if name == stem {
-                player.volume = 1.0
-            } else {
-                player.volume = 0.0
-            }
+        if soloed {
+            soloedStemKeys.insert(stem)
+        } else {
+            soloedStemKeys.remove(stem)
         }
-        print("AVAudioEngine: Soloed \(stem) channel. All other tracks silenced.")
+        applyCurrentMix()
+        print("AVAudioEngine: \(stem) solo is \(soloed ? "enabled" : "disabled")")
     }
     
     /// Adjusts the overall playback speed (tempo) without modifying pitch.
@@ -278,6 +407,22 @@ public class AudioEngineManager {
     
     /// Exports the current stem mix with individual volume adjustments into a single output file using offline rendering.
     public func exportStemMix(volumes: [String: Float], outputURL: URL) async throws {
+        try await exportStemMix(
+            volumes: volumes,
+            outputURL: outputURL,
+            startTime: 0.0,
+            duration: nil,
+            quality: .high
+        )
+    }
+
+    public func exportStemMix(
+        volumes: [String: Float],
+        outputURL: URL,
+        startTime: Double,
+        duration: Double?,
+        quality: AudioExportQuality
+    ) async throws {
         // Stop current playing engine
         let wasRunning = audioEngine.isRunning
         if wasRunning {
@@ -298,6 +443,12 @@ public class AudioEngineManager {
         
         guard maxDuration > 0 else {
             throw NSError(domain: "AudioEngineManager", code: 400, userInfo: [NSLocalizedDescriptionKey: "No stem audio files loaded for exporting"])
+        }
+
+        let safeStartTime = max(0.0, min(startTime, maxDuration))
+        let renderDuration = min(duration ?? (maxDuration - safeStartTime), maxDuration - safeStartTime)
+        guard renderDuration > 0 else {
+            throw NSError(domain: "AudioEngineManager", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid export range"])
         }
         
         // Temporarily adjust volumes of players to match the export configuration
@@ -323,20 +474,19 @@ public class AudioEngineManager {
         // Start engine
         try audioEngine.start()
         
-        // Schedule play from beginning
-        reschedulePlayers(at: 0.0)
+        // Schedule play from selected export range
+        reschedulePlayers(at: safeStartTime)
         for (_, player) in players {
             player.play()
         }
         
         // Open output file for writing
-        let settings = format.settings
-        let outputFile = try AVAudioFile(forWriting: outputURL, settings: settings)
+        let outputFile = try AVAudioFile(forWriting: outputURL, settings: exportSettings(for: quality, format: format))
         
         let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: maxNumberOfFrames)!
         
         var totalFramesRendered: AVAudioFramePosition = 0
-        let totalFramesToRender = AVAudioFramePosition(maxDuration * format.sampleRate)
+        let totalFramesToRender = AVAudioFramePosition(renderDuration * format.sampleRate)
         
         while totalFramesRendered < totalFramesToRender {
             let framesToRender = min(maxNumberOfFrames, AVAudioFrameCount(totalFramesToRender - totalFramesRendered))
@@ -375,6 +525,30 @@ public class AudioEngineManager {
             try? audioEngine.start()
             reschedulePlayers(at: currentPosition)
         }
+    }
+
+    private func exportSettings(for quality: AudioExportQuality, format: AVAudioFormat) -> [String: Any] {
+        let sampleRate = format.sampleRate
+        let channelCount = Int(format.channelCount)
+
+        if quality == .lossless {
+            return [
+                AVFormatIDKey: kAudioFormatLinearPCM,
+                AVSampleRateKey: sampleRate,
+                AVNumberOfChannelsKey: channelCount,
+                AVLinearPCMBitDepthKey: 32,
+                AVLinearPCMIsFloatKey: true,
+                AVLinearPCMIsNonInterleaved: false
+            ]
+        }
+
+        return [
+            AVFormatIDKey: kAudioFormatMPEG4AAC,
+            AVSampleRateKey: sampleRate,
+            AVNumberOfChannelsKey: channelCount,
+            AVEncoderBitRateKey: channelCount * quality.bitRatePerChannel,
+            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+        ]
     }
     
     /// Loads stems from a StemProject - compatibility method for ExportManager

@@ -7,6 +7,7 @@ struct AppRootView: View {
     @State private var projects: [StemProject] = []
     @State private var selectedProject: StemProject?
     @State private var pendingInputURL: URL?
+    @State private var pendingProcessingOptions: StemProcessingOptions = .allStems
 
     var body: some View {
         NavigationStack(path: $activePath) {
@@ -34,33 +35,38 @@ struct AppRootView: View {
             }
             .navigationDestination(for: NavigationDestination.self) { destination in
                 switch destination {
+                case .studioTimeline:
+                    StudioTimelineView(project: selectedProject, onNavigateToTool: navigateToTool)
                 case .importSources:
-                    ImportSourceView(onImportSelected: { importedURL in
+                    ImportSourceView(onImportSelected: { importedURL, options in
                         pendingInputURL = importedURL
+                        pendingProcessingOptions = options
                         activePath.append(NavigationDestination.processing)
                     })
                 case .processing:
                     if let inputURL = pendingInputURL {
                         ProcessingView(
                             audioURL: inputURL,
+                            options: pendingProcessingOptions,
                             onComplete: { project in
                                 selectedProject = project
                                 pendingInputURL = nil
+                                pendingProcessingOptions = .allStems
                                 reloadProjects(selecting: project.id)
                                 activePath.append(NavigationDestination.results)
                             },
                             onCancel: {
                                 pendingInputURL = nil
+                                pendingProcessingOptions = .allStems
                                 popNavigation()
                             }
                         )
                     } else {
-                        MissingProjectView(
-                            title: "No audio selected",
-                            message: "Choose an audio file or finish a recording before processing.",
-                            actionTitle: "Import Audio",
-                            action: { activePath.append(NavigationDestination.importSources) }
-                        )
+                        ImportSourceView(onImportSelected: { importedURL, options in
+                            pendingInputURL = importedURL
+                            pendingProcessingOptions = options
+                            activePath.append(NavigationDestination.processing)
+                        })
                     }
                 case .results:
                     if let project = selectedProject {
@@ -74,21 +80,46 @@ struct AppRootView: View {
                             }
                         )
                     } else {
-                        noProjectSelectedView
+                        StudioTimelineView(project: nil, onNavigateToTool: navigateToTool)
                     }
                 case .mixer:
                     if let project = selectedProject {
                         StudioMixerView(project: project)
                     } else {
-                        noProjectSelectedView
+                        MixerDesignView(project: nil, onNavigateToTool: navigateToTool)
                     }
                 case .analyzer:
-                    AIAnalyzerView(project: selectedProject)
+                    AnalyzeDesignView(project: selectedProject, onNavigateToTool: navigateToTool)
                 case .lyrics:
-                    LyricsViewerView(project: selectedProject)
+                    LyricsSyncDesignView(project: selectedProject)
                 case .recording:
+                    RecorderOnlyDesignView()
+                case .recordCover:
+                    RecordCoverDesignView()
+                case .loopPractice:
+                    LoopPracticeDesignView(project: selectedProject)
+                case .chords:
+                    ChordsDesignView(project: selectedProject)
+                case .audioDevices:
+                    AudioDevicesDesignView()
+                case .equalizer:
+                    EqualizerDesignView(project: selectedProject)
+                case .export:
+                    ExportDesignView(project: selectedProject)
+                case .settings:
+                    SettingsDesignView(onNavigateToTool: navigateToTool)
+                case .chordLyrics:
+                    ChordLyricsDesignView(project: selectedProject)
+                case .aiJam:
+                    AIJamSessionDesignView(project: selectedProject)
+                case .dualCamera:
+                    DualCameraCoverDesignView()
+                case .performanceMode:
+                    PerformanceModeDesignView(project: selectedProject)
+                case .legacyRecording:
                     RecordingView(onRecordFinished: { recordedURL in
                         pendingInputURL = recordedURL
+                        pendingProcessingOptions = .allStems
                         activePath.append(NavigationDestination.processing)
                     })
                 }
@@ -100,7 +131,7 @@ struct AppRootView: View {
         Group {
             switch selectedTab {
             case 0:
-                HomeView(
+                HomeDashboardView(
                     projects: projects,
                     onNavigateToTool: { tool in
                         navigateToTool(tool)
@@ -111,22 +142,11 @@ struct AppRootView: View {
                     }
                 )
             case 1:
-                ProjectsView(
-                    projects: projects,
-                    onCreateProject: {
-                        activePath.append(NavigationDestination.importSources)
-                    },
-                    onProjectSelected: { project in
-                        selectedProject = project
-                        activePath.append(NavigationDestination.results)
-                    }
-                )
-            case 2:
-                ToolsHubView(onNavigateToTool: { tool in
-                    navigateToTool(tool)
-                })
+                StudioTimelineView(project: selectedProject, onNavigateToTool: navigateToTool)
             case 3:
-                ProfileView()
+                AnalyzeDesignView(project: selectedProject, onNavigateToTool: navigateToTool, showsBack: false)
+            case 4:
+                SettingsDesignView(onNavigateToTool: navigateToTool, showsBack: false)
             default:
                 EmptyView()
             }
@@ -136,10 +156,10 @@ struct AppRootView: View {
     private var customTabBar: some View {
         HStack(spacing: 0) {
             tabButton(index: 0, icon: "house.fill", label: "Home")
-            tabButton(index: 1, icon: "music.note.list", label: "Projects")
+            tabButton(index: 1, icon: "slider.horizontal.below.waveform", label: "Studio")
 
             Button(action: {
-                activePath.append(NavigationDestination.importSources)
+                activePath.append(NavigationDestination.recordCover)
             }) {
                 ZStack {
                     Circle()
@@ -153,7 +173,7 @@ struct AppRootView: View {
                         .frame(width: 50, height: 50)
                         .shadow(color: DesignSystem.AccentRed.opacity(0.4), radius: 6, x: 0, y: 3)
 
-                    Image(systemName: "plus")
+                    Image(systemName: "record.circle.fill")
                         .foregroundColor(.white)
                         .font(.system(size: 20, weight: .bold))
                 }
@@ -161,8 +181,8 @@ struct AppRootView: View {
             .offset(y: -10)
             .frame(maxWidth: .infinity)
 
-            tabButton(index: 2, icon: "slider.horizontal.3", label: "Tools")
-            tabButton(index: 3, icon: "person.fill", label: "Profile")
+            tabButton(index: 3, icon: "waveform.path.ecg", label: "Analyze")
+            tabButton(index: 4, icon: "gearshape.fill", label: "Settings")
         }
         .frame(minHeight: 72)
         .padding(.vertical, 8)
@@ -175,15 +195,6 @@ struct AppRootView: View {
                 .stroke(DesignSystem.BorderGlass, lineWidth: 1)
         )
         .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
-    }
-
-    private var noProjectSelectedView: some View {
-        MissingProjectView(
-            title: "No project selected",
-            message: "Import or record audio first, then open the project tools from Results.",
-            actionTitle: "Import Audio",
-            action: { activePath.append(NavigationDestination.importSources) }
-        )
     }
 
     private func tabButton(index: Int, icon: String, label: String) -> some View {
@@ -209,14 +220,38 @@ struct AppRootView: View {
         switch tool {
         case "Import Audio", "Import Source", "Stem Separation":
             activePath.append(NavigationDestination.importSources)
-        case "Studio Mixer":
+        case "Studio Timeline", "Studio":
+            activePath.append(NavigationDestination.studioTimeline)
+        case "Studio Mixer", "Mixer":
             activePath.append(NavigationDestination.mixer)
         case "AI Analyzer":
             activePath.append(NavigationDestination.analyzer)
-        case "Lyrics Viewer":
+        case "Lyrics Viewer", "Lyrics Sync":
             activePath.append(NavigationDestination.lyrics)
-        case "Record", "Recording":
+        case "Record", "Recording", "Recorder":
             activePath.append(NavigationDestination.recording)
+        case "Record Cover":
+            activePath.append(NavigationDestination.recordCover)
+        case "Loop Practice", "Practice Loop":
+            activePath.append(NavigationDestination.loopPractice)
+        case "Chords View", "Chords":
+            activePath.append(NavigationDestination.chords)
+        case "Audio Devices":
+            activePath.append(NavigationDestination.audioDevices)
+        case "Equalizer":
+            activePath.append(NavigationDestination.equalizer)
+        case "Export":
+            activePath.append(NavigationDestination.export)
+        case "Settings":
+            activePath.append(NavigationDestination.settings)
+        case "Chord Lyrics", "Chord + Lyrics":
+            activePath.append(NavigationDestination.chordLyrics)
+        case "AI Jam Session":
+            activePath.append(NavigationDestination.aiJam)
+        case "Dual Camera Cover":
+            activePath.append(NavigationDestination.dualCamera)
+        case "Performance Mode":
+            activePath.append(NavigationDestination.performanceMode)
         default:
             break
         }
@@ -242,47 +277,8 @@ struct AppRootView: View {
     }
 }
 
-struct MissingProjectView: View {
-    let title: String
-    let message: String
-    let actionTitle: String
-    let action: () -> Void
-
-    var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [DesignSystem.BackgroundDark, DesignSystem.BackgroundDeep],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-
-            VStack(spacing: 16) {
-                Image(systemName: "music.note.list")
-                    .font(.system(size: 42, weight: .semibold))
-                    .foregroundColor(DesignSystem.TextMuted)
-
-                Text(title)
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white)
-
-                Text(message)
-                    .font(.system(size: 14))
-                    .foregroundColor(DesignSystem.TextSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 28)
-
-                GlassButton(title: actionTitle, icon: "plus", isAccented: true, action: action)
-                    .padding(.horizontal, 36)
-            }
-            .padding(24)
-        }
-        .navigationBarBackButtonHidden()
-        .toolbar(.hidden, for: .navigationBar)
-    }
-}
-
 enum NavigationDestination: Hashable {
+    case studioTimeline
     case importSources
     case processing
     case results
@@ -290,6 +286,18 @@ enum NavigationDestination: Hashable {
     case analyzer
     case lyrics
     case recording
+    case recordCover
+    case loopPractice
+    case chords
+    case audioDevices
+    case equalizer
+    case export
+    case settings
+    case chordLyrics
+    case aiJam
+    case dualCamera
+    case performanceMode
+    case legacyRecording
 }
 
 #Preview {

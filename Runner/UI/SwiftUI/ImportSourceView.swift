@@ -11,12 +11,13 @@ private struct ImportSourceOption: Identifiable {
 }
 
 struct ImportSourceView: View {
-    var onImportSelected: (URL) -> Void
+    var onImportSelected: (URL, StemProcessingOptions) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var activeSource: ImportSourceOption?
     @State private var isDocumentPickerPresented = false
     @State private var importErrorMessage: String?
+    @State private var selectedTemplate = StemProcessingOptions.allStems
 
     private let sources = [
         ImportSourceOption(
@@ -64,6 +65,7 @@ struct ImportSourceView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 14) {
+                        stemTemplatePicker
                         ForEach(sources) { source in
                             sourceRow(source)
                         }
@@ -80,7 +82,7 @@ struct ImportSourceView: View {
             DocumentPickerView(
                 onPick: { importedURL in
                     isDocumentPickerPresented = false
-                    onImportSelected(importedURL)
+                    onImportSelected(importedURL, selectedTemplate)
                 },
                 onError: { error in
                     isDocumentPickerPresented = false
@@ -139,6 +141,53 @@ struct ImportSourceView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 24)
+    }
+
+    private var stemTemplatePicker: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Stem Template")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                    Text(selectedTemplate.displaySummary)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(DesignSystem.TextSecondary)
+                        .lineLimit(2)
+                }
+                Spacer()
+            }
+
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                ForEach(StemProcessingOptions.templates, id: \.self) { template in
+                    Button(action: { selectedTemplate = template }) {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text(template.templateName)
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
+                            Text(template.displaySummary)
+                                .font(.system(size: 9, weight: .medium))
+                                .foregroundColor(DesignSystem.TextMuted)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.75)
+                        }
+                        .padding(10)
+                        .frame(maxWidth: .infinity, minHeight: 62, alignment: .leading)
+                        .background(template == selectedTemplate ? DesignSystem.AccentRed.opacity(0.35) : Color.white.opacity(0.06))
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(template == selectedTemplate ? DesignSystem.SoftRed.opacity(0.65) : DesignSystem.BorderGlass, lineWidth: 0.9)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .padding(14)
+        .glassStyle(cornerRadius: DesignSystem.Radius.medium)
     }
 
     private var supportedFormatsCard: some View {
@@ -207,5 +256,5 @@ struct ImportSourceView: View {
 }
 
 #Preview {
-    ImportSourceView(onImportSelected: { _ in })
+    ImportSourceView(onImportSelected: { _, _ in })
 }

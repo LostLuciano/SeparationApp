@@ -146,28 +146,156 @@ struct StudioMixerView: View {
                     .blur(radius: 20)
                     .padding(.horizontal, 20)
 
-                if channels.isEmpty {
-                    emptyMixerState
-                } else {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 10) {
+                        if channels.isEmpty {
+                            emptyMixerState
+                                .frame(minHeight: 220)
+                        } else {
                             ForEach($channels) { $channel in
-                                MixerFader(
-                                    channel: channel,
+                                horizontalStemRow(
+                                    channel: $channel,
                                     volume: $channel.volume,
                                     isMuted: $channel.isMuted,
                                     isSoloed: $channel.isSoloed
                                 )
                             }
+                            masterOutputCard
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 8)
-                        .frame(minHeight: min(geometry.size.height, 300))
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 8)
                 }
             }
         }
-        .frame(minHeight: 260)
+        .frame(minHeight: 360)
+    }
+
+    private func horizontalStemRow(
+        channel: Binding<MixerChannel>,
+        volume: Binding<Double>,
+        isMuted: Binding<Bool>,
+        isSoloed: Binding<Bool>
+    ) -> some View {
+        let accent = stemColor(channel.wrappedValue.key)
+
+        return HStack(spacing: 10) {
+            Image(systemName: stemIcon(channel.wrappedValue.key))
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 34, height: 34)
+                .background(accent.opacity(0.28))
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+            Text(displayStemName(channel.wrappedValue.name))
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 52, alignment: .leading)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+
+            Slider(value: volume, in: 0...1)
+                .tint(isMuted.wrappedValue ? DesignSystem.TextMuted : accent)
+                .disabled(isMuted.wrappedValue)
+                .opacity(isMuted.wrappedValue ? 0.55 : 1.0)
+
+            Text("\(Int(volume.wrappedValue * 100))%")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(DesignSystem.TextSecondary)
+                .frame(width: 38, alignment: .trailing)
+
+            mixerToggle(title: "S", isOn: isSoloed, activeColor: DesignSystem.WarningYellow)
+            mixerToggle(title: "M", isOn: isMuted, activeColor: DesignSystem.RecordRed)
+        }
+        .padding(10)
+        .background(DesignSystem.SurfaceGlass)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(isSoloed.wrappedValue ? DesignSystem.WarningYellow.opacity(0.5) : DesignSystem.BorderGlass, lineWidth: 0.9)
+        )
+    }
+
+    private func mixerToggle(title: String, isOn: Binding<Bool>, activeColor: Color) -> some View {
+        Button(action: {
+            withAnimation(.easeInOut(duration: 0.16)) {
+                isOn.wrappedValue.toggle()
+            }
+        }) {
+            Text(title)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(isOn.wrappedValue && title == "S" ? .black : .white)
+                .frame(width: 28, height: 28)
+                .background(isOn.wrappedValue ? activeColor : Color.white.opacity(0.08))
+                .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+        }
+    }
+
+    private var masterOutputCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Master Output")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.white)
+                Spacer()
+                Text("0.0 dB")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(DesignSystem.TextSecondary)
+            }
+
+            stereoMeter(label: "L", activeBars: 24)
+            stereoMeter(label: "R", activeBars: 21)
+        }
+        .padding(12)
+        .background(DesignSystem.SurfaceGlass)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(DesignSystem.BorderGlass, lineWidth: 0.9)
+        )
+    }
+
+    private func stereoMeter(label: String, activeBars: Int) -> some View {
+        HStack(spacing: 2) {
+            Text(label)
+                .font(.system(size: 9, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 12, alignment: .leading)
+            ForEach(0..<30, id: \.self) { index in
+                RoundedRectangle(cornerRadius: 1.5)
+                    .fill(index < 22 ? DesignSystem.SuccessGreen : (index < 27 ? DesignSystem.WarningYellow : DesignSystem.RecordRed))
+                    .opacity(index < activeBars ? 1 : 0.12)
+                    .frame(height: 5)
+            }
+        }
+    }
+
+    private func stemIcon(_ key: String) -> String {
+        switch key {
+        case "vocals": return "figure.stand"
+        case "drums": return "circle.grid.cross"
+        case "bass": return "speaker.wave.2.fill"
+        case "guitar": return "guitars.fill"
+        case "piano": return "pianokeys"
+        default: return "slider.horizontal.3"
+        }
+    }
+
+    private func stemColor(_ key: String) -> Color {
+        switch key {
+        case "vocals": return .purple
+        case "drums": return .blue
+        case "bass": return .green
+        case "guitar": return .orange
+        case "piano": return .teal
+        default: return .gray
+        }
+    }
+
+    private func displayStemName(_ name: String) -> String {
+        name == "Piano" ? "Keys" : name
     }
 
     private var emptyMixerState: some View {
@@ -243,6 +371,7 @@ struct StudioMixerView: View {
 
         do {
             try audioEngine.loadStemFiles(project.stemPaths)
+            applyBalancedMixerState(channels)
         } catch {
             loadError = error.localizedDescription
             channels = []
@@ -268,9 +397,14 @@ struct StudioMixerView: View {
         isExporting = true
         exportMessage = nil
 
-        let volumes = Dictionary(uniqueKeysWithValues: channels.map { channel in
-            (channel.key, Float(channel.isMuted ? 0.0 : channel.volume))
+        let rawVolumes = Dictionary(uniqueKeysWithValues: channels.map { channel in
+            (channel.key, Float(channel.volume))
         })
+        let volumes = AudioEngineManager.balancedGains(
+            volumes: rawVolumes,
+            mutedStems: Set(channels.filter(\.isMuted).map(\.key)),
+            soloedStems: Set(channels.filter(\.isSoloed).map(\.key))
+        )
 
         Task {
             do {
@@ -295,26 +429,26 @@ struct StudioMixerView: View {
     private func applyMixerChanges(oldChannels: [MixerChannel], newChannels: [MixerChannel]) {
         guard oldChannels.count == newChannels.count else { return }
 
-        for i in 0..<newChannels.count {
-            let old = oldChannels[i]
-            let new = newChannels[i]
-            let stemKey = new.key
-
-            if old.volume != new.volume {
-                audioEngine.setStemVolume(stem: stemKey, volume: Float(new.volume))
-            }
-            if old.isMuted != new.isMuted {
-                audioEngine.muteStem(stemKey, muted: new.isMuted)
-            }
-            if old.isSoloed != new.isSoloed {
-                if new.isSoloed {
-                    audioEngine.soloStem(stemKey)
-                } else {
-                    audioEngine.muteStem(stemKey, muted: new.isMuted)
-                    audioEngine.setStemVolume(stem: stemKey, volume: Float(new.volume))
-                }
-            }
+        let changed = zip(oldChannels, newChannels).contains { old, new in
+            old.volume != new.volume || old.isMuted != new.isMuted || old.isSoloed != new.isSoloed
         }
+        guard changed else { return }
+
+        applyBalancedMixerState(newChannels)
+    }
+
+    private func applyBalancedMixerState(_ channels: [MixerChannel]) {
+        let volumes = Dictionary(uniqueKeysWithValues: channels.map { channel in
+            (channel.key, Float(channel.volume))
+        })
+        let mutedStems = Set(channels.filter(\.isMuted).map(\.key))
+        let soloedStems = Set(channels.filter(\.isSoloed).map(\.key))
+
+        audioEngine.applyBalancedMix(
+            volumes: volumes,
+            mutedStems: mutedStems,
+            soloedStems: soloedStems
+        )
     }
 }
 

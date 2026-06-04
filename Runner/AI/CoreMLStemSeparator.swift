@@ -14,6 +14,7 @@ public class CoreMLStemSeparator {
     private let stemNames = ["vocals", "drums", "bass", "guitar", "piano", "other"]
 
     private let featureExtractor = AudioFeatureExtractor()
+    private var modelCache: [String: LoadedStemModel] = [:]
 
     private struct ModelCandidate {
         let name: String
@@ -45,12 +46,107 @@ public class CoreMLStemSeparator {
         }
     }
 
+    private final class StreamingStereoChunkReader {
+        private let audioFile: AVAudioFile
+        private let nFFT: Int
+        private let hopSize: Int
+        private let chunkFrames: Int
+        private let maxReadFrames: AVAudioFrameCount = 32768
+        private var leftBuffer: [Float] = []
+        private var rightBuffer: [Float] = []
+        private var reachedEnd = false
+
+        init(audioFile: AVAudioFile, nFFT: Int, hopSize: Int, chunkFrames: Int) {
+            self.audioFile = audioFile
+            self.nFFT = nFFT
+            self.hopSize = hopSize
+            self.chunkFrames = chunkFrames
+        }
+
+        func nextChunk() throws -> (left: [Float], right: [Float], actualFrames: Int)? {
+            let desiredSamples = (chunkFrames - 1) * hopSize + nFFT
+
+            while leftBuffer.count < desiredSamples && !reachedEnd {
+                try readMoreSamples(targetSamples: desiredSamples - leftBuffer.count)
+            }
+
+            guard leftBuffer.count >= nFFT else { return nil }
+
+            let availableFrames = ((leftBuffer.count - nFFT) / hopSize) + 1
+            let actualFrames = min(chunkFrames, availableFrames)
+            let chunkSampleCount = (actualFrames - 1) * hopSize + nFFT
+            let consumedSamples = actualFrames * hopSize
+
+            let leftChunk = Array(leftBuffer.prefix(chunkSampleCount))
+            let rightChunk = Array(rightBuffer.prefix(chunkSampleCount))
+
+            leftBuffer = Array(leftBuffer.dropFirst(min(consumedSamples, leftBuffer.count)))
+            rightBuffer = Array(rightBuffer.dropFirst(min(consumedSamples, rightBuffer.count)))
+
+            return (leftChunk, rightChunk, actualFrames)
+        }
+
+        private func readMoreSamples(targetSamples: Int) throws {
+            let remainingFrames = audioFile.length - audioFile.framePosition
+            guard remainingFrames > 0 else {
+                reachedEnd = true
+                return
+            }
+
+            let requestedFrames = min(
+                maxReadFrames,
+                AVAudioFrameCount(max(targetSamples, hopSize)),
+                AVAudioFrameCount(remainingFrames)
+            )
+
+            guard let readBuffer = AVAudioPCMBuffer(
+                pcmFormat: audioFile.processingFormat,
+                frameCapacity: requestedFrames
+            ) else {
+                throw NSError(
+                    domain: "CoreMLStemSeparator",
+                    code: 500,
+                    userInfo: [NSLocalizedDescriptionKey: "Failed to allocate streaming read buffer."]
+                )
+            }
+
+            try audioFile.read(into: readBuffer, frameCount: requestedFrames)
+
+            guard readBuffer.frameLength > 0 else {
+                reachedEnd = true
+                return
+            }
+
+            guard let channelData = readBuffer.floatChannelData else {
+                throw NSError(
+                    domain: "CoreMLStemSeparator",
+                    code: 500,
+                    userInfo: [NSLocalizedDescriptionKey: "Streaming buffer has no float channel data."]
+                )
+            }
+
+            let frameLength = Int(readBuffer.frameLength)
+            let leftSamples = UnsafeBufferPointer(start: channelData[0], count: frameLength)
+            let rightSamples = readBuffer.format.channelCount >= 2
+                ? UnsafeBufferPointer(start: channelData[1], count: frameLength)
+                : leftSamples
+
+            leftBuffer.append(contentsOf: leftSamples)
+            rightBuffer.append(contentsOf: rightSamples)
+
+            if audioFile.framePosition >= audioFile.length {
+                reachedEnd = true
+            }
+        }
+    }
+
     public init() {}
 
     public func separate(
         audioURL: URL,
         processingMode: String?,
         modelQuality: String?,
+        selectedStems: [String]? = nil,
         onProgress: @escaping (String, Double) -> Void
     ) async throws -> [String: URL] {
         guard FileManager.default.fileExists(atPath: audioURL.path) else {
@@ -75,6 +171,7 @@ public class CoreMLStemSeparator {
             let result = try await runInference(
                 audioURL: readableURL,
                 modelQuality: modelQuality,
+                selectedStems: selectedStems,
                 onProgress: onProgress
             )
             onProgress("Proses pemisahan stem berhasil diselesaikan!", 1.0)
@@ -124,6 +221,7 @@ public class CoreMLStemSeparator {
     private func runInference(
         audioURL: URL,
         modelQuality: String?,
+        selectedStems: [String]?,
         onProgress: @escaping (String, Double) -> Void
     ) async throws -> [String: URL] {
         onProgress("Memuat model CoreML...", 0.05)
@@ -132,14 +230,21 @@ public class CoreMLStemSeparator {
         hopSize = loadedModel.hopSize
         nBins = loadedModel.nBins
         chunkFrames = loadedModel.chunkFrames
+        onProgress("Model aktif: \(loadedModel.name)", 0.07)
 
-        onProgress("Melakukan decoding audio...", 0.1)
-        let (leftChannel, rightChannel) = try loadStereoAudio(url: audioURL)
+        onProgress("Menyiapkan streaming PCM 44.1kHz stereo...", 0.1)
+        let streamingURL = try normalizeAudioForStreamingIfNeeded(url: audioURL)
+        defer {
+            if streamingURL != audioURL {
+                try? FileManager.default.removeItem(at: streamingURL)
+            }
+        }
 
-        onProgress("Menghitung STFT audio...", 0.2)
-        let leftSTFT = computeChannelSTFT(samples: leftChannel)
-        let rightSTFT = computeChannelSTFT(samples: rightChannel)
-        let totalFrames = min(leftSTFT.real.count, rightSTFT.real.count)
+        let streamingFile = try AVAudioFile(forReading: streamingURL)
+        let totalSamples = Int(streamingFile.length)
+        let totalFrames = totalSamples >= nFFT
+            ? ((totalSamples - nFFT) / hopSize) + 1
+            : 0
 
         guard totalFrames > 0 else {
             throw NSError(
@@ -149,25 +254,43 @@ public class CoreMLStemSeparator {
             )
         }
 
+        let requestedStems = normalizedStemSelection(selectedStems)
         var stemSTFTs: [String: StemSTFTBuffer] = [:]
-        for stem in stemNames {
+        for stem in requestedStems {
             stemSTFTs[stem] = StemSTFTBuffer(frameCount: totalFrames, binCount: nBins)
         }
 
         let totalChunks = Int(ceil(Double(totalFrames) / Double(chunkFrames)))
-        onProgress("Menjalankan inferensi neural network (\(totalChunks) chunks)...", 0.3)
+        let chunkReader = StreamingStereoChunkReader(
+            audioFile: streamingFile,
+            nFFT: nFFT,
+            hopSize: hopSize,
+            chunkFrames: chunkFrames
+        )
 
-        var chunkStart = 0
+        onProgress("Streaming STFT + inferensi CoreML (\(totalChunks) chunks)...", 0.2)
+
+        var globalFrameStart = 0
         var chunkCount = 0
 
-        while chunkStart < totalFrames {
+        while let chunk = try chunkReader.nextChunk() {
             try Task.checkCancellation()
 
-            let actualFrames = min(chunkFrames, totalFrames - chunkStart)
+            let leftSTFT = computeChannelSTFT(samples: chunk.left)
+            let rightSTFT = computeChannelSTFT(samples: chunk.right)
+            let actualFrames = min(
+                chunk.actualFrames,
+                leftSTFT.real.count,
+                rightSTFT.real.count,
+                totalFrames - globalFrameStart
+            )
+
+            guard actualFrames > 0 else { break }
+
             let inputArray = try makeInputArray(
                 leftSTFT: leftSTFT,
                 rightSTFT: rightSTFT,
-                startFrame: chunkStart,
+                startFrame: 0,
                 actualFrames: actualFrames
             )
 
@@ -176,7 +299,7 @@ public class CoreMLStemSeparator {
             ])
             let prediction = try await loadedModel.model.prediction(from: provider)
 
-            for stem in stemNames {
+            for stem in requestedStems {
                 guard let outputArray = prediction.featureValue(for: stem)?.multiArrayValue,
                       let buffer = stemSTFTs[stem] else {
                     throw NSError(
@@ -189,21 +312,38 @@ public class CoreMLStemSeparator {
                 try copyOutputArray(
                     outputArray,
                     into: buffer,
-                    startFrame: chunkStart,
+                    startFrame: globalFrameStart,
                     actualFrames: actualFrames
                 )
             }
 
-            chunkStart += chunkFrames
+            globalFrameStart += actualFrames
             chunkCount += 1
 
             let currentProgress = 0.3 + (Double(chunkCount) / Double(totalChunks)) * 0.48
-            onProgress("Processing chunk \(chunkCount)/\(totalChunks)", currentProgress)
+            onProgress("Streaming chunk \(chunkCount)/\(totalChunks)", currentProgress)
             await Task.yield()
+
+            if globalFrameStart >= totalFrames {
+                break
+            }
         }
 
-        onProgress("Rekonstruksi waveform stereo...", 0.82)
-        return try writeStemOutputs(from: stemSTFTs, onProgress: onProgress)
+        onProgress("Rekonstruksi waveform stereo (\(requestedStems.count) stems)...", 0.82)
+        return try writeStemOutputs(from: stemSTFTs, selectedStems: requestedStems, onProgress: onProgress)
+    }
+
+    private func normalizedStemSelection(_ selectedStems: [String]?) -> [String] {
+        let available = Set(stemNames)
+        let requested = selectedStems?
+            .map { $0.lowercased() }
+            .filter { available.contains($0) }
+
+        guard let requested, !requested.isEmpty else {
+            return stemNames
+        }
+
+        return stemNames.filter { requested.contains($0) }
     }
 
     private func loadModel(modelQuality: String?) throws -> LoadedStemModel {
@@ -220,14 +360,18 @@ public class CoreMLStemSeparator {
             chunkFrames: 64
         )
 
-        let orderedCandidates: [ModelCandidate]
-        if modelQuality == "Model Ringan" {
-            orderedCandidates = [lightQuality, highQuality]
-        } else {
-            orderedCandidates = [highQuality, lightQuality]
-        }
+        let normalizedQuality = modelQuality?.lowercased() ?? ""
+        let wantsHighQuality = normalizedQuality.contains("high") || normalizedQuality.contains("standard")
+        let orderedCandidates: [ModelCandidate] = wantsHighQuality
+            ? [highQuality, lightQuality]
+            : [lightQuality, highQuality]
 
         for candidate in orderedCandidates {
+            if let cachedModel = modelCache[candidate.name] {
+                print("[StemSeparator] Reusing CoreML model: \(candidate.name)")
+                return cachedModel
+            }
+
             guard let modelURL = Bundle.main.url(forResource: candidate.name, withExtension: "mlmodelc") else {
                 continue
             }
@@ -235,8 +379,7 @@ public class CoreMLStemSeparator {
             let config = MLModelConfiguration()
             config.computeUnits = .all
             let model = try MLModel(contentsOf: modelURL, configuration: config)
-            print("[StemSeparator] Loaded CoreML model: \(candidate.name)")
-            return LoadedStemModel(
+            let loadedModel = LoadedStemModel(
                 model: model,
                 name: candidate.name,
                 nFFT: candidate.nFFT,
@@ -244,6 +387,9 @@ public class CoreMLStemSeparator {
                 nBins: candidate.nFFT / 2,
                 chunkFrames: candidate.chunkFrames
             )
+            modelCache[candidate.name] = loadedModel
+            print("[StemSeparator] Loaded CoreML model: \(candidate.name)")
+            return loadedModel
         }
 
         throw NSError(
@@ -326,6 +472,134 @@ public class CoreMLStemSeparator {
                 buffer.realR[targetFrame][bin] = pointer[offset(channel: 2, frame: frame, bin: bin)]
                 buffer.imagR[targetFrame][bin] = pointer[offset(channel: 3, frame: frame, bin: bin)]
             }
+        }
+    }
+
+    private func normalizeAudioForStreamingIfNeeded(url: URL) throws -> URL {
+        let sourceFile = try AVAudioFile(forReading: url)
+        let sourceFormat = sourceFile.processingFormat
+
+        guard let targetFormat = AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: targetSampleRate,
+            channels: 2,
+            interleaved: false
+        ) else {
+            throw NSError(
+                domain: "CoreMLStemSeparator",
+                code: 500,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to create streaming target format."]
+            )
+        }
+
+        let alreadyStreamable =
+            abs(sourceFormat.sampleRate - targetSampleRate) < 0.5 &&
+            sourceFormat.channelCount == 2 &&
+            sourceFormat.commonFormat == .pcmFormatFloat32 &&
+            !sourceFormat.isInterleaved
+
+        if alreadyStreamable {
+            return url
+        }
+
+        guard let converter = AVAudioConverter(from: sourceFormat, to: targetFormat) else {
+            throw NSError(
+                domain: "CoreMLStemSeparator",
+                code: 500,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to create streaming audio converter."]
+            )
+        }
+
+        let outputURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("streaming-pcm-\(UUID().uuidString).caf")
+
+        if FileManager.default.fileExists(atPath: outputURL.path) {
+            try FileManager.default.removeItem(at: outputURL)
+        }
+
+        let outputFile = try AVAudioFile(forWriting: outputURL, settings: targetFormat.settings)
+        let readCapacity: AVAudioFrameCount = 32768
+
+        while sourceFile.framePosition < sourceFile.length {
+            let remainingFrames = sourceFile.length - sourceFile.framePosition
+            let frameCount = min(readCapacity, AVAudioFrameCount(remainingFrames))
+
+            guard let inputBuffer = AVAudioPCMBuffer(
+                pcmFormat: sourceFormat,
+                frameCapacity: frameCount
+            ) else {
+                throw NSError(
+                    domain: "CoreMLStemSeparator",
+                    code: 500,
+                    userInfo: [NSLocalizedDescriptionKey: "Failed to allocate converter input buffer."]
+                )
+            }
+
+            try sourceFile.read(into: inputBuffer, frameCount: frameCount)
+            if inputBuffer.frameLength == 0 { break }
+
+            let ratio = targetFormat.sampleRate / sourceFormat.sampleRate
+            let outputCapacity = AVAudioFrameCount(Double(inputBuffer.frameLength) * ratio) + 1024
+
+            guard let outputBuffer = AVAudioPCMBuffer(
+                pcmFormat: targetFormat,
+                frameCapacity: outputCapacity
+            ) else {
+                throw NSError(
+                    domain: "CoreMLStemSeparator",
+                    code: 500,
+                    userInfo: [NSLocalizedDescriptionKey: "Failed to allocate converter output buffer."]
+                )
+            }
+
+            var consumedInput = false
+            var conversionError: NSError?
+            converter.convert(to: outputBuffer, error: &conversionError) { _, outStatus in
+                if consumedInput {
+                    outStatus.pointee = .noDataNow
+                    return nil
+                }
+
+                consumedInput = true
+                outStatus.pointee = .haveData
+                return inputBuffer
+            }
+
+            if let conversionError {
+                throw conversionError
+            }
+
+            if outputBuffer.frameLength > 0 {
+                try outputFile.write(from: outputBuffer)
+            }
+        }
+
+        try flushConverter(converter, outputFile: outputFile, targetFormat: targetFormat)
+        return outputURL
+    }
+
+    private func flushConverter(
+        _ converter: AVAudioConverter,
+        outputFile: AVAudioFile,
+        targetFormat: AVAudioFormat
+    ) throws {
+        guard let flushBuffer = AVAudioPCMBuffer(
+            pcmFormat: targetFormat,
+            frameCapacity: 4096
+        ) else { return }
+
+        var conversionError: NSError?
+        converter.convert(to: flushBuffer, error: &conversionError) { _, outStatus in
+            outStatus.pointee = .endOfStream
+            return nil
+        }
+
+        if let conversionError {
+            throw conversionError
+        }
+
+        if flushBuffer.frameLength > 0 {
+            try outputFile.write(from: flushBuffer)
         }
     }
 
@@ -454,6 +728,7 @@ public class CoreMLStemSeparator {
 
     private func writeStemOutputs(
         from stemSTFTs: [String: StemSTFTBuffer],
+        selectedStems: [String],
         onProgress: @escaping (String, Double) -> Void
     ) throws -> [String: URL] {
         let outputDirectory = FileManager.default.temporaryDirectory
@@ -461,10 +736,10 @@ public class CoreMLStemSeparator {
         try FileManager.default.createDirectory(at: outputDirectory, withIntermediateDirectories: true)
 
         var outputPaths: [String: URL] = [:]
-        for (index, stem) in stemNames.enumerated() {
+        for (index, stem) in selectedStems.enumerated() {
             guard let stemData = stemSTFTs[stem] else { continue }
 
-            let progress = 0.82 + (Double(index) / Double(stemNames.count)) * 0.16
+            let progress = 0.82 + (Double(index) / Double(max(selectedStems.count, 1))) * 0.16
             onProgress("Menulis file stem: \(stem)", progress)
 
             guard let pcmBuffer = featureExtractor.computeISTFTStereo(

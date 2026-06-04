@@ -22,7 +22,9 @@
 		DDA9F0FECFA576B9F33BD7AE /* ISTFTProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/DSP/ISTFTProcessor.swift"; sourceTree = SOURCE_ROOT; };
 		74683815CDE3F0216EE66499 /* STFTProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/DSP/STFTProcessor.swift"; sourceTree = SOURCE_ROOT; };
 		8D7471C6683D6E382D326A5B /* WaveformGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/DSP/WaveformGenerator.swift"; sourceTree = SOURCE_ROOT; };
+		8DAF3C12C56E316F8555CD42 /* ChordLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/Data/ChordLibrary.swift"; sourceTree = SOURCE_ROOT; };
 		190585455A9F379549808330 /* LyricsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/Data/LyricsManager.swift"; sourceTree = SOURCE_ROOT; };
+		52490C67061878AA3396B7D3 /* ProcessingOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/Data/ProcessingOptions.swift"; sourceTree = SOURCE_ROOT; };
 		15FC8E36E3A4ED78E0CC982D /* ProjectStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/Data/ProjectStore.swift"; sourceTree = SOURCE_ROOT; };
 		DA933B8FE60BEEF1D6EFC856 /* StemProject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/Data/StemProject.swift"; sourceTree = SOURCE_ROOT; };
 		09F5EB6D0BE52A9AC7A3B672 /* TrackMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/Data/TrackMetadata.swift"; sourceTree = SOURCE_ROOT; };
@@ -76,6 +78,7 @@
 		E7CA388A547682DC3794636F /* ProjectsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/ProjectsView.swift"; sourceTree = SOURCE_ROOT; };
 		26FD0AD3BF1DD252D066D1E6 /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/RecordingView.swift"; sourceTree = SOURCE_ROOT; };
 		33928A596C4CA82E63DEF1EF /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/ResultsView.swift"; sourceTree = SOURCE_ROOT; };
+		72783B8E2A04FA515D2050DF /* StudioDesignViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/StudioDesignViews.swift"; sourceTree = SOURCE_ROOT; };
 		3A970D0F7018C73ACB749AEB /* StudioMixerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/StudioMixerView.swift"; sourceTree = SOURCE_ROOT; };
 		E49B5E941F74CF8E6AC1D3EE /* ToolsHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/ToolsHubView.swift"; sourceTree = SOURCE_ROOT; };
 		B708A1C2130BCE22279313F1 /* AppStudioColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/Theme/AppStudioColors.swift"; sourceTree = SOURCE_ROOT; };
@@ -113,7 +116,9 @@
 		362839CAB68569F631D7F211 /* ISTFTProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA9F0FECFA576B9F33BD7AE; };
 		9B0E90EBDF38028B2C1DFAAA /* STFTProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74683815CDE3F0216EE66499; };
 		E8CCD417D9A68B8FB2F20322 /* WaveformGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D7471C6683D6E382D326A5B; };
+		693E73784E12EEB629B0A7CC /* ChordLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DAF3C12C56E316F8555CD42; };
 		BB3CB87FE20852932BF4BD9C /* LyricsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 190585455A9F379549808330; };
+		2A510E542A2B1F807370813E /* ProcessingOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52490C67061878AA3396B7D3; };
 		7C50A0A8262763085737E44F /* ProjectStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15FC8E36E3A4ED78E0CC982D; };
 		3BAFE6396224915365A7D9F0 /* StemProject.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA933B8FE60BEEF1D6EFC856; };
 		125A136B224F9A135EE40C64 /* TrackMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09F5EB6D0BE52A9AC7A3B672; };
@@ -167,6 +172,7 @@
 		9F5D28547C9F663B31E5B07D /* ProjectsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7CA388A547682DC3794636F; };
 		C8788E17A9D8050761F50EDF /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26FD0AD3BF1DD252D066D1E6; };
 		3829A67B00D03A4237BF5D50 /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33928A596C4CA82E63DEF1EF; };
+		CA9F518AFE8D95C26C49BDF6 /* StudioDesignViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72783B8E2A04FA515D2050DF; };
 		7C8A129290E723A88BAA8B7F /* StudioMixerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A970D0F7018C73ACB749AEB; };
 		105BC27549726400FD4E941B /* ToolsHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E49B5E941F74CF8E6AC1D3EE; };
 		FFE610A33B70E53DDACB0295 /* AppStudioColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B708A1C2130BCE22279313F1; };
@@ -208,7 +214,9 @@
 				362839CAB68569F631D7F211 /* ISTFTProcessor.swift in Sources */,
 				9B0E90EBDF38028B2C1DFAAA /* STFTProcessor.swift in Sources */,
 				E8CCD417D9A68B8FB2F20322 /* WaveformGenerator.swift in Sources */,
+				693E73784E12EEB629B0A7CC /* ChordLibrary.swift in Sources */,
 				BB3CB87FE20852932BF4BD9C /* LyricsManager.swift in Sources */,
+				2A510E542A2B1F807370813E /* ProcessingOptions.swift in Sources */,
 				7C50A0A8262763085737E44F /* ProjectStore.swift in Sources */,
 				3BAFE6396224915365A7D9F0 /* StemProject.swift in Sources */,
 				125A136B224F9A135EE40C64 /* TrackMetadata.swift in Sources */,
@@ -262,6 +270,7 @@
 				9F5D28547C9F663B31E5B07D /* ProjectsView.swift in Sources */,
 				C8788E17A9D8050761F50EDF /* RecordingView.swift in Sources */,
 				3829A67B00D03A4237BF5D50 /* ResultsView.swift in Sources */,
+				CA9F518AFE8D95C26C49BDF6 /* StudioDesignViews.swift in Sources */,
 				7C8A129290E723A88BAA8B7F /* StudioMixerView.swift in Sources */,
 				105BC27549726400FD4E941B /* ToolsHubView.swift in Sources */,
 				FFE610A33B70E53DDACB0295 /* AppStudioColors.swift in Sources */,
@@ -367,7 +376,7 @@
 				CC7D1E8287F30E45188B760B /* BeatDetectionManager.swift */,
 				5FBB22BB9E5B81521FE1685C /* ChordDetectionManager.swift */,
 				BA7484D72D50F0264BA329E0 /* ChordTheory.swift */,
-				/* ... and 72 more */
+				/* ... and 75 more */
 			);
 			name = Runner;
 			path = Runner;

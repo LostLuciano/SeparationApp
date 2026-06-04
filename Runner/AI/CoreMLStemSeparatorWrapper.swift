@@ -20,8 +20,19 @@ public class CoreMLStemSeparatorWrapper {
         audioURL: URL,
         processingMode: String? = nil,
         modelQuality: String? = nil,
+        selectedStems: [String]? = nil,
         onProgress: @escaping (String, Double) -> Void
     ) async throws -> [String: URL] {
+        guard processingGate.requestOperation(.separation) else {
+            throw NSError(
+                domain: "CoreMLStemSeparatorWrapper",
+                code: 409,
+                userInfo: [NSLocalizedDescriptionKey: "Another processing job is already running."]
+            )
+        }
+        defer {
+            processingGate.completeOperation(.separation)
+        }
         
         // Check thermal state
         if performanceGuard.isThermalThrottling() {
@@ -48,6 +59,7 @@ public class CoreMLStemSeparatorWrapper {
                 audioURL: audioURL,
                 processingMode: processingMode,
                 modelQuality: modelQuality,
+                selectedStems: selectedStems,
                 onProgress: wrappedProgress
             )
             
@@ -70,6 +82,6 @@ public class CoreMLStemSeparatorWrapper {
     // MARK: - Status
     
     public func isSeparationInProgress() -> Bool {
-        return performanceGuard.currentThermalState != "Nominal"
+        return processingGate.isActive
     }
 }

@@ -43,6 +43,7 @@ enum StepStatus {
 
 struct ProcessingView: View {
     let audioURL: URL
+    var options: StemProcessingOptions = .allStems
     var onComplete: (StemProject) -> Void
     var onCancel: () -> Void
 
@@ -128,6 +129,13 @@ struct ProcessingView: View {
                 .foregroundColor(DesignSystem.TextMuted)
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
+                .padding(.horizontal, 28)
+
+            Text("\(options.templateName) - \(options.displaySummary)")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(DesignSystem.SoftRed)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
                 .padding(.horizontal, 28)
         }
         .padding(.top, 16)
@@ -282,22 +290,12 @@ struct ProcessingView: View {
 
         guard shouldStart else { return }
 
-        guard ProcessingGate.shared.requestOperation(.separation) else {
-            await MainActor.run {
-                failProcessing("Another processing job is already running.")
-            }
-            return
-        }
-
-        defer {
-            ProcessingGate.shared.completeOperation(.separation)
-        }
-
         do {
             let generatedStems = try await CoreMLStemSeparatorWrapper.shared.separate(
                 audioURL: audioURL,
-                processingMode: "High Quality",
-                modelQuality: "High Quality"
+                processingMode: "Performance",
+                modelQuality: "Performance",
+                selectedStems: options.selectedStems
             ) { message, value in
                 Task { @MainActor in
                     updateProgress(value, message: message)
@@ -447,6 +445,7 @@ struct ProcessingView: View {
 #Preview {
     ProcessingView(
         audioURL: URL(fileURLWithPath: "/tmp/input.m4a"),
+        options: .allStems,
         onComplete: { _ in },
         onCancel: {}
     )
