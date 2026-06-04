@@ -174,7 +174,7 @@ public class CoreMLStemSeparator {
             let provider = try MLDictionaryFeatureProvider(dictionary: [
                 "mixture": MLFeatureValue(multiArray: inputArray)
             ])
-            let prediction = try loadedModel.model.prediction(from: provider)
+            let prediction = try await loadedModel.model.prediction(from: provider)
 
             for stem in stemNames {
                 guard let outputArray = prediction.featureValue(for: stem)?.multiArrayValue,
