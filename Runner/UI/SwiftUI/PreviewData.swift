@@ -91,6 +91,15 @@ struct PreviewData {
             waveformCachePath: nil
         )
     ]
+
+    static let stems: [Stem] = [
+        Stem(name: "Vocals", icon: "mic.fill", duration: "03:24"),
+        Stem(name: "Drums", icon: "circle.grid.cross.fill", duration: "03:24"),
+        Stem(name: "Bass", icon: "speaker.wave.2.fill", duration: "03:24"),
+        Stem(name: "Guitar", icon: "guitars.fill", duration: "03:24"),
+        Stem(name: "Piano", icon: "pianokeys", duration: "03:24"),
+        Stem(name: "Other", icon: "waveform", duration: "03:24")
+    ]
     
     static let lyricLines: [LyricLine] = [
         LyricLine(startTime: 0.0, endTime: 5.0, text: "Welcome to the future of sound"),
@@ -109,6 +118,13 @@ struct PreviewData {
         MixerChannel(name: "Keys", volume: 0.70, isMuted: false, isSoloed: false),
         MixerChannel(name: "Others", volume: 0.45, isMuted: false, isSoloed: false)
     ]
+}
+
+struct Stem: Identifiable, Hashable {
+    let id = UUID()
+    let name: String
+    let icon: String
+    let duration: String
 }
 
 struct MixerChannel: Identifiable, Hashable {

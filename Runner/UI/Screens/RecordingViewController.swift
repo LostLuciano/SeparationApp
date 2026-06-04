@@ -242,5 +242,6 @@ class RecordingViewController: UIViewController {
             recordButton.backgroundColor = UIColor(white: 1.0, alpha: 0.1)
             timerLabel.textColor = AppStudioColors.textSecondary
             Logger.shared.info("Recording stopped")
+        }
     }
 }
