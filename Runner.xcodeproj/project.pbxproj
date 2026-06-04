@@ -128,6 +128,7 @@
 		477B940E919B8B46BE92306A /* convtcn20_2048_fp16.mlmodelc */ = {isa = PBXFileReference; lastKnownFileType = folder.mlmodelc; path = "Runner/Resources/Models/convtcn20_2048_fp16.mlmodelc"; sourceTree = SOURCE_ROOT; };
 		AF88E533E2CAA990CB65BD66 /* dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1.mlmodelc */ = {isa = PBXFileReference; lastKnownFileType = folder.mlmodelc; path = "Runner/Resources/Models/dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1.mlmodelc"; sourceTree = SOURCE_ROOT; };
 		516D8047CFD83F47C50EFB8C /* dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0.mlmodelc */ = {isa = PBXFileReference; lastKnownFileType = folder.mlmodelc; path = "Runner/Resources/Models/dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0.mlmodelc"; sourceTree = SOURCE_ROOT; };
+		D8C21451C48BF3A35A3F3D1E /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Runner/LaunchScreen.storyboard"; sourceTree = SOURCE_ROOT; };
 
 	/* Configuration Files */
 		D3B79DBC97D7260662B70705 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Runner/Info.plist"; sourceTree = SOURCE_ROOT; };
@@ -254,6 +255,7 @@
 		3507DAA699F3B077915EC494 /* convtcn20_2048_fp16.mlmodelc in Resources */ = {isa = PBXBuildFile; fileRef = 477B940E919B8B46BE92306A; };
 		F4A8E62A2535CEB7300FA3B2 /* dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1.mlmodelc in Resources */ = {isa = PBXBuildFile; fileRef = AF88E533E2CAA990CB65BD66; };
 		980D6E4D7A96B18AD9FD94F6 /* dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0.mlmodelc in Resources */ = {isa = PBXBuildFile; fileRef = 516D8047CFD83F47C50EFB8C; };
+		7D589FC8E57ED3D77F884B34 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D8C21451C48BF3A35A3F3D1E; };
 
 	/* Products */
 		4CB1B68FB1FB6DF0BED8838F /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -391,6 +393,7 @@
 				3507DAA699F3B077915EC494 /* convtcn20_2048_fp16.mlmodelc in Resources */,
 				F4A8E62A2535CEB7300FA3B2 /* dun_tfc_tdf_b9_l3_w_6stems_32_fp32_v2.0.1.mlmodelc in Resources */,
 				980D6E4D7A96B18AD9FD94F6 /* dunlight_tfc_tdf_b9_l3_w_subv1_cirm_6stems_64_fp16_v2.0.0.mlmodelc in Resources */,
+				7D589FC8E57ED3D77F884B34 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -532,6 +535,7 @@
 				EXECUTABLE_NAME = Runner;
 				INFOPLIST_FILE = "Runner/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Runner;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -568,6 +572,7 @@
 				EXECUTABLE_NAME = Runner;
 				INFOPLIST_FILE = "Runner/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Runner;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

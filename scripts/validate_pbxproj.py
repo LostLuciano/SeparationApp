@@ -49,7 +49,7 @@ def scan_actual_files(runner_dir):
         swift_files.add(rel_path)
     
     # Resources
-    for ext in ['json', 'm4a', 'caf', 'wav', 'mp3']:
+    for ext in ['json', 'm4a', 'caf', 'wav', 'mp3', 'storyboard']:
         for f in Path(runner_dir).rglob(f'*.{ext}'):
             rel_path = f.relative_to(Path(runner_dir).parent).as_posix()
             if ".mlmodelc/" in rel_path or ".xcassets/" in rel_path:

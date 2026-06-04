@@ -34,7 +34,7 @@ public class ProcessingGate {
     /// - Returns: true if operation can start immediately, false if already processing
     public func requestOperation(_ operation: ProcessingOperation) -> Bool {
         var acquired = false
-        queue.async(flags: .barrier) {
+        queue.sync(flags: .barrier) {
             if !self.isProcessing {
                 self.isProcessing = true
                 self.currentOperation = operation
@@ -58,7 +58,7 @@ public class ProcessingGate {
     /// - Returns: true if lock was acquired, false if already processing
     public func tryAcquire() -> Bool {
         var acquired = false
-        queue.async(flags: .barrier) {
+        queue.sync(flags: .barrier) {
             if !self.isProcessing {
                 self.isProcessing = true
                 acquired = true

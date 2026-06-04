@@ -2,69 +2,36 @@ import SwiftUI
 
 struct AppRootView: View {
     @State private var selectedTab: Int = 0
-    @State private var showImportSheet: Bool = false
     @State private var activePath = NavigationPath()
-    
-    // Shared state to allow flow transitions (UI only)
-    @State private var showProcessingView: Bool = false
-    @State private var showResultsView: Bool = false
+
     @State private var selectedProjectName: String = "Ocean Waves"
     
     var body: some View {
         NavigationStack(path: $activePath) {
             ZStack {
-                // Background Gradient
                 LinearGradient(
                     colors: [DesignSystem.BackgroundDark, DesignSystem.BackgroundDeep],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
                 .ignoresSafeArea()
-                
-                // Content Switcher
-                VStack(spacing: 0) {
-                    Group {
-                        switch selectedTab {
-                        case 0:
-                            HomeView(
-                                onNavigateToTool: { tool in
-                                    navigateToTool(tool)
-                                },
-                                onProjectSelected: { projName in
-                                    selectedProjectName = projName
-                                    activePath.append(NavigationDestination.results)
-                                }
-                            )
-                        case 1:
-                            ProjectsView(onProjectSelected: { projName in
-                                selectedProjectName = projName
-                                activePath.append(NavigationDestination.results)
-                            })
-                        case 2:
-                            ToolsHubView(onNavigateToTool: { tool in
-                                navigateToTool(tool)
-                            })
-                        case 3:
-                            ProfileView()
-                        default:
-                            HomeView(onNavigateToTool: { _ in }, onProjectSelected: { _ in })
-                        }
-                    }
+
+                currentTabView
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    
-                    Spacer()
-                    
-                    // Floating Custom Glass Tab Bar (Pushed slightly up to float)
-                    customTabBar
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 12)
-                }
-                .ignoresSafeArea(.keyboard, edges: .bottom)
             }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                customTabBar
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 4)
+            }
+            .toolbar(.hidden, for: .navigationBar)
+            .ignoresSafeArea(.keyboard, edges: .bottom)
             .navigationDestination(for: NavigationDestination.self) { destination in
                 switch destination {
                 case .importSources:
-                    ImportSourceView(onImportSelected: {
+                    ImportSourceView(onImportSelected: { importedURL in
+                        selectedProjectName = importedURL.deletingPathExtension().lastPathComponent
                         activePath.append(NavigationDestination.processing)
                     })
                 case .processing:
@@ -87,14 +54,49 @@ struct AppRootView: View {
                     LyricsViewerView()
                 case .recording:
                     RecordingView(onRecordFinished: {
+                        selectedProjectName = "Recorded Session"
                         activePath.append(NavigationDestination.processing)
                     })
                 }
             }
         }
     }
+
+    private var currentTabView: some View {
+        Group {
+            switch selectedTab {
+            case 0:
+                HomeView(
+                    onNavigateToTool: { tool in
+                        navigateToTool(tool)
+                    },
+                    onProjectSelected: { projName in
+                        selectedProjectName = projName
+                        activePath.append(NavigationDestination.results)
+                    }
+                )
+            case 1:
+                ProjectsView(
+                    onCreateProject: {
+                        activePath.append(NavigationDestination.importSources)
+                    },
+                    onProjectSelected: { projName in
+                        selectedProjectName = projName
+                        activePath.append(NavigationDestination.results)
+                    }
+                )
+            case 2:
+                ToolsHubView(onNavigateToTool: { tool in
+                    navigateToTool(tool)
+                })
+            case 3:
+                ProfileView()
+            default:
+                EmptyView()
+            }
+        }
+    }
     
-    // Custom Glass Tab Bar View
     private var customTabBar: some View {
         HStack(spacing: 0) {
             tabButton(index: 0, icon: "house.fill", label: "Home")
@@ -127,8 +129,9 @@ struct AppRootView: View {
             tabButton(index: 2, icon: "slider.horizontal.3", label: "Tools")
             tabButton(index: 3, icon: "person.fill", label: "Profile")
         }
+        .frame(minHeight: 72)
         .padding(.vertical, 8)
-        .padding(.horizontal, 12)
+        .padding(.horizontal, 10)
         .background(DesignSystem.SurfaceGlass)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.extraLarge))
@@ -151,15 +154,17 @@ struct AppRootView: View {
                 Text(label)
                     .font(.system(size: 10, weight: selectedTab == index ? .semibold : .regular))
                     .foregroundColor(selectedTab == index ? .white : DesignSystem.TextMuted)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
             }
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, minHeight: 52)
         }
     }
     
     // Routing helpers
     private func navigateToTool(_ tool: String) {
         switch tool {
-        case "Import Audio", "Import Source":
+        case "Import Audio", "Import Source", "Stem Separation":
             activePath.append(NavigationDestination.importSources)
         case "Studio Mixer":
             activePath.append(NavigationDestination.mixer)

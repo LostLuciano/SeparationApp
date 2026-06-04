@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ProjectsView: View {
+    var onCreateProject: () -> Void = {}
     var onProjectSelected: (String) -> Void
     
     @State private var searchText: String = ""
@@ -41,9 +42,7 @@ struct ProjectsView: View {
                 
                 Spacer()
                 
-                Button(action: {
-                    onProjectSelected("New Custom Session")
-                }) {
+                Button(action: onCreateProject) {
                     Image(systemName: "plus")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)

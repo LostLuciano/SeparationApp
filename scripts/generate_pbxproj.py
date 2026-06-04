@@ -47,8 +47,8 @@ class PBXProjGenerator:
                 'build_uuid': generate_uuid(f"BUILD_{rel_path}"),
             })
         
-        # Scan resource files: JSON, audio, etc.
-        for ext in ['json', 'm4a', 'caf', 'wav', 'mp3']:
+        # Scan resource files: JSON, audio, launch/storyboard assets, etc.
+        for ext in ['json', 'm4a', 'caf', 'wav', 'mp3', 'storyboard']:
             for resource in self.runner_dir.rglob(f"*.{ext}"):
                 rel_path = resource.relative_to(self.project_root).as_posix()
                 # Exclude files inside .mlmodelc folders or .xcassets to avoid multiple commands producing conflicts
@@ -132,6 +132,8 @@ class PBXProjGenerator:
                     ftype = 'text.json'
                 elif name.endswith(('.m4a', '.wav', '.mp3', '.caf')):
                     ftype = 'audio.wav'
+                elif name.endswith('.storyboard'):
+                    ftype = 'file.storyboard'
                 else:
                     ftype = 'data'
                 
@@ -335,6 +337,7 @@ class PBXProjGenerator:
             content += f"\t\t\t\tEXECUTABLE_NAME = Runner;\n"
             content += f"\t\t\t\tINFOPLIST_FILE = \"Runner/Info.plist\";\n"
             content += f"\t\t\t\tINFOPLIST_KEY_CFBundleDisplayName = Runner;\n"
+            content += f"\t\t\t\tINFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;\n"
             content += f"\t\t\t\tINFOPLIST_KEY_UIMainStoryboardFile = \"\";\n"
             content += f"\t\t\t\tINFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;\n"
             content += f"\t\t\t\tINFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = \"UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight\";\n"

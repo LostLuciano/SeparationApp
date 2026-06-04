@@ -1,11 +1,8 @@
 import UIKit
 import AVFoundation
-import SwiftUI
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    
-    var window: UIWindow?
     
     func application(
         _ application: UIApplication,
@@ -17,17 +14,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Initialize all logic managers
         initializeManagers()
-        
-        // Create main window
-        window = UIWindow(frame: UIScreen.main.bounds)
-        
-        // Setup root view controller
-        let rootSwiftUIView = AppRootView()
-        let hostingController = UIHostingController(rootView: rootSwiftUIView)
-        
-        window?.rootViewController = hostingController
-        window?.makeKeyAndVisible()
-        
+
         return true
     }
     
