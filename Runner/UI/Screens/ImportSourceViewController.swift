@@ -197,10 +197,11 @@ class ImportSourceViewController: UIViewController {
     }
     
     private func presentDocumentPicker() {
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: AudioImportManager.allowedUTTypes, asCopy: false)
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: AudioImportManager.allowedUTTypes, asCopy: true)
         picker.allowsMultipleSelection = false
         picker.delegate = self
-        Logger.shared.info("Opening Files picker")
+        picker.shouldShowFileExtensions = true
+        Logger.shared.info("Opening Files picker with asCopy: true")
         present(picker, animated: true)
     }
     

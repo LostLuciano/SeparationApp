@@ -6,10 +6,11 @@ struct DocumentPickerView: UIViewControllerRepresentable {
     var onError: (Error) -> Void
 
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: AudioImportManager.allowedUTTypes, asCopy: false)
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: AudioImportManager.allowedUTTypes, asCopy: true)
         picker.allowsMultipleSelection = false
         picker.delegate = context.coordinator
-        Logger.shared.info("Opening Files picker")
+        picker.shouldShowFileExtensions = true
+        Logger.shared.info("Opening Files picker with asCopy: true")
         return picker
     }
 
