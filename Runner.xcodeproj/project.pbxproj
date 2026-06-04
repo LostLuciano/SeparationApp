@@ -26,6 +26,7 @@
 		15FC8E36E3A4ED78E0CC982D /* ProjectStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/Data/ProjectStore.swift"; sourceTree = SOURCE_ROOT; };
 		DA933B8FE60BEEF1D6EFC856 /* StemProject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/Data/StemProject.swift"; sourceTree = SOURCE_ROOT; };
 		09F5EB6D0BE52A9AC7A3B672 /* TrackMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/Data/TrackMetadata.swift"; sourceTree = SOURCE_ROOT; };
+		795F81F4A982FF7313231A98 /* AudioImportManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/System/AudioImportManager.swift"; sourceTree = SOURCE_ROOT; };
 		AF4F6D2D3ECF845F7B03652C /* CacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/System/CacheManager.swift"; sourceTree = SOURCE_ROOT; };
 		D0CC5355687A014DEACBB5E0 /* ExportManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/System/ExportManager.swift"; sourceTree = SOURCE_ROOT; };
 		4C6DDC8B613BD31E4F59D3A0 /* FileImportManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/System/FileImportManager.swift"; sourceTree = SOURCE_ROOT; };
@@ -64,6 +65,7 @@
 		00D9128AE3B5E34EB756DEBD /* AIAnalyzerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/AIAnalyzerView.swift"; sourceTree = SOURCE_ROOT; };
 		B5493170A6FE69CBB292C4D5 /* AppRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/AppRootView.swift"; sourceTree = SOURCE_ROOT; };
 		FB6D919A2A43EA7F9355EE11 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/DesignSystem.swift"; sourceTree = SOURCE_ROOT; };
+		93FF71040FB541C60CC68870 /* DocumentPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/DocumentPickerView.swift"; sourceTree = SOURCE_ROOT; };
 		0E91CA3DF849616F106B228F /* GlassComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/GlassComponents.swift"; sourceTree = SOURCE_ROOT; };
 		40B6175E1DF0ECAB38542DC0 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/HomeView.swift"; sourceTree = SOURCE_ROOT; };
 		ED870FD710F6259755A34883 /* ImportSourceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/ImportSourceView.swift"; sourceTree = SOURCE_ROOT; };
@@ -115,6 +117,7 @@
 		7C50A0A8262763085737E44F /* ProjectStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15FC8E36E3A4ED78E0CC982D; };
 		3BAFE6396224915365A7D9F0 /* StemProject.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA933B8FE60BEEF1D6EFC856; };
 		125A136B224F9A135EE40C64 /* TrackMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09F5EB6D0BE52A9AC7A3B672; };
+		B97E4FD6C7649A2323298756 /* AudioImportManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 795F81F4A982FF7313231A98; };
 		F3817CF04D5B54790154DEF5 /* CacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4F6D2D3ECF845F7B03652C; };
 		58BC8AC297779FDB7CF95A38 /* ExportManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0CC5355687A014DEACBB5E0; };
 		DA1258AEB8EB41555FACE2F7 /* FileImportManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C6DDC8B613BD31E4F59D3A0; };
@@ -153,6 +156,7 @@
 		5F1E34B4EE8383519E33D053 /* AIAnalyzerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00D9128AE3B5E34EB756DEBD; };
 		1DB0D430C1BB83EAE82E48E9 /* AppRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5493170A6FE69CBB292C4D5; };
 		89F5B903784CBEE11B202D52 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6D919A2A43EA7F9355EE11; };
+		D89FA3E7F7F1AEECAB5C8309 /* DocumentPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93FF71040FB541C60CC68870; };
 		BA3FE63408D7D41CE853A753 /* GlassComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E91CA3DF849616F106B228F; };
 		21C59AA02909A465DB611A17 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B6175E1DF0ECAB38542DC0; };
 		698E06D827980D24E928245D /* ImportSourceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED870FD710F6259755A34883; };
@@ -208,6 +212,7 @@
 				7C50A0A8262763085737E44F /* ProjectStore.swift in Sources */,
 				3BAFE6396224915365A7D9F0 /* StemProject.swift in Sources */,
 				125A136B224F9A135EE40C64 /* TrackMetadata.swift in Sources */,
+				B97E4FD6C7649A2323298756 /* AudioImportManager.swift in Sources */,
 				F3817CF04D5B54790154DEF5 /* CacheManager.swift in Sources */,
 				58BC8AC297779FDB7CF95A38 /* ExportManager.swift in Sources */,
 				DA1258AEB8EB41555FACE2F7 /* FileImportManager.swift in Sources */,
@@ -246,6 +251,7 @@
 				5F1E34B4EE8383519E33D053 /* AIAnalyzerView.swift in Sources */,
 				1DB0D430C1BB83EAE82E48E9 /* AppRootView.swift in Sources */,
 				89F5B903784CBEE11B202D52 /* DesignSystem.swift in Sources */,
+				D89FA3E7F7F1AEECAB5C8309 /* DocumentPickerView.swift in Sources */,
 				BA3FE63408D7D41CE853A753 /* GlassComponents.swift in Sources */,
 				21C59AA02909A465DB611A17 /* HomeView.swift in Sources */,
 				698E06D827980D24E928245D /* ImportSourceView.swift in Sources */,
@@ -361,7 +367,7 @@
 				CC7D1E8287F30E45188B760B /* BeatDetectionManager.swift */,
 				5FBB22BB9E5B81521FE1685C /* ChordDetectionManager.swift */,
 				BA7484D72D50F0264BA329E0 /* ChordTheory.swift */,
-				/* ... and 70 more */
+				/* ... and 72 more */
 			);
 			name = Runner;
 			path = Runner;

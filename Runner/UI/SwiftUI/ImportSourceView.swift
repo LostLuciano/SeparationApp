@@ -15,7 +15,7 @@ struct ImportSourceView: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var activeSource: ImportSourceOption?
-    @State private var isFileImporterPresented = false
+    @State private var isDocumentPickerPresented = false
     @State private var importErrorMessage: String?
 
     private let sources = [
@@ -76,12 +76,17 @@ struct ImportSourceView: View {
             }
         }
         .navigationBarBackButtonHidden()
-        .fileImporter(
-            isPresented: $isFileImporterPresented,
-            allowedContentTypes: [.item],
-            allowsMultipleSelection: false
-        ) { result in
-            handleImportResult(result)
+        .sheet(isPresented: $isDocumentPickerPresented) {
+            DocumentPickerView(
+                onPick: { importedURL in
+                    isDocumentPickerPresented = false
+                    onImportSelected(importedURL)
+                },
+                onError: { error in
+                    isDocumentPickerPresented = false
+                    importErrorMessage = error.localizedDescription
+                }
+            )
         }
         .alert("Import Failed", isPresented: Binding(
             get: { importErrorMessage != nil },
@@ -158,7 +163,7 @@ struct ImportSourceView: View {
     private func sourceRow(_ source: ImportSourceOption) -> some View {
         GlassListRow(action: {
             activeSource = source
-            isFileImporterPresented = true
+            isDocumentPickerPresented = true
         }) {
             HStack(spacing: 16) {
                 ZStack {
@@ -199,31 +204,6 @@ struct ImportSourceView: View {
         }
     }
 
-    private func handleImportResult(_ result: Result<[URL], Error>) {
-        do {
-            guard let selectedURL = try result.get().first else { return }
-            let didAccessSecurityScope = selectedURL.startAccessingSecurityScopedResource()
-            defer {
-                if didAccessSecurityScope {
-                    selectedURL.stopAccessingSecurityScopedResource()
-                }
-            }
-
-            guard FileImportManager.shared.isFormatSupported(selectedURL) else {
-                importErrorMessage = "Format file belum didukung. Gunakan WAV, MP3, M4A, AAC, AIFF, CAF, FLAC, MOV, MP4, M4V, atau MKV."
-                return
-            }
-
-            let importsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                .appendingPathComponent("Imports", isDirectory: true)
-            let importedURL = try FileImportManager.shared.importFile(selectedURL, to: importsDirectory)
-            onImportSelected(importedURL)
-        } catch let error as CocoaError where error.code == .userCancelled {
-            return
-        } catch {
-            importErrorMessage = error.localizedDescription
-        }
-    }
 }
 
 #Preview {
