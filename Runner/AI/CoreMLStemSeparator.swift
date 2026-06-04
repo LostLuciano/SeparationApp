@@ -161,45 +161,52 @@ public class CoreMLStemSeparator {
         var chunkCount = 0
 
         while chunkStart < totalFrames {
-            try Task.checkCancellation()
+            // Wrap each chunk in autoreleasepool to prevent memory accumulation
+            try await autoreleasepool {
+                try Task.checkCancellation()
 
-            let actualFrames = min(chunkFrames, totalFrames - chunkStart)
-            let inputArray = try makeInputArray(
-                leftSTFT: leftSTFT,
-                rightSTFT: rightSTFT,
-                startFrame: chunkStart,
-                actualFrames: actualFrames
-            )
-
-            let provider = try MLDictionaryFeatureProvider(dictionary: [
-                "mixture": MLFeatureValue(multiArray: inputArray)
-            ])
-            let prediction = try await loadedModel.model.prediction(from: provider)
-
-            for stem in stemNames {
-                guard let outputArray = prediction.featureValue(for: stem)?.multiArrayValue,
-                      let buffer = stemSTFTs[stem] else {
-                    throw NSError(
-                        domain: "CoreMLStemSeparator",
-                        code: 500,
-                        userInfo: [NSLocalizedDescriptionKey: "Model output missing stem: \(stem)"]
-                    )
-                }
-
-                try copyOutputArray(
-                    outputArray,
-                    into: buffer,
+                let actualFrames = min(chunkFrames, totalFrames - chunkStart)
+                let inputArray = try makeInputArray(
+                    leftSTFT: leftSTFT,
+                    rightSTFT: rightSTFT,
                     startFrame: chunkStart,
                     actualFrames: actualFrames
                 )
+
+                let provider = try MLDictionaryFeatureProvider(dictionary: [
+                    "mixture": MLFeatureValue(multiArray: inputArray)
+                ])
+                let prediction = try await loadedModel.model.prediction(from: provider)
+
+                for stem in stemNames {
+                    guard let outputArray = prediction.featureValue(for: stem)?.multiArrayValue,
+                          let buffer = stemSTFTs[stem] else {
+                        throw NSError(
+                            domain: "CoreMLStemSeparator",
+                            code: 500,
+                            userInfo: [NSLocalizedDescriptionKey: "Model output missing stem: \(stem)"]
+                        )
+                    }
+
+                    try copyOutputArray(
+                        outputArray,
+                        into: buffer,
+                        startFrame: chunkStart,
+                        actualFrames: actualFrames
+                    )
+                }
+
+                chunkStart += chunkFrames
+                chunkCount += 1
+
+                let currentProgress = 0.3 + (Double(chunkCount) / Double(totalChunks)) * 0.48
+                onProgress("Processing chunk \(chunkCount)/\(totalChunks)", currentProgress)
+                
+                // Force cleanup every 50 chunks to prevent memory buildup
+                if chunkCount % 50 == 0 {
+                    await Task.yield()
+                }
             }
-
-            chunkStart += chunkFrames
-            chunkCount += 1
-
-            let currentProgress = 0.3 + (Double(chunkCount) / Double(totalChunks)) * 0.48
-            onProgress("Processing chunk \(chunkCount)/\(totalChunks)", currentProgress)
-            await Task.yield()
         }
 
         onProgress("Rekonstruksi waveform stereo...", 0.82)
@@ -483,7 +490,7 @@ public class CoreMLStemSeparator {
                 )
             }
 
-            let outputURL = outputDirectory.appendingPathComponent("\(stem).m4a")
+            let outputURL = outputDirectory.appendingPathComponent("\(stem).wav")
             try writeAudioBuffer(pcmBuffer, to: outputURL)
             outputPaths[stem] = outputURL
         }
@@ -493,19 +500,33 @@ public class CoreMLStemSeparator {
 
     private func writeAudioBuffer(_ buffer: AVAudioPCMBuffer, to url: URL) throws {
         let channelCount = Int(buffer.format.channelCount)
+        
+        // Use LOSSLESS format for maximum quality preservation
+        // WAV PCM 32-bit float is industry standard for professional audio work
         let settings: [String: Any] = [
-            AVFormatIDKey: kAudioFormatMPEG4AAC,
+            AVFormatIDKey: kAudioFormatLinearPCM,
             AVSampleRateKey: targetSampleRate,
             AVNumberOfChannelsKey: channelCount,
-            AVEncoderBitRateKey: channelCount * 96000,
-            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+            AVLinearPCMBitDepthKey: 32,
+            AVLinearPCMIsFloatKey: true,
+            AVLinearPCMIsBigEndianKey: false,
+            AVLinearPCMIsNonInterleaved: false
         ]
 
-        if FileManager.default.fileExists(atPath: url.path) {
-            try FileManager.default.removeItem(at: url)
+        // Change extension to .wav for lossless output
+        let wavURL = url.deletingPathExtension().appendingPathExtension("wav")
+        
+        if FileManager.default.fileExists(atPath: wavURL.path) {
+            try FileManager.default.removeItem(at: wavURL)
         }
 
-        let audioFile = try AVAudioFile(forWriting: url, settings: settings)
+        let audioFile = try AVAudioFile(forWriting: wavURL, settings: settings)
         try audioFile.write(from: buffer)
+        
+        // Log file size for monitoring
+        if let attrs = try? FileManager.default.attributesOfItem(atPath: wavURL.path),
+           let fileSize = attrs[.size] as? Int64 {
+            Logger.shared.info("Wrote lossless WAV: \(wavURL.lastPathComponent) (\(fileSize / 1024 / 1024) MB)")
+        }
     }
 }

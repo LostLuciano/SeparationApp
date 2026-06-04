@@ -3,6 +3,7 @@ import SwiftUI
 struct AppRootView: View {
     @State private var selectedTab: Int = 0
     @State private var activePath = NavigationPath()
+    @State private var showDocumentPicker = false
 
     @State private var projects: [StemProject] = []
     @State private var selectedProject: StemProject?
@@ -31,6 +32,20 @@ struct AppRootView: View {
             .ignoresSafeArea(.keyboard, edges: .bottom)
             .onAppear {
                 reloadProjects()
+            }
+            .sheet(isPresented: $showDocumentPicker) {
+                DocumentPickerView(
+                    onPick: { importedURL in
+                        showDocumentPicker = false
+                        pendingInputURL = importedURL
+                        activePath.append(NavigationDestination.processing)
+                    },
+                    onError: { error in
+                        showDocumentPicker = false
+                        // Show error alert if needed
+                        Logger.shared.error("Import failed: \(error.localizedDescription)")
+                    }
+                )
             }
             .navigationDestination(for: NavigationDestination.self) { destination in
                 switch destination {
@@ -139,7 +154,8 @@ struct AppRootView: View {
             tabButton(index: 1, icon: "music.note.list", label: "Projects")
 
             Button(action: {
-                activePath.append(NavigationDestination.importSources)
+                // Directly show document picker instead of import source screen
+                showDocumentPicker = true
             }) {
                 ZStack {
                     Circle()
