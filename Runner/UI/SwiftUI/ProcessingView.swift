@@ -64,7 +64,11 @@ struct ProcessingView: View {
             backgroundGradient
             contentView
         }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            cancelButton
+        }
         .navigationBarBackButtonHidden()
+        .toolbar(.hidden, for: .navigationBar)
         .onReceive(timer) { _ in
             handleTimerTick()
         }
@@ -80,14 +84,15 @@ struct ProcessingView: View {
     }
 
     private var contentView: some View {
-        VStack(spacing: 20) {
-            headerView
-            progressRing
-            elapsedSummary
-            processingStepsCard
-            engineDetailsCard
-            Spacer()
-            cancelButton
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 20) {
+                headerView
+                progressRing
+                elapsedSummary
+                processingStepsCard
+                engineDetailsCard
+            }
+            .padding(.bottom, 16)
         }
     }
 
@@ -157,7 +162,9 @@ struct ProcessingView: View {
                 )
         }
         .padding(.horizontal, 20)
-        .padding(.bottom, 20)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+        .background(DesignSystem.BackgroundDeep.opacity(0.92))
     }
 
     private func timeStat(title: String, value: String, valueColor: Color) -> some View {
