@@ -103,6 +103,7 @@ public class AudioFeatureExtractor {
     }
 
     /// Reconstructs stereo time-domain signal from Left and Right STFT frames using overlap-add synthesis.
+    /// Uses synthesis window correction for perfect reconstruction.
     public func computeISTFTStereo(
         realL: [[Float]], imagL: [[Float]],
         realR: [[Float]], imagR: [[Float]],
@@ -121,9 +122,15 @@ public class AudioFeatureExtractor {
         let totalFrames = (realL.count - 1) * hopSize + nFFT
         var leftOutput = [Float](repeating: 0, count: totalFrames)
         var rightOutput = [Float](repeating: 0, count: totalFrames)
+        var windowSum = [Float](repeating: 0, count: totalFrames)
 
+        // Analysis window (same as used in forward STFT)
         var hanningWindow = [Float](repeating: 0, count: nFFT)
         vDSP_hann_window(&hanningWindow, vDSP_Length(nFFT), Int32(vDSP_HANN_NORM))
+        
+        // Synthesis window for perfect reconstruction (square of analysis window)
+        var synthesisWindow = [Float](repeating: 0, count: nFFT)
+        vDSP_vsq(hanningWindow, 1, &synthesisWindow, 1, vDSP_Length(nFFT))
 
         // Reconstruct Left Channel
         for (frameIdx, (realFrame, imagFrame)) in zip(realL, imagL).enumerated() {
@@ -135,6 +142,11 @@ public class AudioFeatureExtractor {
                     var splitComplex = DSPSplitComplex(realp: rBuf.baseAddress!, imagp: iBuf.baseAddress!)
                     vDSP_fft_zrip(fftSetup, &splitComplex, 1, log2n, FFTDirection(FFT_INVERSE))
 
+                    // Apply inverse FFT scaling (required for vDSP)
+                    var scale = Float(0.5 / Float(nFFT))
+                    vDSP_vsmul(splitComplex.realp, 1, &scale, splitComplex.realp, 1, vDSP_Length(halfN))
+                    vDSP_vsmul(splitComplex.imagp, 1, &scale, splitComplex.imagp, 1, vDSP_Length(halfN))
+
                     var timeDomain = [Float](repeating: 0, count: nFFT)
                     timeDomain.withUnsafeMutableBufferPointer { ptr in
                         ptr.baseAddress!.withMemoryRebound(to: DSPComplex.self, capacity: halfN) { dst in
@@ -142,13 +154,15 @@ public class AudioFeatureExtractor {
                         }
                     }
 
+                    // Apply synthesis window (not analysis window - this is the key!)
                     var windowed = [Float](repeating: 0, count: nFFT)
-                    vDSP_vmul(timeDomain, 1, hanningWindow, 1, &windowed, 1, vDSP_Length(nFFT))
+                    vDSP_vmul(timeDomain, 1, synthesisWindow, 1, &windowed, 1, vDSP_Length(nFFT))
 
                     let offset = frameIdx * hopSize
                     for i in 0..<nFFT {
                         if offset + i < leftOutput.count {
                             leftOutput[offset + i] += windowed[i]
+                            windowSum[offset + i] += synthesisWindow[i]
                         }
                     }
                 }
@@ -165,6 +179,11 @@ public class AudioFeatureExtractor {
                     var splitComplex = DSPSplitComplex(realp: rBuf.baseAddress!, imagp: iBuf.baseAddress!)
                     vDSP_fft_zrip(fftSetup, &splitComplex, 1, log2n, FFTDirection(FFT_INVERSE))
 
+                    // Apply inverse FFT scaling (required for vDSP)
+                    var scale = Float(0.5 / Float(nFFT))
+                    vDSP_vsmul(splitComplex.realp, 1, &scale, splitComplex.realp, 1, vDSP_Length(halfN))
+                    vDSP_vsmul(splitComplex.imagp, 1, &scale, splitComplex.imagp, 1, vDSP_Length(halfN))
+
                     var timeDomain = [Float](repeating: 0, count: nFFT)
                     timeDomain.withUnsafeMutableBufferPointer { ptr in
                         ptr.baseAddress!.withMemoryRebound(to: DSPComplex.self, capacity: halfN) { dst in
@@ -172,8 +191,9 @@ public class AudioFeatureExtractor {
                         }
                     }
 
+                    // Apply synthesis window
                     var windowed = [Float](repeating: 0, count: nFFT)
-                    vDSP_vmul(timeDomain, 1, hanningWindow, 1, &windowed, 1, vDSP_Length(nFFT))
+                    vDSP_vmul(timeDomain, 1, synthesisWindow, 1, &windowed, 1, vDSP_Length(nFFT))
 
                     let offset = frameIdx * hopSize
                     for i in 0..<nFFT {
@@ -184,15 +204,25 @@ public class AudioFeatureExtractor {
                 }
             }
         }
+        
+        // Window normalization for perfect reconstruction
+        for i in 0..<totalFrames {
+            if windowSum[i] > 0.01 {  // Avoid division by very small numbers
+                leftOutput[i] /= windowSum[i]
+                rightOutput[i] /= windowSum[i]
+            }
+        }
 
-        // Normalize both channels
+        // Normalize both channels with headroom to prevent clipping
         var maxValL: Float = 0
         var maxValR: Float = 0
         vDSP_maxv(leftOutput, 1, &maxValL, vDSP_Length(leftOutput.count))
         vDSP_maxv(rightOutput, 1, &maxValR, vDSP_Length(rightOutput.count))
         let maxVal = max(maxValL, maxValR)
-        if maxVal > 0 {
-            var scale = 1.0 / maxVal
+        
+        // Use 0.95 headroom to prevent clipping while preserving dynamics
+        if maxVal > 0.95 {
+            var scale = 0.95 / maxVal
             leftOutput.withUnsafeMutableBufferPointer { buf in
                 guard let ptr = buf.baseAddress else { return }
                 vDSP_vsmul(ptr, 1, &scale, ptr, 1, vDSP_Length(buf.count))
