@@ -13,29 +13,15 @@ public class FileImportManager {
     ]
     
     public func getSupportedAudioUTTypes() -> [UTType] {
-        var types: [UTType] = [.audio]
-        let audioFormats = ["mp3", "wav", "m4a", "aac", "aiff", "caf", "flac"]
-        for format in audioFormats {
-            if let type = UTType(filenameExtension: format), !types.contains(type) {
-                types.append(type)
-            }
-        }
-        return types
+        return [.item]
     }
     
     public func getSupportedVideoUTTypes() -> [UTType] {
-        var types: [UTType] = [.movie, .video]
-        let videoFormats = ["mov", "mp4", "m4v", "mkv"]
-        for format in videoFormats {
-            if let type = UTType(filenameExtension: format), !types.contains(type) {
-                types.append(type)
-            }
-        }
-        return types
+        return [.item]
     }
     
     public func getSupportedUTTypes() -> [UTType] {
-        return getSupportedAudioUTTypes() + getSupportedVideoUTTypes()
+        return [.item]
     }
     
     public init() {}
