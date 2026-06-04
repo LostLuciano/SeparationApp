@@ -137,7 +137,8 @@ struct RecordingView: View {
                                     .font(.system(size: 11, weight: .semibold))
                             }
                             .foregroundColor(.white)
-                            .frame(maxWidth: .infinity, height: 55)
+                            .frame(height: 55)
+                            .frame(maxWidth: .infinity)
                             .background(Color.white.opacity(0.06))
                             .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.medium))
                             .overlay(
@@ -155,7 +156,8 @@ struct RecordingView: View {
                                     .font(.system(size: 11, weight: .semibold))
                             }
                             .foregroundColor(isMetronomeOn ? .black : .white)
-                            .frame(maxWidth: .infinity, height: 55)
+                            .frame(height: 55)
+                            .frame(maxWidth: .infinity)
                             .background(isMetronomeOn ? Color.white : Color.white.opacity(0.06))
                             .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.medium))
                             .overlay(

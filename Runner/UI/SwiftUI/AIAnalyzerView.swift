@@ -299,7 +299,8 @@ struct AIAnalyzerView: View {
                     }
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, height: 48)
+                    .frame(height: 48)
+                    .frame(maxWidth: .infinity)
                     .background(Color.white.opacity(0.08))
                     .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.medium))
                     .overlay(
@@ -316,7 +317,8 @@ struct AIAnalyzerView: View {
                     }
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(isMetronomeActive ? .black : .white)
-                    .frame(maxWidth: .infinity, height: 48)
+                    .frame(height: 48)
+                    .frame(maxWidth: .infinity)
                     .background(isMetronomeActive ? Color.white : Color.white.opacity(0.08))
                     .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.medium))
                     .overlay(
