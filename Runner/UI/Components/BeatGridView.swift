@@ -46,7 +46,7 @@ class BeatGridView: UIView {
         
         for i in 0..<beats {
             let x = padding + beatWidth * CGFloat(i) + beatWidth / 2
-            let color: UIColor = (i == currentBeat) ? StudioColors.purpleAccent : StudioColors.textSecondary
+            let color: UIColor = (i == currentBeat) ? AppStudioColors.purpleAccent : AppStudioColors.textSecondary
             
             // Draw beat circle
             let circlePath = UIBezierPath(

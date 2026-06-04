@@ -1,6 +1,6 @@
 import UIKit
 
-class StudioColors {
+class AppStudioColors {
     // MARK: - Primary Colors
     static let darkBg = UIColor(red: 0.08, green: 0.06, blue: 0.15, alpha: 1.0)      // Dark purple-black
     static let darkBg2 = UIColor(red: 0.12, green: 0.10, blue: 0.20, alpha: 1.0)     // Slightly lighter

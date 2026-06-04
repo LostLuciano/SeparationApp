@@ -59,24 +59,24 @@ class ExportViewController: UIViewController {
         // Title
         let titleLabel = UILabel()
         titleLabel.text = "Export Mix"
-        titleLabel.font = Typography.headingLarge
-        titleLabel.textColor = StudioColors.textPrimary
+        titleLabel.font = StudioTypography.headingLarge
+        titleLabel.textColor = AppStudioColors.textPrimary
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(titleLabel)
         
         // Project info
         let projectLabel = UILabel()
         projectLabel.text = project?.title ?? "Unknown Project"
-        projectLabel.font = Typography.bodyMedium
-        projectLabel.textColor = StudioColors.textSecondary
+        projectLabel.font = StudioTypography.bodyMedium
+        projectLabel.textColor = AppStudioColors.textSecondary
         projectLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(projectLabel)
         
         // Format section
         let formatLabel = UILabel()
         formatLabel.text = "Format"
-        formatLabel.font = Typography.labelMedium
-        formatLabel.textColor = StudioColors.textPrimary
+        formatLabel.font = StudioTypography.labelMedium
+        formatLabel.textColor = AppStudioColors.textPrimary
         formatLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(formatLabel)
         
@@ -87,31 +87,31 @@ class ExportViewController: UIViewController {
         // Quality section
         let qualityTitleLabel = UILabel()
         qualityTitleLabel.text = "Quality"
-        qualityTitleLabel.font = Typography.labelMedium
-        qualityTitleLabel.textColor = StudioColors.textPrimary
+        qualityTitleLabel.font = StudioTypography.labelMedium
+        qualityTitleLabel.textColor = AppStudioColors.textPrimary
         qualityTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(qualityTitleLabel)
         
         qualitySlider.minimumValue = 64
         qualitySlider.maximumValue = 320
         qualitySlider.value = 192
-        qualitySlider.minimumTrackTintColor = StudioColors.purpleAccent
+        qualitySlider.minimumTrackTintColor = AppStudioColors.purpleAccent
         qualitySlider.maximumTrackTintColor = UIColor(white: 1.0, alpha: 0.15)
         qualitySlider.addTarget(self, action: #selector(qualityChanged), for: .valueChanged)
         qualitySlider.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(qualitySlider)
         
         qualityLabel.text = "192 kbps"
-        qualityLabel.font = Typography.labelSmall
-        qualityLabel.textColor = StudioColors.textSecondary
+        qualityLabel.font = StudioTypography.labelSmall
+        qualityLabel.textColor = AppStudioColors.textSecondary
         qualityLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(qualityLabel)
         
         // Advanced Options
         let advancedLabel = UILabel()
         advancedLabel.text = "Advanced Options"
-        advancedLabel.font = Typography.labelMedium
-        advancedLabel.textColor = StudioColors.textPrimary
+        advancedLabel.font = StudioTypography.labelMedium
+        advancedLabel.textColor = AppStudioColors.textPrimary
         advancedLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(advancedLabel)
         
@@ -121,8 +121,8 @@ class ExportViewController: UIViewController {
         normalizationToggle.layer.borderWidth = 1.0
         normalizationToggle.layer.borderColor = UIColor(white: 1.0, alpha: 0.15).cgColor
         normalizationToggle.layer.cornerRadius = StudioTheme.shared.cornerRadius12
-        normalizationToggle.setTitleColor(StudioColors.textPrimary, for: .normal)
-        normalizationToggle.titleLabel?.font = Typography.labelMedium
+        normalizationToggle.setTitleColor(AppStudioColors.textPrimary, for: .normal)
+        normalizationToggle.titleLabel?.font = StudioTypography.labelMedium
         normalizationToggle.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(normalizationToggle)
         

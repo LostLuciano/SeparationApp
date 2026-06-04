@@ -25,13 +25,13 @@ class FloatingTabBar: UIView {
     
     private func setup() {
         // Container
-        backgroundColor = StudioColors.glassMedium
+        backgroundColor = AppStudioColors.glassMedium
         layer.borderWidth = 1.0
         layer.borderColor = UIColor(white: 1.0, alpha: 0.2).cgColor
         layer.cornerRadius = StudioTheme.shared.cornerRadius24
         
         // Blur effect
-        GlassEffect.applyGlassEffect(to: self)
+        StudioGlassEffect.applyGlassEffect(to: self)
         
         // Stack view
         stackView.axis = .horizontal
@@ -52,16 +52,16 @@ class FloatingTabBar: UIView {
         for (index, tab) in tabs.enumerated() {
             let button = UIButton(type: .system)
             button.setTitle(tab, for: .normal)
-            button.titleLabel?.font = Typography.labelMedium
+            button.titleLabel?.font = StudioTypography.labelMedium
             
             button.tag = index
             button.addTarget(self, action: #selector(tabTapped(_:)), for: .touchUpInside)
             
             // Select first tab by default
             if index == 0 {
-                button.setTitleColor(StudioColors.purpleAccent, for: .normal)
+                button.setTitleColor(AppStudioColors.purpleAccent, for: .normal)
             } else {
-                button.setTitleColor(StudioColors.textSecondary, for: .normal)
+                button.setTitleColor(AppStudioColors.textSecondary, for: .normal)
             }
             
             stackView.addArrangedSubview(button)
@@ -78,9 +78,9 @@ class FloatingTabBar: UIView {
         
         for (i, button) in tabButtons.enumerated() {
             if i == index {
-                button.setTitleColor(StudioColors.purpleAccent, for: .normal)
+                button.setTitleColor(AppStudioColors.purpleAccent, for: .normal)
             } else {
-                button.setTitleColor(StudioColors.textSecondary, for: .normal)
+                button.setTitleColor(AppStudioColors.textSecondary, for: .normal)
             }
         }
         

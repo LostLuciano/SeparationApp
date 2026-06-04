@@ -21,11 +21,11 @@ class PurpleGlowButton: UIButton {
     
     private func setup() {
         // Background
-        backgroundColor = StudioColors.purpleAccent
+        backgroundColor = AppStudioColors.purpleAccent
         
         // Text
-        titleLabel?.font = Typography.labelLarge
-        setTitleColor(StudioColors.textPrimary, for: .normal)
+        titleLabel?.font = StudioTypography.labelLarge
+        setTitleColor(AppStudioColors.textPrimary, for: .normal)
         
         // Corner radius
         layer.cornerRadius = StudioTheme.shared.cornerRadius16
@@ -35,13 +35,13 @@ class PurpleGlowButton: UIButton {
         layer.borderColor = UIColor(white: 1.0, alpha: 0.2).cgColor
         
         // Glow
-        GlassEffect.applyPurpleGlow(to: self, radius: 16)
+        StudioGlassEffect.applyPurpleGlow(to: self, radius: 16)
         
         // Height constraint
         heightAnchor.constraint(equalToConstant: StudioTheme.shared.buttonHeightMedium).isActive = true
         
         // Spinner
-        spinner.color = StudioColors.textPrimary
+        spinner.color = AppStudioColors.textPrimary
         spinner.hidesWhenStopped = true
         addSubview(spinner)
         spinner.translatesAutoresizingMaskIntoConstraints = false

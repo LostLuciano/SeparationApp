@@ -1,6 +1,6 @@
 import UIKit
 
-class GlassEffect {
+class StudioGlassEffect {
     // MARK: - Glass Card Effect
     static func applyGlassEffect(to view: UIView, blur: UIBlurEffect.Style = .dark) {
         // Remove existing blur effect if any
@@ -47,7 +47,7 @@ class GlassEffect {
     
     // MARK: - Add Glow Effect
     static func applyPurpleGlow(to view: UIView, radius: CGFloat = 20) {
-        view.layer.shadowColor = StudioColors.purpleAccent.cgColor
+        view.layer.shadowColor = AppStudioColors.purpleAccent.cgColor
         view.layer.shadowOpacity = 0.6
         view.layer.shadowOffset = CGSize(width: 0, height: 0)
         view.layer.shadowRadius = radius

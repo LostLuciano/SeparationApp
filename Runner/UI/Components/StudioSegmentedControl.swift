@@ -17,13 +17,13 @@ class StudioSegmentedControl: UISegmentedControl {
         
         // Segment colors
         let normalAttributes: [NSAttributedString.Key: Any] = [
-            .font: Typography.labelMedium,
-            .foregroundColor: StudioColors.textSecondary
+            .font: StudioTypography.labelMedium,
+            .foregroundColor: AppStudioColors.textSecondary
         ]
         
         let selectedAttributes: [NSAttributedString.Key: Any] = [
-            .font: Typography.labelMedium,
-            .foregroundColor: StudioColors.purpleAccent
+            .font: StudioTypography.labelMedium,
+            .foregroundColor: AppStudioColors.purpleAccent
         ]
         
         setTitleTextAttributes(normalAttributes, for: .normal)

@@ -1,4 +1,7 @@
 import UIKit
+import Photos
+import MediaPlayer
+import AVFoundation
 
 class ImportSourceViewController: UIViewController {
     private let scrollView = UIScrollView()
@@ -58,15 +61,15 @@ class ImportSourceViewController: UIViewController {
         // Title
         let titleLabel = UILabel()
         titleLabel.text = "Impor Audio / Video"
-        titleLabel.font = Typography.headingLarge
-        titleLabel.textColor = StudioColors.textPrimary
+        titleLabel.font = StudioTypography.headingLarge
+        titleLabel.textColor = AppStudioColors.textPrimary
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(titleLabel)
         
         let subtitleLabel = UILabel()
         subtitleLabel.text = "Pilih Sumber"
-        subtitleLabel.font = Typography.bodyMedium
-        subtitleLabel.textColor = StudioColors.textSecondary
+        subtitleLabel.font = StudioTypography.bodyMedium
+        subtitleLabel.textColor = AppStudioColors.textSecondary
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(subtitleLabel)
         
@@ -88,8 +91,8 @@ class ImportSourceViewController: UIViewController {
         
         // Recent files
         recentLabel.text = "Recent Files"
-        recentLabel.font = Typography.headingMedium
-        recentLabel.textColor = StudioColors.textPrimary
+        recentLabel.font = StudioTypography.headingMedium
+        recentLabel.textColor = AppStudioColors.textPrimary
         recentLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(recentLabel)
         
@@ -102,8 +105,8 @@ class ImportSourceViewController: UIViewController {
         for file in recentFiles {
             let fileButton = UIButton(type: .system)
             fileButton.setTitle("📁 " + file, for: .normal)
-            fileButton.setTitleColor(StudioColors.purpleAccent, for: .normal)
-            fileButton.titleLabel?.font = Typography.labelMedium
+            fileButton.setTitleColor(AppStudioColors.purpleAccent, for: .normal)
+            fileButton.titleLabel?.font = StudioTypography.labelMedium
             fileButton.backgroundColor = UIColor(white: 1.0, alpha: 0.06)
             fileButton.layer.borderWidth = 1.0
             fileButton.layer.borderColor = UIColor(white: 1.0, alpha: 0.1).cgColor
@@ -145,12 +148,46 @@ class ImportSourceViewController: UIViewController {
     
     @objc private func importAudioTapped() {
         Logger.shared.info("Import audio tapped")
-        presentDocumentPicker()
+        
+        let alert = UIAlertController(title: "Impor Audio", message: "Pilih sumber audio Anda", preferredStyle: .actionSheet)
+        
+        alert.addAction(UIAlertAction(title: "Files App", style: .default, handler: { [weak self] _ in
+            self?.presentDocumentPicker()
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Music Library", style: .default, handler: { [weak self] _ in
+            guard let self = self else { return }
+            PermissionManager.shared.requestMediaLibraryPermission { [weak self] granted in
+                guard let self = self else { return }
+                if granted {
+                    self.presentMediaPicker()
+                } else {
+                    PermissionManager.shared.showPermissionDeniedAlert(for: .mediaLibrary, from: self)
+                }
+            }
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Batal", style: .cancel, handler: nil))
+        
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = importAudioButton
+            popover.sourceRect = importAudioButton.bounds
+        }
+        
+        present(alert, animated: true)
     }
     
     @objc private func importVideoTapped() {
         Logger.shared.info("Import video tapped")
-        presentDocumentPicker()
+        
+        PermissionManager.shared.requestPhotoLibraryPermission { [weak self] granted in
+            guard let self = self else { return }
+            if granted {
+                self.presentImagePicker(for: .photoLibrary)
+            } else {
+                PermissionManager.shared.showPermissionDeniedAlert(for: .photoLibrary, from: self)
+            }
+        }
     }
     
     @objc private func browseFilesTapped() {
@@ -163,6 +200,26 @@ class ImportSourceViewController: UIViewController {
         documentPicker.delegate = self
         present(documentPicker, animated: true)
     }
+    
+    private func presentMediaPicker() {
+        let mediaPicker = MPMediaPickerController(mediaTypes: .anyAudio)
+        mediaPicker.delegate = self
+        mediaPicker.allowsPickingMultipleItems = false
+        mediaPicker.showsItemsWithProtectedAssets = false
+        present(mediaPicker, animated: true)
+    }
+    
+    private func presentImagePicker(for sourceType: UIImagePickerController.SourceType) {
+        guard UIImagePickerController.isSourceTypeAvailable(sourceType) else {
+            Logger.shared.error("Source type not available: \(sourceType)")
+            return
+        }
+        let imagePicker = UIImagePickerController()
+        imagePicker.delegate = self
+        imagePicker.sourceType = sourceType
+        imagePicker.mediaTypes = ["public.movie"]
+        present(imagePicker, animated: true)
+    }
 }
 
 // MARK: - UIDocumentPickerDelegate
@@ -171,5 +228,42 @@ extension ImportSourceViewController: UIDocumentPickerDelegate {
         guard let url = urls.first else { return }
         Logger.shared.info("Document picked: \(url.lastPathComponent)")
         onAudioSelected?(url)
+    }
+}
+
+// MARK: - MPMediaPickerControllerDelegate
+extension ImportSourceViewController: MPMediaPickerControllerDelegate {
+    func mediaPicker(_ mediaPicker: MPMediaPickerController, didPickMediaItems mediaItemCollection: MPMediaItemCollection) {
+        mediaPicker.dismiss(animated: true) { [weak self] in
+            guard let item = mediaItemCollection.items.first else { return }
+            if let assetURL = item.assetURL {
+                Logger.shared.info("Media picker picked audio: \(item.title ?? "Song")")
+                self?.onAudioSelected?(assetURL)
+            } else {
+                Logger.shared.error("Selected media item has no asset URL")
+            }
+        }
+    }
+    
+    func mediaPickerDidCancel(_ mediaPicker: MPMediaPickerController) {
+        mediaPicker.dismiss(animated: true)
+    }
+}
+
+// MARK: - UIImagePickerControllerDelegate, UINavigationControllerDelegate
+extension ImportSourceViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true) { [weak self] in
+            if let mediaURL = info[.mediaURL] as? URL {
+                Logger.shared.info("Video picked: \(mediaURL.lastPathComponent)")
+                self?.onVideoSelected?(mediaURL)
+            } else {
+                Logger.shared.error("No video URL found in info dict")
+            }
+        }
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true)
     }
 }

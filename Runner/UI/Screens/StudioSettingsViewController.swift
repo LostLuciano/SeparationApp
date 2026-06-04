@@ -47,8 +47,8 @@ class StudioSettingsViewController: UIViewController {
         // Title
         let titleLabel = UILabel()
         titleLabel.text = "Pengaturan Studio"
-        titleLabel.font = Typography.headingLarge
-        titleLabel.textColor = StudioColors.textPrimary
+        titleLabel.font = StudioTypography.headingLarge
+        titleLabel.textColor = AppStudioColors.textPrimary
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(titleLabel)
         
@@ -57,8 +57,8 @@ class StudioSettingsViewController: UIViewController {
         // MARK: - UI Style Section
         let uiStyleLabel = UILabel()
         uiStyleLabel.text = "Gaya Tampilan"
-        uiStyleLabel.font = Typography.headingMedium
-        uiStyleLabel.textColor = StudioColors.textPrimary
+        uiStyleLabel.font = StudioTypography.headingMedium
+        uiStyleLabel.textColor = AppStudioColors.textPrimary
         uiStyleLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(uiStyleLabel)
         
@@ -87,8 +87,8 @@ class StudioSettingsViewController: UIViewController {
         // MARK: - Audio Hardware Section
         let audioLabel = UILabel()
         audioLabel.text = "Audio Hardware"
-        audioLabel.font = Typography.headingMedium
-        audioLabel.textColor = StudioColors.textPrimary
+        audioLabel.font = StudioTypography.headingMedium
+        audioLabel.textColor = AppStudioColors.textPrimary
         audioLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(audioLabel)
         
@@ -117,8 +117,8 @@ class StudioSettingsViewController: UIViewController {
         // MARK: - AI & DSP Section
         let aiLabel = UILabel()
         aiLabel.text = "AI & DSP"
-        aiLabel.font = Typography.headingMedium
-        aiLabel.textColor = StudioColors.textPrimary
+        aiLabel.font = StudioTypography.headingMedium
+        aiLabel.textColor = AppStudioColors.textPrimary
         aiLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(aiLabel)
         
@@ -147,8 +147,8 @@ class StudioSettingsViewController: UIViewController {
         // MARK: - Model Status Section
         let modelLabel = UILabel()
         modelLabel.text = "Status Model AI"
-        modelLabel.font = Typography.headingMedium
-        modelLabel.textColor = StudioColors.textPrimary
+        modelLabel.font = StudioTypography.headingMedium
+        modelLabel.textColor = AppStudioColors.textPrimary
         modelLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(modelLabel)
         
@@ -171,15 +171,15 @@ class StudioSettingsViewController: UIViewController {
             
             let label = UILabel()
             label.text = status
-            label.font = Typography.labelMedium
-            label.textColor = StudioColors.textPrimary
+            label.font = StudioTypography.labelMedium
+            label.textColor = AppStudioColors.textPrimary
             label.translatesAutoresizingMaskIntoConstraints = false
             statusView.addSubview(label)
             
             let statusIndicator = UILabel()
             statusIndicator.text = "✓ Ready"
-            statusIndicator.font = Typography.labelSmall
-            statusIndicator.textColor = StudioColors.statusSuccess
+            statusIndicator.font = StudioTypography.labelSmall
+            statusIndicator.textColor = AppStudioColors.statusSuccess
             statusIndicator.translatesAutoresizingMaskIntoConstraints = false
             statusView.addSubview(statusIndicator)
             
@@ -226,15 +226,15 @@ class StudioSettingsViewController: UIViewController {
         
         let label = UILabel()
         label.text = title
-        label.font = Typography.labelMedium
-        label.textColor = StudioColors.textPrimary
+        label.font = StudioTypography.labelMedium
+        label.textColor = AppStudioColors.textPrimary
         label.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(label)
         
         let arrow = UILabel()
         arrow.text = "›"
-        arrow.font = Typography.bodyLarge
-        arrow.textColor = StudioColors.textSecondary
+        arrow.font = StudioTypography.bodyLarge
+        arrow.textColor = AppStudioColors.textSecondary
         arrow.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(arrow)
         

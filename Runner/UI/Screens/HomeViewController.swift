@@ -72,22 +72,22 @@ class HomeViewController: UIViewController {
         
         // MARK: - Header Section
         titleLabel.text = "Studio"
-        titleLabel.font = Typography.displayLarge
-        titleLabel.textColor = StudioColors.textPrimary
+        titleLabel.font = StudioTypography.displayLarge
+        titleLabel.textColor = AppStudioColors.textPrimary
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(titleLabel)
         
         subtitleLabel.text = "AI Audio · Stem · Chord"
-        subtitleLabel.font = Typography.bodyMedium
-        subtitleLabel.textColor = StudioColors.textSecondary
+        subtitleLabel.font = StudioTypography.bodyMedium
+        subtitleLabel.textColor = AppStudioColors.textSecondary
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(subtitleLabel)
         
         // MARK: - Import Section
         let importLabel = UILabel()
         importLabel.text = "Mulai Proyek Baru"
-        importLabel.font = Typography.headingMedium
-        importLabel.textColor = StudioColors.textPrimary
+        importLabel.font = StudioTypography.headingMedium
+        importLabel.textColor = AppStudioColors.textPrimary
         importLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(importLabel)
         
@@ -103,8 +103,8 @@ class HomeViewController: UIViewController {
         
         // MARK: - Tools Section
         toolsLabel.text = "Tools"
-        toolsLabel.font = Typography.headingMedium
-        toolsLabel.textColor = StudioColors.textPrimary
+        toolsLabel.font = StudioTypography.headingMedium
+        toolsLabel.textColor = AppStudioColors.textPrimary
         toolsLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(toolsLabel)
         
@@ -131,10 +131,10 @@ class HomeViewController: UIViewController {
             
             var config = UIButton.Configuration.plain()
             config.image = nil
-            config.baseForegroundColor = StudioColors.textPrimary
+            config.baseForegroundColor = AppStudioColors.textPrimary
             config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
                 var outgoing = incoming
-                outgoing.font = Typography.labelMedium
+                outgoing.font = StudioTypography.labelMedium
                 return outgoing
             }
             toolCard.configuration = config
@@ -147,8 +147,8 @@ class HomeViewController: UIViewController {
         
         // MARK: - Model Status Section
         modelStatusLabel.text = "Status Model AI"
-        modelStatusLabel.font = Typography.headingMedium
-        modelStatusLabel.textColor = StudioColors.textPrimary
+        modelStatusLabel.font = StudioTypography.headingMedium
+        modelStatusLabel.textColor = AppStudioColors.textPrimary
         modelStatusLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(modelStatusLabel)
         
@@ -162,15 +162,15 @@ class HomeViewController: UIViewController {
         
         let stemLabel = UILabel()
         stemLabel.text = "🎵 Stem Model"
-        stemLabel.font = Typography.labelMedium
-        stemLabel.textColor = StudioColors.textPrimary
+        stemLabel.font = StudioTypography.labelMedium
+        stemLabel.textColor = AppStudioColors.textPrimary
         stemLabel.translatesAutoresizingMaskIntoConstraints = false
         stemModelView.addSubview(stemLabel)
         
         let stemStatus = UILabel()
         stemStatus.text = "Ready"
-        stemStatus.font = Typography.labelSmall
-        stemStatus.textColor = StudioColors.statusSuccess
+        stemStatus.font = StudioTypography.labelSmall
+        stemStatus.textColor = AppStudioColors.statusSuccess
         stemStatus.translatesAutoresizingMaskIntoConstraints = false
         stemModelView.addSubview(stemStatus)
         
@@ -192,15 +192,15 @@ class HomeViewController: UIViewController {
         
         let chordLabel = UILabel()
         chordLabel.text = "🎼 Chord Model"
-        chordLabel.font = Typography.labelMedium
-        chordLabel.textColor = StudioColors.textPrimary
+        chordLabel.font = StudioTypography.labelMedium
+        chordLabel.textColor = AppStudioColors.textPrimary
         chordLabel.translatesAutoresizingMaskIntoConstraints = false
         chordModelView.addSubview(chordLabel)
         
         let chordStatus = UILabel()
         chordStatus.text = "Ready"
-        chordStatus.font = Typography.labelSmall
-        chordStatus.textColor = StudioColors.statusSuccess
+        chordStatus.font = StudioTypography.labelSmall
+        chordStatus.textColor = AppStudioColors.statusSuccess
         chordStatus.translatesAutoresizingMaskIntoConstraints = false
         chordModelView.addSubview(chordStatus)
         
@@ -222,15 +222,15 @@ class HomeViewController: UIViewController {
         
         let beatLabel = UILabel()
         beatLabel.text = "♩ Beat Model"
-        beatLabel.font = Typography.labelMedium
-        beatLabel.textColor = StudioColors.textPrimary
+        beatLabel.font = StudioTypography.labelMedium
+        beatLabel.textColor = AppStudioColors.textPrimary
         beatLabel.translatesAutoresizingMaskIntoConstraints = false
         beatModelView.addSubview(beatLabel)
         
         let beatStatus = UILabel()
         beatStatus.text = "Ready"
-        beatStatus.font = Typography.labelSmall
-        beatStatus.textColor = StudioColors.statusSuccess
+        beatStatus.font = StudioTypography.labelSmall
+        beatStatus.textColor = AppStudioColors.statusSuccess
         beatStatus.translatesAutoresizingMaskIntoConstraints = false
         beatModelView.addSubview(beatStatus)
         

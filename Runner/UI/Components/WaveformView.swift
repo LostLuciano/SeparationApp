@@ -69,7 +69,7 @@ class WaveformView: UIView {
         guard !waveformData.isEmpty else { return }
         
         let context = UIGraphicsGetCurrentContext()
-        context?.setFillColor(StudioColors.purpleAccent.cgColor)
+        context?.setFillColor(AppStudioColors.purpleAccent.cgColor)
         
         let width = rect.width
         let height = rect.height
@@ -92,7 +92,7 @@ class WaveformView: UIView {
         
         // Draw playback position
         let positionX = currentPlaybackPosition * width
-        context?.setStrokeColor(StudioColors.purpleAccent.withAlphaComponent(0.8).cgColor)
+        context?.setStrokeColor(AppStudioColors.purpleAccent.withAlphaComponent(0.8).cgColor)
         context?.setLineWidth(2)
         context?.move(to: CGPoint(x: positionX, y: 0))
         context?.addLine(to: CGPoint(x: positionX, y: height))

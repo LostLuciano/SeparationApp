@@ -82,25 +82,25 @@ class MixerViewController: UIViewController {
         
         // Play/Pause buttons
         playButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
-        playButton.tintColor = StudioColors.purpleAccent
+        playButton.tintColor = AppStudioColors.purpleAccent
         playButton.translatesAutoresizingMaskIntoConstraints = false
         playerCard.addSubview(playButton)
         
         pauseButton.setImage(UIImage(systemName: "pause.fill"), for: .normal)
-        pauseButton.tintColor = StudioColors.purpleAccent
+        pauseButton.tintColor = AppStudioColors.purpleAccent
         pauseButton.translatesAutoresizingMaskIntoConstraints = false
         playerCard.addSubview(pauseButton)
         
         // Time labels
         timeLabel.text = "0:00"
-        timeLabel.font = Typography.monoSmall
-        timeLabel.textColor = StudioColors.textSecondary
+        timeLabel.font = StudioTypography.monoSmall
+        timeLabel.textColor = AppStudioColors.textSecondary
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
         playerCard.addSubview(timeLabel)
         
         durationLabel.text = "0:00"
-        durationLabel.font = Typography.monoSmall
-        durationLabel.textColor = StudioColors.textSecondary
+        durationLabel.font = StudioTypography.monoSmall
+        durationLabel.textColor = AppStudioColors.textSecondary
         durationLabel.translatesAutoresizingMaskIntoConstraints = false
         playerCard.addSubview(durationLabel)
         
@@ -133,8 +133,8 @@ class MixerViewController: UIViewController {
         
         // MARK: - Mixer Label
         mixerLabel.text = "Studio Mixer"
-        mixerLabel.font = Typography.headingMedium
-        mixerLabel.textColor = StudioColors.textPrimary
+        mixerLabel.font = StudioTypography.headingMedium
+        mixerLabel.textColor = AppStudioColors.textPrimary
         mixerLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(mixerLabel)
         
@@ -150,13 +150,13 @@ class MixerViewController: UIViewController {
         contentView.addSubview(channelsStackView)
         
         let stemData = [
-            ("Master", StudioColors.purpleAccent),
-            ("🎤 Vocals", StudioColors.stemVocals),
-            ("🥁 Drums", StudioColors.stemDrums),
-            ("🎸 Bass", StudioColors.stemBass),
-            ("🎸 Guitar", StudioColors.stemGuitar),
-            ("🎹 Piano/Synth", StudioColors.stemPiano),
-            ("❓ Others", StudioColors.stemOthers)
+            ("Master", AppStudioColors.purpleAccent),
+            ("🎤 Vocals", AppStudioColors.stemVocals),
+            ("🥁 Drums", AppStudioColors.stemDrums),
+            ("🎸 Bass", AppStudioColors.stemBass),
+            ("🎸 Guitar", AppStudioColors.stemGuitar),
+            ("🎹 Piano/Synth", AppStudioColors.stemPiano),
+            ("❓ Others", AppStudioColors.stemOthers)
         ]
         
         for (name, color) in stemData {
@@ -173,8 +173,8 @@ class MixerViewController: UIViewController {
         
         // MARK: - Performance Controls
         performanceLabel.text = "Performance"
-        performanceLabel.font = Typography.headingMedium
-        performanceLabel.textColor = StudioColors.textPrimary
+        performanceLabel.font = StudioTypography.headingMedium
+        performanceLabel.textColor = AppStudioColors.textPrimary
         performanceLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(performanceLabel)
         
@@ -185,22 +185,22 @@ class MixerViewController: UIViewController {
         
         let tempoTitleLabel = UILabel()
         tempoTitleLabel.text = "Tempo"
-        tempoTitleLabel.font = Typography.labelMedium
-        tempoTitleLabel.textColor = StudioColors.textPrimary
+        tempoTitleLabel.font = StudioTypography.labelMedium
+        tempoTitleLabel.textColor = AppStudioColors.textPrimary
         tempoTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         tempoContainer.addSubview(tempoTitleLabel)
         
         tempoSlider.minimumValue = 0.5
         tempoSlider.maximumValue = 2.0
         tempoSlider.value = 1.0
-        tempoSlider.minimumTrackTintColor = StudioColors.purpleAccent
+        tempoSlider.minimumTrackTintColor = AppStudioColors.purpleAccent
         tempoSlider.maximumTrackTintColor = UIColor(white: 1.0, alpha: 0.15)
         tempoSlider.translatesAutoresizingMaskIntoConstraints = false
         tempoContainer.addSubview(tempoSlider)
         
         tempoLabel.text = "1.0x"
-        tempoLabel.font = Typography.labelSmall
-        tempoLabel.textColor = StudioColors.textSecondary
+        tempoLabel.font = StudioTypography.labelSmall
+        tempoLabel.textColor = AppStudioColors.textSecondary
         tempoLabel.translatesAutoresizingMaskIntoConstraints = false
         tempoContainer.addSubview(tempoLabel)
         
@@ -224,22 +224,22 @@ class MixerViewController: UIViewController {
         
         let pitchTitleLabel = UILabel()
         pitchTitleLabel.text = "Pitch"
-        pitchTitleLabel.font = Typography.labelMedium
-        pitchTitleLabel.textColor = StudioColors.textPrimary
+        pitchTitleLabel.font = StudioTypography.labelMedium
+        pitchTitleLabel.textColor = AppStudioColors.textPrimary
         pitchTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         pitchContainer.addSubview(pitchTitleLabel)
         
         pitchSlider.minimumValue = -12
         pitchSlider.maximumValue = 12
         pitchSlider.value = 0
-        pitchSlider.minimumTrackTintColor = StudioColors.purpleAccent
+        pitchSlider.minimumTrackTintColor = AppStudioColors.purpleAccent
         pitchSlider.maximumTrackTintColor = UIColor(white: 1.0, alpha: 0.15)
         pitchSlider.translatesAutoresizingMaskIntoConstraints = false
         pitchContainer.addSubview(pitchSlider)
         
         pitchLabel.text = "0 st"
-        pitchLabel.font = Typography.labelSmall
-        pitchLabel.textColor = StudioColors.textSecondary
+        pitchLabel.font = StudioTypography.labelSmall
+        pitchLabel.textColor = AppStudioColors.textSecondary
         pitchLabel.translatesAutoresizingMaskIntoConstraints = false
         pitchContainer.addSubview(pitchLabel)
         

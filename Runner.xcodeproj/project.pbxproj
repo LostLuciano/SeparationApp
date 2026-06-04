@@ -32,6 +32,7 @@
 		4C6DDC8B613BD31E4F59D3A0 /* FileImportManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/System/FileImportManager.swift"; sourceTree = SOURCE_ROOT; };
 		8C7261FAD49446EE4CB8C932 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/System/Logger.swift"; sourceTree = SOURCE_ROOT; };
 		0365D1F96C36660E0D17CA05 /* PerformanceGuard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/System/PerformanceGuard.swift"; sourceTree = SOURCE_ROOT; };
+		B664DF2D88153D93CD6140F3 /* PermissionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/System/PermissionManager.swift"; sourceTree = SOURCE_ROOT; };
 		362D7A9D4C10961BC4EAF3A5 /* ProcessingGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/System/ProcessingGate.swift"; sourceTree = SOURCE_ROOT; };
 		509D19E6753C5A1790D0E370 /* AudioLevelMeterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/Components/AudioLevelMeterView.swift"; sourceTree = SOURCE_ROOT; };
 		EC79EF817B836DF405B426CA /* BeatGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/Components/BeatGridView.swift"; sourceTree = SOURCE_ROOT; };
@@ -76,10 +77,10 @@
 		33928A596C4CA82E63DEF1EF /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/ResultsView.swift"; sourceTree = SOURCE_ROOT; };
 		3A970D0F7018C73ACB749AEB /* StudioMixerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/StudioMixerView.swift"; sourceTree = SOURCE_ROOT; };
 		E49B5E941F74CF8E6AC1D3EE /* ToolsHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/SwiftUI/ToolsHubView.swift"; sourceTree = SOURCE_ROOT; };
-		437E94B1178501333F3F88C1 /* GlassEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/Theme/GlassEffect.swift"; sourceTree = SOURCE_ROOT; };
-		EE7D42E1B9B2CEC2DB999322 /* StudioColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/Theme/StudioColors.swift"; sourceTree = SOURCE_ROOT; };
+		B708A1C2130BCE22279313F1 /* AppStudioColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/Theme/AppStudioColors.swift"; sourceTree = SOURCE_ROOT; };
+		1437626D10BDCCB713A1235C /* StudioGlassEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/Theme/StudioGlassEffect.swift"; sourceTree = SOURCE_ROOT; };
 		9AC69503C735819EBA6C3C3F /* StudioTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/Theme/StudioTheme.swift"; sourceTree = SOURCE_ROOT; };
-		E148FF57C1471FDBFC336103 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/Theme/Typography.swift"; sourceTree = SOURCE_ROOT; };
+		7D7DA339CE4EAF42977EC8B5 /* StudioTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Runner/UI/Theme/StudioTypography.swift"; sourceTree = SOURCE_ROOT; };
 
 	/* Resource Files */
 		3B36063D0F4EAA4753CA5C61 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Runner/Assets.xcassets"; sourceTree = SOURCE_ROOT; };
@@ -157,6 +158,7 @@
 		DA1258AEB8EB41555FACE2F7 /* FileImportManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C6DDC8B613BD31E4F59D3A0; };
 		89106900C20D33D12D889004 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C7261FAD49446EE4CB8C932; };
 		CCF291A5122767CE722ED7C3 /* PerformanceGuard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0365D1F96C36660E0D17CA05; };
+		3EAEFF505CE43746881667E6 /* PermissionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B664DF2D88153D93CD6140F3; };
 		F7DD8FA73C3454B4DC120F63 /* ProcessingGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 362D7A9D4C10961BC4EAF3A5; };
 		45D28D703DD7D5651EB64025 /* AudioLevelMeterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509D19E6753C5A1790D0E370; };
 		6B9754C54E918E31E14A2F14 /* BeatGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC79EF817B836DF405B426CA; };
@@ -201,10 +203,10 @@
 		3829A67B00D03A4237BF5D50 /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33928A596C4CA82E63DEF1EF; };
 		7C8A129290E723A88BAA8B7F /* StudioMixerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A970D0F7018C73ACB749AEB; };
 		105BC27549726400FD4E941B /* ToolsHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E49B5E941F74CF8E6AC1D3EE; };
-		BAD5AFAEBC4B45A7DFA2F0C5 /* GlassEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437E94B1178501333F3F88C1; };
-		119C6E9634C0CF5F1B644B10 /* StudioColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE7D42E1B9B2CEC2DB999322; };
+		FFE610A33B70E53DDACB0295 /* AppStudioColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B708A1C2130BCE22279313F1; };
+		1B20820131D1F5A7785E4DCC /* StudioGlassEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1437626D10BDCCB713A1235C; };
 		E5E24ABACE85C59F1D694152 /* StudioTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AC69503C735819EBA6C3C3F; };
-		FC88EB185716D74F5AA9AECB /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = E148FF57C1471FDBFC336103; };
+		85A59BCDA1E63A7B65039C7A /* StudioTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D7DA339CE4EAF42977EC8B5; };
 
 	/* PBXBuildFile - Resources */
 		45213F1CF0878654F62F6C37 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3B36063D0F4EAA4753CA5C61; };
@@ -286,6 +288,7 @@
 				DA1258AEB8EB41555FACE2F7 /* FileImportManager.swift in Sources */,
 				89106900C20D33D12D889004 /* Logger.swift in Sources */,
 				CCF291A5122767CE722ED7C3 /* PerformanceGuard.swift in Sources */,
+				3EAEFF505CE43746881667E6 /* PermissionManager.swift in Sources */,
 				F7DD8FA73C3454B4DC120F63 /* ProcessingGate.swift in Sources */,
 				45D28D703DD7D5651EB64025 /* AudioLevelMeterView.swift in Sources */,
 				6B9754C54E918E31E14A2F14 /* BeatGridView.swift in Sources */,
@@ -330,10 +333,10 @@
 				3829A67B00D03A4237BF5D50 /* ResultsView.swift in Sources */,
 				7C8A129290E723A88BAA8B7F /* StudioMixerView.swift in Sources */,
 				105BC27549726400FD4E941B /* ToolsHubView.swift in Sources */,
-				BAD5AFAEBC4B45A7DFA2F0C5 /* GlassEffect.swift in Sources */,
-				119C6E9634C0CF5F1B644B10 /* StudioColors.swift in Sources */,
+				FFE610A33B70E53DDACB0295 /* AppStudioColors.swift in Sources */,
+				1B20820131D1F5A7785E4DCC /* StudioGlassEffect.swift in Sources */,
 				E5E24ABACE85C59F1D694152 /* StudioTheme.swift in Sources */,
-				FC88EB185716D74F5AA9AECB /* Typography.swift in Sources */,
+				85A59BCDA1E63A7B65039C7A /* StudioTypography.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -469,7 +472,7 @@
 				CC7D1E8287F30E45188B760B /* BeatDetectionManager.swift */,
 				5FBB22BB9E5B81521FE1685C /* ChordDetectionManager.swift */,
 				BA7484D72D50F0264BA329E0 /* ChordTheory.swift */,
-				/* ... and 70 more */
+				/* ... and 71 more */
 			);
 			name = Runner;
 			path = Runner;
@@ -516,6 +519,7 @@
 		714923E7D30D3EB05FE2124D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
 				ASSETSPACK_BUILD_DATE_UTC = 0;
 				BUNDLE_LOADER = "";
 				CODE_SIGN_IDENTITY = "";
@@ -551,6 +555,7 @@
 		79EC590A773BC5BDD7295097 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
 				ASSETSPACK_BUILD_DATE_UTC = 0;
 				BUNDLE_LOADER = "";
 				CODE_SIGN_IDENTITY = "";

@@ -17,21 +17,21 @@ class FloatingActionButton: UIButton {
         heightAnchor.constraint(equalToConstant: 56).isActive = true
         
         // Style
-        backgroundColor = StudioColors.purpleAccent
+        backgroundColor = AppStudioColors.purpleAccent
         layer.cornerRadius = 28
         
         // Icon
         if let icon = icon {
             setImage(UIImage(systemName: icon), for: .normal)
-            tintColor = StudioColors.textPrimary
+            tintColor = AppStudioColors.textPrimary
         } else {
             setTitle("+", for: .normal)
-            titleLabel?.font = Typography.displayMedium
-            setTitleColor(StudioColors.textPrimary, for: .normal)
+            titleLabel?.font = StudioTypography.displayMedium
+            setTitleColor(AppStudioColors.textPrimary, for: .normal)
         }
         
         // Glow
-        GlassEffect.applyPurpleGlow(to: self, radius: 24)
+        StudioGlassEffect.applyPurpleGlow(to: self, radius: 24)
         
         // Shadow
         layer.shadowColor = UIColor.black.cgColor

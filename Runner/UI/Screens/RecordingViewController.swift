@@ -18,6 +18,9 @@ class RecordingViewController: UIViewController {
     private let monitorLabel = UILabel()
     private let monitorSegment = StudioSegmentedControl(items: ["Off", "Input", "Mix"])
     
+    // Video Switch
+    private let videoSwitch = UISwitch()
+    
     // Record Button
     private let recordButton = UIButton(type: .system)
     private var isRecording = false
@@ -61,8 +64,8 @@ class RecordingViewController: UIViewController {
         
         // Title
         titleLabel.text = "Sesi Rekaman"
-        titleLabel.font = Typography.headingLarge
-        titleLabel.textColor = StudioColors.textPrimary
+        titleLabel.font = StudioTypography.headingLarge
+        titleLabel.textColor = AppStudioColors.textPrimary
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(titleLabel)
         
@@ -74,15 +77,20 @@ class RecordingViewController: UIViewController {
         // Recording video label
         let videoLabel = UILabel()
         videoLabel.text = "Rekam Video Sesi"
-        videoLabel.font = Typography.labelMedium
-        videoLabel.textColor = StudioColors.textSecondary
+        videoLabel.font = StudioTypography.labelMedium
+        videoLabel.textColor = AppStudioColors.textSecondary
         videoLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(videoLabel)
         
+        videoSwitch.isOn = false
+        videoSwitch.translatesAutoresizingMaskIntoConstraints = false
+        videoSwitch.addTarget(self, action: #selector(videoSwitchChanged), for: .valueChanged)
+        contentView.addSubview(videoSwitch)
+        
         // Input Level
         levelMeterLabel.text = "Input Level"
-        levelMeterLabel.font = Typography.labelMedium
-        levelMeterLabel.textColor = StudioColors.textPrimary
+        levelMeterLabel.font = StudioTypography.labelMedium
+        levelMeterLabel.textColor = AppStudioColors.textPrimary
         levelMeterLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(levelMeterLabel)
         
@@ -90,15 +98,15 @@ class RecordingViewController: UIViewController {
         contentView.addSubview(levelMeterView)
         
         dbLabel.text = "-12 dB"
-        dbLabel.font = Typography.labelSmall
-        dbLabel.textColor = StudioColors.textSecondary
+        dbLabel.font = StudioTypography.labelSmall
+        dbLabel.textColor = AppStudioColors.textSecondary
         dbLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(dbLabel)
         
         // Headphone monitoring
         monitorLabel.text = "Headphone Monitoring"
-        monitorLabel.font = Typography.labelMedium
-        monitorLabel.textColor = StudioColors.textPrimary
+        monitorLabel.font = StudioTypography.labelMedium
+        monitorLabel.textColor = AppStudioColors.textPrimary
         monitorLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(monitorLabel)
         
@@ -108,8 +116,8 @@ class RecordingViewController: UIViewController {
         
         // Timer
         timerLabel.text = "00:00:00"
-        timerLabel.font = Typography.monoLarge
-        timerLabel.textColor = StudioColors.purpleAccent
+        timerLabel.font = StudioTypography.monoLarge
+        timerLabel.textColor = AppStudioColors.purpleAccent
         timerLabel.textAlignment = .center
         timerLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(timerLabel)
@@ -117,7 +125,7 @@ class RecordingViewController: UIViewController {
         // Record button (large red circle)
         recordButton.widthAnchor.constraint(equalToConstant: 120).isActive = true
         recordButton.heightAnchor.constraint(equalToConstant: 120).isActive = true
-        recordButton.backgroundColor = StudioColors.statusError
+        recordButton.backgroundColor = AppStudioColors.statusError
         recordButton.layer.cornerRadius = 60
         recordButton.setImage(UIImage(systemName: "circle.fill"), for: .normal)
         recordButton.imageView?.contentMode = .scaleAspectFill
@@ -132,8 +140,8 @@ class RecordingViewController: UIViewController {
         metronomeToggle.layer.borderWidth = 1.0
         metronomeToggle.layer.borderColor = UIColor(white: 1.0, alpha: 0.2).cgColor
         metronomeToggle.layer.cornerRadius = StudioTheme.shared.cornerRadius16
-        metronomeToggle.setTitleColor(StudioColors.textPrimary, for: .normal)
-        metronomeToggle.titleLabel?.font = Typography.labelMedium
+        metronomeToggle.setTitleColor(AppStudioColors.textPrimary, for: .normal)
+        metronomeToggle.titleLabel?.font = StudioTypography.labelMedium
         metronomeToggle.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(metronomeToggle)
         
@@ -151,6 +159,9 @@ class RecordingViewController: UIViewController {
             
             videoLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
             videoLabel.topAnchor.constraint(equalTo: modeSegment.bottomAnchor, constant: padding),
+            
+            videoSwitch.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -padding),
+            videoSwitch.centerYAnchor.constraint(equalTo: videoLabel.centerYAnchor),
             
             levelMeterLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
             levelMeterLabel.topAnchor.constraint(equalTo: videoLabel.bottomAnchor, constant: padding * 1.5),
@@ -184,17 +195,52 @@ class RecordingViewController: UIViewController {
         levelMeterView.startAnimating()
     }
     
+    @objc private func videoSwitchChanged() {
+        if videoSwitch.isOn {
+            PermissionManager.shared.requestCameraPermission { [weak self] granted in
+                guard let self = self else { return }
+                if !granted {
+                    self.videoSwitch.setOn(false, animated: true)
+                    PermissionManager.shared.showPermissionDeniedAlert(for: .camera, from: self)
+                }
+            }
+        }
+    }
+    
     @objc private func recordTapped() {
+        PermissionManager.shared.requestMicrophonePermission { [weak self] granted in
+            guard let self = self else { return }
+            if !granted {
+                PermissionManager.shared.showPermissionDeniedAlert(for: .microphone, from: self)
+                return
+            }
+            
+            // If video recording is enabled, verify camera permission
+            if self.videoSwitch.isOn {
+                PermissionManager.shared.requestCameraPermission { [weak self] cameraGranted in
+                    guard let self = self else { return }
+                    if !cameraGranted {
+                        PermissionManager.shared.showPermissionDeniedAlert(for: .camera, from: self)
+                        return
+                    }
+                    self.toggleRecording()
+                }
+            } else {
+                self.toggleRecording()
+            }
+        }
+    }
+    
+    private func toggleRecording() {
         isRecording.toggle()
         
         if isRecording {
-            recordButton.backgroundColor = StudioColors.statusError
-            timerLabel.textColor = StudioColors.statusError
+            recordButton.backgroundColor = AppStudioColors.statusError
+            timerLabel.textColor = AppStudioColors.statusError
             Logger.shared.info("Recording started")
         } else {
             recordButton.backgroundColor = UIColor(white: 1.0, alpha: 0.1)
-            timerLabel.textColor = StudioColors.textSecondary
+            timerLabel.textColor = AppStudioColors.textSecondary
             Logger.shared.info("Recording stopped")
-        }
     }
 }

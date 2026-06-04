@@ -24,22 +24,22 @@ class ChordPatternView: UIView {
         
         // Chord name (large)
         chordLabel.text = chord
-        chordLabel.font = Typography.displayMedium
-        chordLabel.textColor = StudioColors.purpleAccent
+        chordLabel.font = StudioTypography.displayMedium
+        chordLabel.textColor = AppStudioColors.purpleAccent
         chordLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(chordLabel)
         
         // Notes (medium)
         notesLabel.text = notes
-        notesLabel.font = Typography.bodyMedium
-        notesLabel.textColor = StudioColors.textPrimary
+        notesLabel.font = StudioTypography.bodyMedium
+        notesLabel.textColor = AppStudioColors.textPrimary
         notesLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(notesLabel)
         
         // Quality (small)
         qualityLabel.text = quality
-        qualityLabel.font = Typography.labelSmall
-        qualityLabel.textColor = StudioColors.textSecondary
+        qualityLabel.font = StudioTypography.labelSmall
+        qualityLabel.textColor = AppStudioColors.textSecondary
         qualityLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(qualityLabel)
         

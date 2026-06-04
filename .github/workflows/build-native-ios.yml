@@ -37,26 +37,19 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            build 2>&1 | tee xcodebuild.log
+            build 2>&1 | tee build_output.log
 
       - name: Show Build Errors
         if: failure()
         run: |
-          echo "===== LAST 200 LINES ====="
-          tail -n 200 xcodebuild.log
-          echo "===== ERRORS ====="
-          grep -i "error:" xcodebuild.log || true
-          echo "===== UNDEFINED SYMBOLS ====="
-          grep -i "undefined symbol" xcodebuild.log || true
-          echo "===== LINKER ERRORS ====="
-          grep -i "ld:" xcodebuild.log || true
+          python3 scripts/diagnose_build.py build_output.log
 
       - name: Upload Build Log
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: xcodebuild-log
-          path: xcodebuild.log
+          path: build_output.log
 
       - name: Find Built App
         run: |

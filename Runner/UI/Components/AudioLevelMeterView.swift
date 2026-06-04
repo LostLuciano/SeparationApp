@@ -25,20 +25,20 @@ class AudioLevelMeterView: UIView {
         layer.borderColor = UIColor(white: 1.0, alpha: 0.15).cgColor
         
         // Left bar
-        leftBar.backgroundColor = StudioColors.statusSuccess
+        leftBar.backgroundColor = AppStudioColors.statusSuccess
         leftBar.layer.cornerRadius = 2
         leftBar.translatesAutoresizingMaskIntoConstraints = false
         addSubview(leftBar)
         
         // Right bar
-        rightBar.backgroundColor = StudioColors.statusSuccess
+        rightBar.backgroundColor = AppStudioColors.statusSuccess
         rightBar.layer.cornerRadius = 2
         rightBar.translatesAutoresizingMaskIntoConstraints = false
         addSubview(rightBar)
         
         // Peak label
-        peakLabel.font = Typography.labelSmall
-        peakLabel.textColor = StudioColors.textSecondary
+        peakLabel.font = StudioTypography.labelSmall
+        peakLabel.textColor = AppStudioColors.textSecondary
         peakLabel.text = "-∞ dB"
         peakLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(peakLabel)
@@ -76,14 +76,14 @@ class AudioLevelMeterView: UIView {
         // Update color based on level
         let peakLevel = max(left, right)
         if peakLevel > 0.9 {
-            leftBar.backgroundColor = StudioColors.statusError
-            rightBar.backgroundColor = StudioColors.statusError
+            leftBar.backgroundColor = AppStudioColors.statusError
+            rightBar.backgroundColor = AppStudioColors.statusError
         } else if peakLevel > 0.7 {
-            leftBar.backgroundColor = StudioColors.statusWarning
-            rightBar.backgroundColor = StudioColors.statusWarning
+            leftBar.backgroundColor = AppStudioColors.statusWarning
+            rightBar.backgroundColor = AppStudioColors.statusWarning
         } else {
-            leftBar.backgroundColor = StudioColors.statusSuccess
-            rightBar.backgroundColor = StudioColors.statusSuccess
+            leftBar.backgroundColor = AppStudioColors.statusSuccess
+            rightBar.backgroundColor = AppStudioColors.statusSuccess
         }
         
         // Update dB label

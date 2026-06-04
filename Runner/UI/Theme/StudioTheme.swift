@@ -39,6 +39,6 @@ class StudioTheme {
     }
     
     func glowShadow() -> (color: UIColor, opacity: Float, offset: CGSize, radius: CGFloat) {
-        return (StudioColors.purpleAccent, 0.4, CGSize(width: 0, height: 0), 20)
+        return (AppStudioColors.purpleAccent, 0.4, CGSize(width: 0, height: 0), 20)
     }
 }

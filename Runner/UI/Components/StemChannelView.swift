@@ -18,7 +18,7 @@ class StemChannelView: UIView {
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        setup(title: "Unknown", color: StudioColors.stemOthers)
+        setup(title: "Unknown", color: AppStudioColors.stemOthers)
     }
     
     private func setup(title: String, color: UIColor) {
@@ -30,7 +30,7 @@ class StemChannelView: UIView {
         
         // Title
         titleLabel.text = title
-        titleLabel.font = Typography.labelMedium
+        titleLabel.font = StudioTypography.labelMedium
         titleLabel.textColor = color
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(titleLabel)
@@ -47,21 +47,21 @@ class StemChannelView: UIView {
         
         // dB Label
         dbLabel.text = "-6 dB"
-        dbLabel.font = Typography.labelSmall
-        dbLabel.textColor = StudioColors.textSecondary
+        dbLabel.font = StudioTypography.labelSmall
+        dbLabel.textColor = AppStudioColors.textSecondary
         dbLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(dbLabel)
         
         // Mute button
         muteButton.setImage(UIImage(systemName: "speaker.slash"), for: .normal)
-        muteButton.tintColor = StudioColors.textSecondary
+        muteButton.tintColor = AppStudioColors.textSecondary
         muteButton.addTarget(self, action: #selector(muteToggled), for: .touchUpInside)
         muteButton.translatesAutoresizingMaskIntoConstraints = false
         addSubview(muteButton)
         
         // Solo button
         soloButton.setImage(UIImage(systemName: "headphones"), for: .normal)
-        soloButton.tintColor = StudioColors.textSecondary
+        soloButton.tintColor = AppStudioColors.textSecondary
         soloButton.addTarget(self, action: #selector(soloToggled), for: .touchUpInside)
         soloButton.translatesAutoresizingMaskIntoConstraints = false
         addSubview(soloButton)
@@ -102,14 +102,14 @@ class StemChannelView: UIView {
     }
     
     @objc private func muteToggled() {
-        let isMuted = muteButton.tintColor == StudioColors.purpleAccent
-        muteButton.tintColor = isMuted ? StudioColors.textSecondary : StudioColors.purpleAccent
+        let isMuted = muteButton.tintColor == AppStudioColors.purpleAccent
+        muteButton.tintColor = isMuted ? AppStudioColors.textSecondary : AppStudioColors.purpleAccent
         onMute?(!isMuted)
     }
     
     @objc private func soloToggled() {
-        let isSolo = soloButton.tintColor == StudioColors.purpleAccent
-        soloButton.tintColor = isSolo ? StudioColors.textSecondary : StudioColors.purpleAccent
+        let isSolo = soloButton.tintColor == AppStudioColors.purpleAccent
+        soloButton.tintColor = isSolo ? AppStudioColors.textSecondary : AppStudioColors.purpleAccent
         onSolo?(!isSolo)
     }
 }

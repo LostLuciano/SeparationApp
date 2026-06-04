@@ -102,32 +102,32 @@ class AnalyzerViewController: UIViewController {
         
         let qualityLabel = UILabel()
         qualityLabel.text = "Quality: Minor"
-        qualityLabel.font = Typography.labelSmall
-        qualityLabel.textColor = StudioColors.textSecondary
+        qualityLabel.font = StudioTypography.labelSmall
+        qualityLabel.textColor = AppStudioColors.textSecondary
         infoStack.addArrangedSubview(qualityLabel)
         
         let romanLabel = UILabel()
         romanLabel.text = "Roman: i"
-        romanLabel.font = Typography.labelSmall
-        romanLabel.textColor = StudioColors.textSecondary
+        romanLabel.font = StudioTypography.labelSmall
+        romanLabel.textColor = AppStudioColors.textSecondary
         infoStack.addArrangedSubview(romanLabel)
         
         let nextLabel = UILabel()
         nextLabel.text = "Next: Bm"
-        nextLabel.font = Typography.labelSmall
-        nextLabel.textColor = StudioColors.textSecondary
+        nextLabel.font = StudioTypography.labelSmall
+        nextLabel.textColor = AppStudioColors.textSecondary
         infoStack.addArrangedSubview(nextLabel)
         
         let keyLabel = UILabel()
         keyLabel.text = "Key: A Minor"
-        keyLabel.font = Typography.labelSmall
-        keyLabel.textColor = StudioColors.textSecondary
+        keyLabel.font = StudioTypography.labelSmall
+        keyLabel.textColor = AppStudioColors.textSecondary
         infoStack.addArrangedSubview(keyLabel)
         
         let confidenceLabel = UILabel()
         confidenceLabel.text = "Confidence: 98%"
-        confidenceLabel.font = Typography.labelSmall
-        confidenceLabel.textColor = StudioColors.statusSuccess
+        confidenceLabel.font = StudioTypography.labelSmall
+        confidenceLabel.textColor = AppStudioColors.statusSuccess
         infoStack.addArrangedSubview(confidenceLabel)
         
         NSLayoutConstraint.activate([
@@ -139,8 +139,8 @@ class AnalyzerViewController: UIViewController {
         
         // Chord progression
         chordProgressionLabel.text = "Am | A | Bm | B# | C | Dm | E | F | G"
-        chordProgressionLabel.font = Typography.bodySmall
-        chordProgressionLabel.textColor = StudioColors.textSecondary
+        chordProgressionLabel.font = StudioTypography.bodySmall
+        chordProgressionLabel.textColor = AppStudioColors.textSecondary
         chordProgressionLabel.numberOfLines = 0
         chordProgressionLabel.translatesAutoresizingMaskIntoConstraints = false
         chordsContainer.addSubview(chordProgressionLabel)
@@ -178,20 +178,20 @@ class AnalyzerViewController: UIViewController {
         contentView.addSubview(beatContainer)
         
         bpmLabel.text = "130 BPM"
-        bpmLabel.font = Typography.displayMedium
-        bpmLabel.textColor = StudioColors.purpleAccent
+        bpmLabel.font = StudioTypography.displayMedium
+        bpmLabel.textColor = AppStudioColors.purpleAccent
         bpmLabel.translatesAutoresizingMaskIntoConstraints = false
         beatContainer.addSubview(bpmLabel)
         
         confidenceLabel.text = "Confidence: 96%"
-        confidenceLabel.font = Typography.labelSmall
-        confidenceLabel.textColor = StudioColors.statusSuccess
+        confidenceLabel.font = StudioTypography.labelSmall
+        confidenceLabel.textColor = AppStudioColors.statusSuccess
         confidenceLabel.translatesAutoresizingMaskIntoConstraints = false
         beatContainer.addSubview(confidenceLabel)
         
         timeSignatureLabel.text = "Time Signature: 4/4"
-        timeSignatureLabel.font = Typography.labelSmall
-        timeSignatureLabel.textColor = StudioColors.textSecondary
+        timeSignatureLabel.font = StudioTypography.labelSmall
+        timeSignatureLabel.textColor = AppStudioColors.textSecondary
         timeSignatureLabel.translatesAutoresizingMaskIntoConstraints = false
         beatContainer.addSubview(timeSignatureLabel)
         
@@ -204,8 +204,8 @@ class AnalyzerViewController: UIViewController {
         tapTempoButton.layer.borderWidth = 1.0
         tapTempoButton.layer.borderColor = UIColor(white: 1.0, alpha: 0.2).cgColor
         tapTempoButton.layer.cornerRadius = StudioTheme.shared.cornerRadius16
-        tapTempoButton.setTitleColor(StudioColors.textPrimary, for: .normal)
-        tapTempoButton.titleLabel?.font = Typography.labelMedium
+        tapTempoButton.setTitleColor(AppStudioColors.textPrimary, for: .normal)
+        tapTempoButton.titleLabel?.font = StudioTypography.labelMedium
         tapTempoButton.translatesAutoresizingMaskIntoConstraints = false
         beatContainer.addSubview(tapTempoButton)
         

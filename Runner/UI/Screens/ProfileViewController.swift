@@ -57,15 +57,15 @@ class ProfileViewController: UIViewController {
         
         let nameLabel = UILabel()
         nameLabel.text = "Musisi Baru"
-        nameLabel.font = Typography.headingMedium
-        nameLabel.textColor = StudioColors.textPrimary
+        nameLabel.font = StudioTypography.headingMedium
+        nameLabel.textColor = AppStudioColors.textPrimary
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         profileCard.addSubview(nameLabel)
         
         let levelLabel = UILabel()
         levelLabel.text = "Free · Level 1"
-        levelLabel.font = Typography.labelSmall
-        levelLabel.textColor = StudioColors.textSecondary
+        levelLabel.font = StudioTypography.labelSmall
+        levelLabel.textColor = AppStudioColors.textSecondary
         levelLabel.translatesAutoresizingMaskIntoConstraints = false
         profileCard.addSubview(levelLabel)
         
@@ -107,11 +107,11 @@ class ProfileViewController: UIViewController {
             statCard.layer.cornerRadius = StudioTheme.shared.cornerRadius16
             
             var config = UIButton.Configuration.plain()
-            config.baseForegroundColor = StudioColors.textPrimary
+            config.baseForegroundColor = AppStudioColors.textPrimary
             statCard.configuration = config
             
             statCard.setTitle("\(icon) \(title)", for: .normal)
-            statCard.titleLabel?.font = Typography.labelMedium
+            statCard.titleLabel?.font = StudioTypography.labelMedium
             statCard.heightAnchor.constraint(equalToConstant: 48).isActive = true
             
             statsStack.addArrangedSubview(statCard)

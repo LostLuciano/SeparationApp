@@ -1,6 +1,6 @@
 import UIKit
 
-class Typography {
+class StudioTypography {
     // MARK: - Display Fonts (Large, Bold)
     static let displayLarge = UIFont.systemFont(ofSize: 34, weight: .bold)     // 34pt, bold
     static let displayMedium = UIFont.systemFont(ofSize: 28, weight: .bold)    // 28pt, bold

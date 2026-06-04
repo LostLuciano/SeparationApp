@@ -10,10 +10,10 @@ class ProcessingStageRowView: UIView {
         
         var color: UIColor {
             switch self {
-            case .pending: return StudioColors.statusPending
-            case .running: return StudioColors.statusWarning
-            case .done: return StudioColors.statusSuccess
-            case .failed: return StudioColors.statusError
+            case .pending: return AppStudioColors.statusPending
+            case .running: return AppStudioColors.statusWarning
+            case .done: return AppStudioColors.statusSuccess
+            case .failed: return AppStudioColors.statusError
             }
         }
         
@@ -46,21 +46,21 @@ class ProcessingStageRowView: UIView {
         
         // Stage label
         stageLabel.text = stage
-        stageLabel.font = Typography.labelMedium
-        stageLabel.textColor = StudioColors.textPrimary
+        stageLabel.font = StudioTypography.labelMedium
+        stageLabel.textColor = AppStudioColors.textPrimary
         stageLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stageLabel)
         
         // Status indicator
         statusIndicator.layer.cornerRadius = 6
-        statusIndicator.backgroundColor = StudioColors.statusPending
+        statusIndicator.backgroundColor = AppStudioColors.statusPending
         statusIndicator.translatesAutoresizingMaskIntoConstraints = false
         addSubview(statusIndicator)
         
         // Status label
         statusLabel.text = "Pending"
-        statusLabel.font = Typography.labelSmall
-        statusLabel.textColor = StudioColors.textSecondary
+        statusLabel.font = StudioTypography.labelSmall
+        statusLabel.textColor = AppStudioColors.textSecondary
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(statusLabel)
         

@@ -30,8 +30,8 @@ class LibraryViewController: UIViewController {
         // Title
         let titleLabel = UILabel()
         titleLabel.text = "Studio Library"
-        titleLabel.font = Typography.headingLarge
-        titleLabel.textColor = StudioColors.textPrimary
+        titleLabel.font = StudioTypography.headingLarge
+        titleLabel.textColor = AppStudioColors.textPrimary
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(titleLabel)
         
@@ -134,18 +134,18 @@ class LibraryProjectCell: UITableViewCell {
         cardView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(cardView)
         
-        titleLabel.font = Typography.labelMedium
-        titleLabel.textColor = StudioColors.textPrimary
+        titleLabel.font = StudioTypography.labelMedium
+        titleLabel.textColor = AppStudioColors.textPrimary
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         cardView.addSubview(titleLabel)
         
-        infoLabel.font = Typography.labelSmall
-        infoLabel.textColor = StudioColors.textSecondary
+        infoLabel.font = StudioTypography.labelSmall
+        infoLabel.textColor = AppStudioColors.textSecondary
         infoLabel.translatesAutoresizingMaskIntoConstraints = false
         cardView.addSubview(infoLabel)
         
         playButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
-        playButton.tintColor = StudioColors.purpleAccent
+        playButton.tintColor = AppStudioColors.purpleAccent
         playButton.translatesAutoresizingMaskIntoConstraints = false
         cardView.addSubview(playButton)
         

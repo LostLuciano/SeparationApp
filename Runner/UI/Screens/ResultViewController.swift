@@ -67,21 +67,21 @@ class ResultViewController: UIViewController {
         
         // MARK: - Title
         titleLabel.text = "Separation Complete"
-        titleLabel.font = Typography.headingLarge
-        titleLabel.textColor = StudioColors.textPrimary
+        titleLabel.font = StudioTypography.headingLarge
+        titleLabel.textColor = AppStudioColors.textPrimary
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(titleLabel)
         
         subtitleLabel.text = "6 Stems Generated"
-        subtitleLabel.font = Typography.bodyMedium
-        subtitleLabel.textColor = StudioColors.purpleAccent
+        subtitleLabel.font = StudioTypography.bodyMedium
+        subtitleLabel.textColor = AppStudioColors.purpleAccent
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(subtitleLabel)
         
         // MARK: - Stems Grid
         stemsLabel.text = "Stems"
-        stemsLabel.font = Typography.headingMedium
-        stemsLabel.textColor = StudioColors.textPrimary
+        stemsLabel.font = StudioTypography.headingMedium
+        stemsLabel.textColor = AppStudioColors.textPrimary
         stemsLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(stemsLabel)
         
@@ -91,12 +91,12 @@ class ResultViewController: UIViewController {
         contentView.addSubview(stemsStackView)
         
         let stemNames = [
-            ("🎤", "Vocals", StudioColors.stemVocals),
-            ("🥁", "Drums", StudioColors.stemDrums),
-            ("🎸", "Guitar", StudioColors.stemGuitar),
-            ("🎹", "Piano / Synth", StudioColors.stemPiano),
-            ("🎺", "Bass", StudioColors.stemBass),
-            ("❓", "Others", StudioColors.stemOthers)
+            ("🎤", "Vocals", AppStudioColors.stemVocals),
+            ("🥁", "Drums", AppStudioColors.stemDrums),
+            ("🎸", "Guitar", AppStudioColors.stemGuitar),
+            ("🎹", "Piano / Synth", AppStudioColors.stemPiano),
+            ("🎺", "Bass", AppStudioColors.stemBass),
+            ("❓", "Others", AppStudioColors.stemOthers)
         ]
         
         for (emoji, name, color) in stemNames {
@@ -110,7 +110,7 @@ class ResultViewController: UIViewController {
             config.baseForegroundColor = color
             config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
                 var outgoing = incoming
-                outgoing.font = Typography.labelMedium
+                outgoing.font = StudioTypography.labelMedium
                 return outgoing
             }
             stemCard.configuration = config

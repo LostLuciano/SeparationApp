@@ -34,8 +34,8 @@ class MainTabBarController: UITabBarController {
         
         // Customize tab bar appearance
         tabBar.backgroundColor = UIColor(white: 1.0, alpha: 0.05)
-        tabBar.tintColor = StudioColors.purpleAccent
-        tabBar.unselectedItemTintColor = StudioColors.textSecondary
+        tabBar.tintColor = AppStudioColors.purpleAccent
+        tabBar.unselectedItemTintColor = AppStudioColors.textSecondary
         tabBar.isTranslucent = true
         
         if #available(iOS 15.0, *) {
@@ -43,11 +43,11 @@ class MainTabBarController: UITabBarController {
             appearance.backgroundEffect = UIBlurEffect(style: .dark)
             appearance.backgroundColor = UIColor(white: 1.0, alpha: 0.08)
             
-            appearance.stackedLayoutAppearance.normal.iconColor = StudioColors.textSecondary
-            appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: StudioColors.textSecondary]
+            appearance.stackedLayoutAppearance.normal.iconColor = AppStudioColors.textSecondary
+            appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: AppStudioColors.textSecondary]
             
-            appearance.stackedLayoutAppearance.selected.iconColor = StudioColors.purpleAccent
-            appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: StudioColors.purpleAccent]
+            appearance.stackedLayoutAppearance.selected.iconColor = AppStudioColors.purpleAccent
+            appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: AppStudioColors.purpleAccent]
             
             tabBar.standardAppearance = appearance
             tabBar.scrollEdgeAppearance = appearance

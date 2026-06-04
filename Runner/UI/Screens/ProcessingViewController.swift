@@ -72,14 +72,14 @@ class ProcessingViewController: UIViewController {
         
         // MARK: - Title
         titleLabel.text = "Separation in Progress"
-        titleLabel.font = Typography.headingLarge
-        titleLabel.textColor = StudioColors.textPrimary
+        titleLabel.font = StudioTypography.headingLarge
+        titleLabel.textColor = AppStudioColors.textPrimary
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(titleLabel)
         
         filenameLabel.text = project?.title ?? "Unknown Audio"
-        filenameLabel.font = Typography.bodyMedium
-        filenameLabel.textColor = StudioColors.textSecondary
+        filenameLabel.font = StudioTypography.bodyMedium
+        filenameLabel.textColor = AppStudioColors.textSecondary
         filenameLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(filenameLabel)
         
@@ -87,8 +87,8 @@ class ProcessingViewController: UIViewController {
         progressRing.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(progressRing)
         
-        percentageLabel.font = Typography.displaySmall
-        percentageLabel.textColor = StudioColors.purpleAccent
+        percentageLabel.font = StudioTypography.displaySmall
+        percentageLabel.textColor = AppStudioColors.purpleAccent
         percentageLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(percentageLabel)
         
@@ -102,8 +102,8 @@ class ProcessingViewController: UIViewController {
         
         // MARK: - Stages
         stagesLabel.text = "Processing Stages"
-        stagesLabel.font = Typography.headingMedium
-        stagesLabel.textColor = StudioColors.textPrimary
+        stagesLabel.font = StudioTypography.headingMedium
+        stagesLabel.textColor = AppStudioColors.textPrimary
         stagesLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(stagesLabel)
         
@@ -124,20 +124,20 @@ class ProcessingViewController: UIViewController {
         contentView.addSubview(infoCard)
         
         modeLabel.text = "Mode: Light FP16 · Neural Engine"
-        modeLabel.font = Typography.labelSmall
-        modeLabel.textColor = StudioColors.textSecondary
+        modeLabel.font = StudioTypography.labelSmall
+        modeLabel.textColor = AppStudioColors.textSecondary
         modeLabel.translatesAutoresizingMaskIntoConstraints = false
         infoCard.addSubview(modeLabel)
         
         timerLabel.text = "Elapsed: 00:00"
-        timerLabel.font = Typography.monoMedium
-        timerLabel.textColor = StudioColors.textPrimary
+        timerLabel.font = StudioTypography.monoMedium
+        timerLabel.textColor = AppStudioColors.textPrimary
         timerLabel.translatesAutoresizingMaskIntoConstraints = false
         infoCard.addSubview(timerLabel)
         
         etaLabel.text = "ETA: 03:00"
-        etaLabel.font = Typography.monoMedium
-        etaLabel.textColor = StudioColors.textPrimary
+        etaLabel.font = StudioTypography.monoMedium
+        etaLabel.textColor = AppStudioColors.textPrimary
         etaLabel.translatesAutoresizingMaskIntoConstraints = false
         infoCard.addSubview(etaLabel)
         
@@ -159,8 +159,8 @@ class ProcessingViewController: UIViewController {
         cancelButton.layer.borderWidth = 1.0
         cancelButton.layer.borderColor = UIColor(white: 1.0, alpha: 0.2).cgColor
         cancelButton.layer.cornerRadius = StudioTheme.shared.cornerRadius16
-        cancelButton.setTitleColor(StudioColors.statusError, for: .normal)
-        cancelButton.titleLabel?.font = Typography.labelLarge
+        cancelButton.setTitleColor(AppStudioColors.statusError, for: .normal)
+        cancelButton.titleLabel?.font = StudioTypography.labelLarge
         cancelButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(cancelButton)

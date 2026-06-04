@@ -29,16 +29,16 @@ class EmptyStateView: UIView {
         
         // Title
         titleLabel.text = title
-        titleLabel.font = Typography.headingMedium
-        titleLabel.textColor = StudioColors.textPrimary
+        titleLabel.font = StudioTypography.headingMedium
+        titleLabel.textColor = AppStudioColors.textPrimary
         titleLabel.textAlignment = .center
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(titleLabel)
         
         // Message
         messageLabel.text = message
-        messageLabel.font = Typography.bodySmall
-        messageLabel.textColor = StudioColors.textSecondary
+        messageLabel.font = StudioTypography.bodySmall
+        messageLabel.textColor = AppStudioColors.textSecondary
         messageLabel.textAlignment = .center
         messageLabel.numberOfLines = 0
         messageLabel.translatesAutoresizingMaskIntoConstraints = false

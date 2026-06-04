@@ -66,12 +66,12 @@ extension LyricsKaraokeView: UITableViewDataSource {
         
         if lyrics.isEmpty {
             cell.textLabel?.text = "No lyrics available"
-            cell.textLabel?.font = Typography.bodySmall
-            cell.textLabel?.textColor = StudioColors.textTertiary
+            cell.textLabel?.font = StudioTypography.bodySmall
+            cell.textLabel?.textColor = AppStudioColors.textTertiary
         } else {
             cell.textLabel?.text = lyrics[indexPath.row]
-            cell.textLabel?.font = Typography.bodyLarge
-            cell.textLabel?.textColor = (indexPath.row == currentLineIndex) ? StudioColors.purpleAccent : StudioColors.textSecondary
+            cell.textLabel?.font = StudioTypography.bodyLarge
+            cell.textLabel?.textColor = (indexPath.row == currentLineIndex) ? AppStudioColors.purpleAccent : AppStudioColors.textSecondary
             cell.textLabel?.textAlignment = .center
         }
         

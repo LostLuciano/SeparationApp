@@ -322,6 +322,7 @@ class PBXProjGenerator:
             content += f"\t\t{conf_uuid} /* {conf_name} */ = {{\n"
             content += f"\t\t\tisa = XCBuildConfiguration;\n"
             content += f"\t\t\tbuildSettings = {{\n"
+            content += f"\t\t\t\tASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;\n"
             content += f"\t\t\t\tASSETSPACK_BUILD_DATE_UTC = 0;\n"
             content += f"\t\t\t\tBUNDLE_LOADER = \"\";\n"
             content += f"\t\t\t\tCODE_SIGN_IDENTITY = \"\";\n"

@@ -115,6 +115,11 @@ struct LyricsViewerView: View {
                         .padding(.vertical, 10)
                         .onAppear {
                             proxy.scrollTo(highlightedIndex, anchor: .center)
+                            PermissionManager.shared.requestSpeechRecognitionPermission { granted in
+                                if !granted {
+                                    PermissionManager.shared.showPermissionDeniedAlert(for: .speechRecognition)
+                                }
+                            }
                         }
                         .onChange(of: highlightedIndex) { _, newIndex in
                             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {

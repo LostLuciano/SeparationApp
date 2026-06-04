@@ -47,7 +47,7 @@ class ProcessingRingView: UIView {
         // Progress circle
         shapeLayer.path = circlePath.cgPath
         shapeLayer.fillColor = UIColor.clear.cgColor
-        shapeLayer.strokeColor = StudioColors.purpleAccent.cgColor
+        shapeLayer.strokeColor = AppStudioColors.purpleAccent.cgColor
         shapeLayer.lineWidth = 8
         shapeLayer.lineCap = .round
         shapeLayer.strokeEnd = 0
@@ -75,8 +75,8 @@ class ProcessingRingView: UIView {
         paragraphStyle.alignment = .center
         
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: Typography.displaySmall,
-            .foregroundColor: StudioColors.purpleAccent,
+            .font: StudioTypography.displaySmall,
+            .foregroundColor: AppStudioColors.purpleAccent,
             .paragraphStyle: paragraphStyle
         ]
         

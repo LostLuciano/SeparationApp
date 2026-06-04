@@ -54,7 +54,7 @@ class ChordTimelineView: UIView {
     func addChord(_ chord: String, index: Int) {
         let button = UIButton(type: .system)
         button.setTitle(chord, for: .normal)
-        button.titleLabel?.font = Typography.labelMedium
+        button.titleLabel?.font = StudioTypography.labelMedium
         button.tag = index
         
         button.backgroundColor = UIColor(white: 1.0, alpha: 0.08)
@@ -62,8 +62,8 @@ class ChordTimelineView: UIView {
         button.layer.borderColor = UIColor(white: 1.0, alpha: 0.15).cgColor
         button.layer.cornerRadius = StudioTheme.shared.cornerRadius12
         
-        button.setTitleColor(StudioColors.textSecondary, for: .normal)
-        button.setTitleColor(StudioColors.purpleAccent, for: .selected)
+        button.setTitleColor(AppStudioColors.textSecondary, for: .normal)
+        button.setTitleColor(AppStudioColors.purpleAccent, for: .selected)
         
         button.addTarget(self, action: #selector(chordTapped(_:)), for: .touchUpInside)
         
