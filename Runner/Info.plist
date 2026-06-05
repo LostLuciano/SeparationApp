@@ -18,6 +18,34 @@
 	<string>1.0.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Audio Files</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.audio</string>
+				<string>public.mp3</string>
+				<string>public.mpeg-4-audio</string>
+				<string>com.microsoft.waveform-audio</string>
+				<string>public.aiff-audio</string>
+				<string>com.apple.coreaudio-format</string>
+				<string>org.xiph.flac</string>
+				<string>com.musicx.audio.mp3</string>
+				<string>com.musicx.audio.m4a</string>
+				<string>com.musicx.audio.wav</string>
+				<string>com.musicx.audio.aac</string>
+				<string>com.musicx.audio.aiff</string>
+				<string>com.musicx.audio.caf</string>
+				<string>com.musicx.audio.flac</string>
+			</array>
+		</dict>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>MinimumOSVersion</key>
@@ -101,5 +129,145 @@
 	</dict>
 	<key>AVAudioDefaultToSpeakerRoute</key>
 	<true/>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.musicx.audio.mp3</string>
+			<key>UTTypeDescription</key>
+			<string>MP3 Audio</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.audio</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>mp3</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>audio/mpeg</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.musicx.audio.m4a</string>
+			<key>UTTypeDescription</key>
+			<string>MPEG-4 Audio</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.audio</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>m4a</string>
+					<string>mp4a</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>audio/mp4</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.musicx.audio.wav</string>
+			<key>UTTypeDescription</key>
+			<string>Waveform Audio</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.audio</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>wav</string>
+					<string>wave</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>audio/wav</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.musicx.audio.aac</string>
+			<key>UTTypeDescription</key>
+			<string>AAC Audio</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.audio</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>aac</string>
+					<string>adts</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>audio/aac</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.musicx.audio.aiff</string>
+			<key>UTTypeDescription</key>
+			<string>AIFF Audio</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.audio</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>aiff</string>
+					<string>aif</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>audio/aiff</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.musicx.audio.caf</string>
+			<key>UTTypeDescription</key>
+			<string>Core Audio Format</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.audio</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>caf</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>audio/x-caf</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.musicx.audio.flac</string>
+			<key>UTTypeDescription</key>
+			<string>FLAC Audio</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.audio</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>flac</string>
+				</array>
+				<key>public.mime-type</key>
+				<string>audio/flac</string>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

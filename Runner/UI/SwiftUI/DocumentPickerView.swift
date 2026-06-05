@@ -8,7 +8,7 @@ struct DocumentPickerView: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
         let contentTypes = allowedTypes.isEmpty ? AudioImportManager.allowedUTTypes : allowedTypes
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: contentTypes, asCopy: false)
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: contentTypes, asCopy: true)
         picker.allowsMultipleSelection = false
         picker.delegate = context.coordinator
         Logger.shared.info("Opening Files picker with \(contentTypes.count) allowed content types")

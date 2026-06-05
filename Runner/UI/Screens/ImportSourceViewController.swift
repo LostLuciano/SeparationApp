@@ -197,7 +197,7 @@ class ImportSourceViewController: UIViewController {
     }
     
     private func presentDocumentPicker(allowedTypes: [UTType]) {
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: allowedTypes, asCopy: false)
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: allowedTypes, asCopy: true)
         picker.allowsMultipleSelection = false
         picker.delegate = self
         Logger.shared.info("Opening Files picker")

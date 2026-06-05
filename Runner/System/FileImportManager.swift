@@ -13,7 +13,20 @@ public class FileImportManager {
     ]
     
     public func getSupportedAudioUTTypes() -> [UTType] {
-        supportedTypes(forExtensions: ["mp3", "wav", "m4a", "aac", "aiff", "aif", "caf", "flac"], fallback: .audio)
+        Array(Set([
+            .audio,
+            .mp3,
+            .wav,
+            .mpeg4Audio,
+            .aiff,
+            UTType(importedAs: "com.musicx.audio.mp3", conformingTo: .audio),
+            UTType(importedAs: "com.musicx.audio.m4a", conformingTo: .audio),
+            UTType(importedAs: "com.musicx.audio.wav", conformingTo: .audio),
+            UTType(importedAs: "com.musicx.audio.aac", conformingTo: .audio),
+            UTType(importedAs: "com.musicx.audio.aiff", conformingTo: .audio),
+            UTType(importedAs: "com.musicx.audio.caf", conformingTo: .audio),
+            UTType(importedAs: "com.musicx.audio.flac", conformingTo: .audio)
+        ] + ["aac", "caf", "flac", "m4a", "aif"].compactMap { UTType(filenameExtension: $0, conformingTo: .audio) }))
     }
     
     public func getSupportedVideoUTTypes() -> [UTType] {

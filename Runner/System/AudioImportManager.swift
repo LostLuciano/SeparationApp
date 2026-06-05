@@ -14,8 +14,15 @@ public class AudioImportManager {
         .mp3,
         .wav,
         .mpeg4Audio,
-        .aiff
-    ] + ["aac", "caf", "flac", "m4a"].compactMap { UTType(filenameExtension: $0) }
+        .aiff,
+        UTType(importedAs: "com.musicx.audio.mp3", conformingTo: .audio),
+        UTType(importedAs: "com.musicx.audio.m4a", conformingTo: .audio),
+        UTType(importedAs: "com.musicx.audio.wav", conformingTo: .audio),
+        UTType(importedAs: "com.musicx.audio.aac", conformingTo: .audio),
+        UTType(importedAs: "com.musicx.audio.aiff", conformingTo: .audio),
+        UTType(importedAs: "com.musicx.audio.caf", conformingTo: .audio),
+        UTType(importedAs: "com.musicx.audio.flac", conformingTo: .audio)
+    ] + ["aac", "caf", "flac", "m4a", "aif"].compactMap { UTType(filenameExtension: $0, conformingTo: .audio) }
     
     // Supported file extensions
     public static let supportedExtensions = [
