@@ -1,14 +1,23 @@
 import SwiftUI
 import Combine
 
+private enum AppRuntimeState {
+    static var selectedTab = 0
+    static var activePath = NavigationPath()
+    static var selectedProjectID: UUID?
+    static var pendingInputURL: URL?
+    static var pendingProcessingOptions = StemProcessingOptions.allStems
+}
+
 struct AppRootView: View {
-    @State private var selectedTab: Int = 0
-    @State private var activePath = NavigationPath()
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var selectedTab: Int = AppRuntimeState.selectedTab
+    @State private var activePath = AppRuntimeState.activePath
 
     @State private var projects: [StemProject] = []
     @State private var selectedProject: StemProject?
-    @State private var pendingInputURL: URL?
-    @State private var pendingProcessingOptions: StemProcessingOptions = .allStems
+    @State private var pendingInputURL: URL? = AppRuntimeState.pendingInputURL
+    @State private var pendingProcessingOptions: StemProcessingOptions = AppRuntimeState.pendingProcessingOptions
 
     var body: some View {
         NavigationStack(path: $activePath) {
@@ -32,7 +41,10 @@ struct AppRootView: View {
             .toolbar(.hidden, for: .navigationBar)
             .ignoresSafeArea(.keyboard, edges: .bottom)
             .onAppear {
-                reloadProjects()
+                reloadProjects(selecting: AppRuntimeState.selectedProjectID)
+            }
+            .onChange(of: scenePhase) { _, _ in
+                persistRuntimeState()
             }
             .onReceive(NotificationCenter.default.publisher(for: .projectStoreDidUpdate).receive(on: RunLoop.main)) { notification in
                 let updatedID = notification.userInfo?["projectID"] as? UUID
@@ -295,12 +307,22 @@ struct AppRootView: View {
         } else if selectedProject == nil {
             selectedProject = projects.first
         }
+
+        AppRuntimeState.selectedProjectID = selectedProject?.id
     }
 
     private func popNavigation() {
         if activePath.count > 0 {
             activePath.removeLast()
         }
+    }
+
+    private func persistRuntimeState() {
+        AppRuntimeState.selectedTab = selectedTab
+        AppRuntimeState.activePath = activePath
+        AppRuntimeState.selectedProjectID = selectedProject?.id
+        AppRuntimeState.pendingInputURL = pendingInputURL
+        AppRuntimeState.pendingProcessingOptions = pendingProcessingOptions
     }
 }
 

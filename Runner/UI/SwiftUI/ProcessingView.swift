@@ -1,5 +1,6 @@
 import SwiftUI
 import AVFoundation
+import UIKit
 
 struct ProcessingStep: Identifiable {
     let id = UUID()
@@ -432,6 +433,19 @@ struct ProcessingView: View {
         let selectedOptions = options
 
         Task.detached(priority: .utility) {
+            let backgroundTaskID = await MainActor.run {
+                UIApplication.shared.beginBackgroundTask(withName: "Full Stem Render") {
+                    Logger.shared.warning("Background full separation time is about to expire")
+                }
+            }
+            defer {
+                if backgroundTaskID != .invalid {
+                    DispatchQueue.main.async {
+                        UIApplication.shared.endBackgroundTask(backgroundTaskID)
+                    }
+                }
+            }
+
             var lastSavedProgress = 0.0
             do {
                 Logger.shared.info("Background full separation started for project \(projectID.uuidString)")

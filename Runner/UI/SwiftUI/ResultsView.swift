@@ -7,6 +7,7 @@ struct ResultsView: View {
     var onOpenAnalyzer: () -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @State private var playingStemId: UUID? = nil
     @State private var audioPlayer: AVAudioPlayer?
     @State private var isExporting = false
@@ -37,7 +38,9 @@ struct ResultsView: View {
         .navigationBarBackButtonHidden()
         .toolbar(.hidden, for: .navigationBar)
         .onDisappear {
-            audioPlayer?.stop()
+            if scenePhase == .active {
+                audioPlayer?.stop()
+            }
         }
     }
 

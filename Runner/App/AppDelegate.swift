@@ -63,9 +63,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 mode: .default,
                 options: [
                     .defaultToSpeaker,
-                    .duckOthers,
                     .allowBluetooth,
-                    .allowBluetoothA2DP
+                    .allowBluetoothA2DP,
+                    .mixWithOthers
                 ]
             )
             
@@ -93,10 +93,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func applicationDidEnterBackground(_ application: UIApplication) {
+        try? AVAudioSession.sharedInstance().setActive(true)
         Logger.shared.info("📦 App entered background")
     }
     
     func applicationWillEnterForeground(_ application: UIApplication) {
+        configureAudioSession()
         Logger.shared.info("📂 App entered foreground")
     }
     

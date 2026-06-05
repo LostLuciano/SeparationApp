@@ -36,7 +36,7 @@ public class AudioEngineManager {
     private func configureAudioSession() {
         let audioSession = AVAudioSession.sharedInstance()
         do {
-            try audioSession.setCategory(.playback, mode: .default, options: [])
+            try audioSession.setCategory(.playback, mode: .default, options: [.allowBluetoothA2DP, .mixWithOthers])
             try audioSession.setActive(true)
             print("AVAudioSession: Configured category to .playback for background audio.")
         } catch {

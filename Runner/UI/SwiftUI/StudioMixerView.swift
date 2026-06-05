@@ -4,6 +4,7 @@ struct StudioMixerView: View {
     var project: StemProject
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @State private var channels: [MixerChannel] = []
     @State private var audioEngine = AudioEngineManager()
     @State private var isPlaying = false
@@ -32,7 +33,9 @@ struct StudioMixerView: View {
             loadProjectAudio()
         }
         .onDisappear {
-            audioEngine.stop()
+            if scenePhase == .active {
+                audioEngine.stop()
+            }
         }
         .onChange(of: channels) { oldChannels, newChannels in
             applyMixerChanges(oldChannels: oldChannels, newChannels: newChannels)
