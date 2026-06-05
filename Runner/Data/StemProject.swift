@@ -1,6 +1,6 @@
 import Foundation
 
-public enum ProjectStatus: String, Codable {
+public enum ProjectStatus: String, Codable, Sendable {
     case imported = "Imported"
     case separating = "Separating"
     case separated = "Separated"
@@ -12,7 +12,7 @@ public enum ProjectStatus: String, Codable {
     case cancelled = "Cancelled"
 }
 
-public struct StemProject: Codable, Identifiable {
+public struct StemProject: Codable, Identifiable, Sendable {
     public let id: UUID
     public var name: String  // Alias for title
     public var title: String
@@ -26,6 +26,8 @@ public struct StemProject: Codable, Identifiable {
     public var bpm: Double?
     public var key: String?
     public var status: ProjectStatus
+    public var sourceHash: String? = nil
+    public var renderProgress: Double? = nil
     public var stemPaths: [String: URL]          // "vocals", "drums", "bass", "guitar", "piano", "others"
     public var chordSegments: [ChordSegment]
     public var beatResult: BeatTempoResult?
@@ -77,5 +79,35 @@ public struct StemProject: Codable, Identifiable {
     public func allStemsAvailable() -> Bool {
         let requiredStems = ["vocals", "drums", "bass", "guitar", "piano", "other"]
         return requiredStems.allSatisfy { stemPaths[$0] != nil }
+    }
+
+    public func hasStems(_ stems: [String]) -> Bool {
+        stems.allSatisfy { stem in
+            guard let url = stemPaths[stem] else { return false }
+            return FileManager.default.fileExists(atPath: url.path)
+        }
+    }
+
+    public var isPreviewOnly: Bool {
+        status == .separating && (renderProgress ?? 0) < 1.0
+    }
+
+    public var renderProgressPercent: Int {
+        Int((renderProgress ?? (status == .separated ? 1.0 : 0.0)) * 100)
+    }
+
+    public var processingSummary: String {
+        if isPreviewOnly {
+            return "Preview ready - full render \(renderProgressPercent)%"
+        }
+
+        switch status {
+        case .separated, .analyzed:
+            return "\(stemPaths.count) Stems - \(displayDuration)"
+        case .failed:
+            return "Render failed - tap to retry"
+        default:
+            return "\(status.rawValue) - \(renderProgressPercent)%"
+        }
     }
 }

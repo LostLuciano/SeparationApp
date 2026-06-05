@@ -15,7 +15,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let rootSwiftUIView = AppRootView()
         let hostingController = UIHostingController(rootView: rootSwiftUIView)
+        hostingController.overrideUserInterfaceStyle = .dark
         window?.rootViewController = hostingController
+        window?.overrideUserInterfaceStyle = .dark
         window?.makeKeyAndVisible()
         
         Logger.shared.info("🔗 Scene connected with SwiftUI root view")

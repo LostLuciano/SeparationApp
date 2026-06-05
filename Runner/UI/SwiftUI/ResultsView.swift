@@ -16,6 +16,10 @@ struct ResultsView: View {
         project.displayStems
     }
 
+    private var renderProgress: Double {
+        project.renderProgress ?? (project.status == .separated ? 1.0 : 0.0)
+    }
+
     var body: some View {
         ZStack {
             backgroundGradient
@@ -78,16 +82,16 @@ struct ResultsView: View {
             HStack(spacing: 16) {
                 ZStack {
                     Circle()
-                        .fill(DesignSystem.SuccessGreen.opacity(0.15))
+                        .fill((project.isPreviewOnly ? DesignSystem.SoftRed : DesignSystem.SuccessGreen).opacity(0.15))
                         .frame(width: 44, height: 44)
 
-                    Image(systemName: "checkmark.seal.fill")
-                        .foregroundColor(DesignSystem.SuccessGreen)
+                    Image(systemName: project.isPreviewOnly ? "bolt.circle.fill" : "checkmark.seal.fill")
+                        .foregroundColor(project.isPreviewOnly ? DesignSystem.SoftRed : DesignSystem.SuccessGreen)
                         .font(.system(size: 22))
                 }
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("\(stemsList.count) Stems Generated")
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(project.isPreviewOnly ? "\(stemsList.count) Stems Preview Ready" : "\(stemsList.count) Stems Generated")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
                         .lineLimit(1)
@@ -97,6 +101,20 @@ struct ResultsView: View {
                         .font(.system(size: 12))
                         .foregroundColor(DesignSystem.TextSecondary)
                         .lineLimit(1)
+
+                    if project.isPreviewOnly {
+                        VStack(alignment: .leading, spacing: 5) {
+                            ProgressView(value: renderProgress)
+                                .progressViewStyle(.linear)
+                                .tint(DesignSystem.SoftRed)
+
+                            Text("Full render running in background - \(project.renderProgressPercent)%")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(DesignSystem.TextMuted)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.82)
+                        }
+                    }
                 }
 
                 Spacer()
@@ -147,6 +165,14 @@ struct ResultsView: View {
                     .multilineTextAlignment(.center)
             }
 
+            if project.isPreviewOnly {
+                Text("Preview playback is ready. Export unlocks after the full song render finishes.")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(DesignSystem.TextMuted)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+            }
+
             HStack(spacing: 12) {
                 GlassButton(title: "Open Mixer", icon: "slider.horizontal.3", isAccented: true, action: onOpenMixer)
                 GlassButton(title: "AI Analyzer", icon: "waveform.path", isAccented: false, action: onOpenAnalyzer)
@@ -156,6 +182,7 @@ struct ResultsView: View {
                 secondaryAction(
                     title: isExporting ? "Exporting" : "Export Stems",
                     icon: isExporting ? "hourglass" : "square.and.arrow.up",
+                    isDisabled: project.isPreviewOnly || isExporting,
                     action: exportStems
                 )
                 secondaryAction(title: "Saved", icon: "checkmark.circle", action: {})
@@ -167,7 +194,12 @@ struct ResultsView: View {
         .background(DesignSystem.BackgroundDeep.opacity(0.92))
     }
 
-    private func secondaryAction(title: String, icon: String, action: @escaping () -> Void) -> some View {
+    private func secondaryAction(
+        title: String,
+        icon: String,
+        isDisabled: Bool = false,
+        action: @escaping () -> Void
+    ) -> some View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Image(systemName: icon)
@@ -176,16 +208,17 @@ struct ResultsView: View {
                     .minimumScaleFactor(0.78)
             }
             .font(.system(size: 14, weight: .semibold))
-            .foregroundColor(.white)
+            .foregroundColor(isDisabled ? DesignSystem.TextMuted : .white)
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity)
-            .background(Color.white.opacity(0.06))
+            .background(Color.white.opacity(isDisabled ? 0.035 : 0.06))
             .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.medium))
             .overlay(
                 RoundedRectangle(cornerRadius: DesignSystem.Radius.medium)
                     .stroke(DesignSystem.BorderGlass, lineWidth: 1)
             )
         }
+        .disabled(isDisabled)
     }
 
     private func toggleStemPlayback(_ stem: Stem) {
@@ -211,6 +244,11 @@ struct ResultsView: View {
 
     private func exportStems() {
         guard !isExporting else { return }
+        guard !project.isPreviewOnly else {
+            exportStatus = "Full render is still running. Export unlocks when it reaches 100%."
+            return
+        }
+
         isExporting = true
         exportStatus = "Exporting stems..."
 

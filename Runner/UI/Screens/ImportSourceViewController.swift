@@ -223,33 +223,36 @@ class ImportSourceViewController: UIViewController {
         imagePicker.mediaTypes = ["public.movie"]
         present(imagePicker, animated: true)
     }
+
+    private func showImportError(_ error: Error) {
+        Logger.shared.error("Import failed: \(error.localizedDescription)")
+
+        let alert = UIAlertController(
+            title: "Import Gagal",
+            message: error.localizedDescription,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
 }
 
 // MARK: - UIDocumentPickerDelegate
 extension ImportSourceViewController: UIDocumentPickerDelegate {
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         guard let sourceURL = urls.first else { return }
-        
-        do {
-            let localURL = try AudioImportManager.shared.importFile(from: sourceURL)
-            
-            let fileExtension = localURL.pathExtension.lowercased()
-            let videoFormats = ["mov", "mp4", "m4v", "mkv"]
-            if videoFormats.contains(fileExtension), let onVideoSelected = onVideoSelected {
-                onVideoSelected(localURL)
-            } else {
-                onAudioSelected?(localURL)
+
+        Task.detached { [weak self] in
+            do {
+                let localURL = try await AudioImportManager.shared.importPlayableAudio(from: sourceURL)
+                await MainActor.run {
+                    self?.onAudioSelected?(localURL)
+                }
+            } catch {
+                await MainActor.run {
+                    self?.showImportError(error)
+                }
             }
-        } catch {
-            Logger.shared.error("Import failed: \(error.localizedDescription)")
-            
-            let alert = UIAlertController(
-                title: "Import Gagal",
-                message: error.localizedDescription,
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            present(alert, animated: true)
         }
     }
 }
@@ -279,7 +282,18 @@ extension ImportSourceViewController: UIImagePickerControllerDelegate, UINavigat
         picker.dismiss(animated: true) { [weak self] in
             if let mediaURL = info[.mediaURL] as? URL {
                 Logger.shared.info("Video picked: \(mediaURL.lastPathComponent)")
-                self?.onVideoSelected?(mediaURL)
+                Task.detached { [weak self] in
+                    do {
+                        let localURL = try await AudioImportManager.shared.importPlayableAudio(from: mediaURL)
+                        await MainActor.run {
+                            self?.onAudioSelected?(localURL)
+                        }
+                    } catch {
+                        await MainActor.run {
+                            self?.showImportError(error)
+                        }
+                    }
+                }
             } else {
                 Logger.shared.error("No video URL found in info dict")
             }

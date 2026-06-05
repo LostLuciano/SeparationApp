@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 struct AppRootView: View {
     @State private var selectedTab: Int = 0
@@ -33,16 +34,36 @@ struct AppRootView: View {
             .onAppear {
                 reloadProjects()
             }
+            .onReceive(NotificationCenter.default.publisher(for: .projectStoreDidUpdate).receive(on: RunLoop.main)) { notification in
+                let updatedID = notification.userInfo?["projectID"] as? UUID
+                reloadProjects(selecting: updatedID ?? selectedProject?.id)
+            }
             .navigationDestination(for: NavigationDestination.self) { destination in
                 switch destination {
+                case .actionsSplit:
+                    ActionsSplitView(
+                        latestProject: selectedProject ?? projects.first,
+                        onPresetSelected: { options in
+                            pendingProcessingOptions = options
+                            activePath.append(NavigationDestination.importSources)
+                        },
+                        onProjectSelected: { project in
+                            selectedProject = project
+                            activePath.append(NavigationDestination.results)
+                        },
+                        onNavigateToTool: navigateToTool
+                    )
                 case .studioTimeline:
                     StudioTimelineView(project: selectedProject, onNavigateToTool: navigateToTool)
                 case .importSources:
-                    ImportSourceView(onImportSelected: { importedURL, options in
-                        pendingInputURL = importedURL
-                        pendingProcessingOptions = options
-                        activePath.append(NavigationDestination.processing)
-                    })
+                    ImportSourceView(
+                        initialTemplate: pendingProcessingOptions,
+                        onImportSelected: { importedURL, options in
+                            pendingInputURL = importedURL
+                            pendingProcessingOptions = options
+                            activePath.append(NavigationDestination.processing)
+                        }
+                    )
                 case .processing:
                     if let inputURL = pendingInputURL {
                         ProcessingView(
@@ -93,7 +114,11 @@ struct AppRootView: View {
                 case .lyrics:
                     LyricsSyncDesignView(project: selectedProject)
                 case .recording:
-                    RecorderOnlyDesignView()
+                    RecordingView(onRecordFinished: { recordedURL in
+                        pendingInputURL = recordedURL
+                        pendingProcessingOptions = .allStems
+                        activePath.append(NavigationDestination.processing)
+                    })
                 case .recordCover:
                     RecordCoverDesignView()
                 case .loopPractice:
@@ -125,6 +150,7 @@ struct AppRootView: View {
                 }
             }
         }
+        .preferredColorScheme(.dark)
     }
 
     private var currentTabView: some View {
@@ -159,7 +185,7 @@ struct AppRootView: View {
             tabButton(index: 1, icon: "slider.horizontal.below.waveform", label: "Studio")
 
             Button(action: {
-                activePath.append(NavigationDestination.recordCover)
+                activePath.append(NavigationDestination.actionsSplit)
             }) {
                 ZStack {
                     Circle()
@@ -173,7 +199,7 @@ struct AppRootView: View {
                         .frame(width: 50, height: 50)
                         .shadow(color: DesignSystem.AccentRed.opacity(0.4), radius: 6, x: 0, y: 3)
 
-                    Image(systemName: "record.circle.fill")
+                    Image(systemName: "plus")
                         .foregroundColor(.white)
                         .font(.system(size: 20, weight: .bold))
                 }
@@ -218,7 +244,10 @@ struct AppRootView: View {
 
     private func navigateToTool(_ tool: String) {
         switch tool {
-        case "Import Audio", "Import Source", "Stem Separation":
+        case "Actions", "Split Actions", "Split Stems", "Stem Separation":
+            activePath.append(NavigationDestination.actionsSplit)
+        case "Import Audio", "Import Source":
+            pendingProcessingOptions = .splits
             activePath.append(NavigationDestination.importSources)
         case "Studio Timeline", "Studio":
             activePath.append(NavigationDestination.studioTimeline)
@@ -228,10 +257,8 @@ struct AppRootView: View {
             activePath.append(NavigationDestination.analyzer)
         case "Lyrics Viewer", "Lyrics Sync":
             activePath.append(NavigationDestination.lyrics)
-        case "Record", "Recording", "Recorder":
+        case "Record", "Recording", "Recorder", "Record Cover":
             activePath.append(NavigationDestination.recording)
-        case "Record Cover":
-            activePath.append(NavigationDestination.recordCover)
         case "Loop Practice", "Practice Loop":
             activePath.append(NavigationDestination.loopPractice)
         case "Chords View", "Chords":
@@ -240,7 +267,7 @@ struct AppRootView: View {
             activePath.append(NavigationDestination.audioDevices)
         case "Equalizer":
             activePath.append(NavigationDestination.equalizer)
-        case "Export":
+        case "Export", "Export Mix":
             activePath.append(NavigationDestination.export)
         case "Settings":
             activePath.append(NavigationDestination.settings)
@@ -278,6 +305,7 @@ struct AppRootView: View {
 }
 
 enum NavigationDestination: Hashable {
+    case actionsSplit
     case studioTimeline
     case importSources
     case processing

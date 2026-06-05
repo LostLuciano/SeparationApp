@@ -2,7 +2,7 @@ import Foundation
 import AVFoundation
 
 /// Model tracking a chord identification duration segment.
-public struct ChordSegment: Codable {
+public struct ChordSegment: Codable, Sendable {
     public let name: String
     public let startTime: Double
     public let endTime: Double

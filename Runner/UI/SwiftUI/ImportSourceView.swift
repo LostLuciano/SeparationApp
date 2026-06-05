@@ -11,13 +11,23 @@ private struct ImportSourceOption: Identifiable {
 }
 
 struct ImportSourceView: View {
+    var initialTemplate: StemProcessingOptions = .allStems
     var onImportSelected: (URL, StemProcessingOptions) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var activeSource: ImportSourceOption?
     @State private var isDocumentPickerPresented = false
     @State private var importErrorMessage: String?
-    @State private var selectedTemplate = StemProcessingOptions.allStems
+    @State private var selectedTemplate: StemProcessingOptions
+
+    init(
+        initialTemplate: StemProcessingOptions = .allStems,
+        onImportSelected: @escaping (URL, StemProcessingOptions) -> Void
+    ) {
+        self.initialTemplate = initialTemplate
+        self.onImportSelected = onImportSelected
+        _selectedTemplate = State(initialValue: initialTemplate)
+    }
 
     private let sources = [
         ImportSourceOption(
@@ -80,6 +90,7 @@ struct ImportSourceView: View {
         .navigationBarBackButtonHidden()
         .sheet(isPresented: $isDocumentPickerPresented) {
             DocumentPickerView(
+                allowedTypes: activeSource?.allowedTypes ?? FileImportManager.shared.getSupportedUTTypes(),
                 onPick: { importedURL in
                     isDocumentPickerPresented = false
                     onImportSelected(importedURL, selectedTemplate)

@@ -1,4 +1,5 @@
 import SwiftUI
+import AVFoundation
 
 struct RecordingView: View {
     var onRecordFinished: (URL) -> Void
@@ -10,8 +11,10 @@ struct RecordingView: View {
     @State private var isMetronomeOn: Bool = false
     @State private var currentRecordingURL: URL?
     @State private var errorMessage: String?
+    @State private var isRequestingMicrophonePermission = false
 
-    private let recorder = RecordingManager()
+    @State private var recorder = RecordingManager()
+    @State private var metronome = MetronomeManager()
     private let timer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
 
     var timeString: String {
@@ -51,11 +54,15 @@ struct RecordingView: View {
             if isRecording {
                 recorder.stopRecording()
             }
+            metronome.stop()
         }
         .onReceive(timer) { _ in
             if isRecording {
                 secondsElapsed += 1
             }
+        }
+        .onAppear {
+            refreshInputSource()
         }
     }
 
@@ -196,7 +203,7 @@ struct RecordingView: View {
     }
 
     private var inputSourceButton: some View {
-        Button(action: { }) {
+        Button(action: refreshInputSource) {
             VStack(spacing: 4) {
                 Image(systemName: "mic.fill")
                     .font(.system(size: 14))
@@ -218,7 +225,7 @@ struct RecordingView: View {
     }
 
     private var metronomeButton: some View {
-        Button(action: { isMetronomeOn.toggle() }) {
+        Button(action: toggleMetronome) {
             VStack(spacing: 4) {
                 Image(systemName: isMetronomeOn ? "metronome.fill" : "metronome")
                     .font(.system(size: 14))
@@ -276,6 +283,8 @@ struct RecordingView: View {
                     .animation(.spring(response: 0.35, dampingFraction: 0.7), value: isRecording)
             }
         }
+        .disabled(isRequestingMicrophonePermission)
+        .opacity(isRequestingMicrophonePermission ? 0.55 : 1.0)
     }
 
     private var finishButton: some View {
@@ -309,20 +318,59 @@ struct RecordingView: View {
             recorder.stopRecording()
             isRecording = false
         } else {
-            do {
-                let recordingsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                    .appendingPathComponent("MusicXNA_Recordings")
-                try FileManager.default.createDirectory(at: recordingsDirectory, withIntermediateDirectories: true)
+            guard !isRequestingMicrophonePermission else { return }
+            isRequestingMicrophonePermission = true
 
-                let outputURL = recordingsDirectory.appendingPathComponent("recording-\(Int(Date().timeIntervalSince1970)).wav")
-                try recorder.startRecording(to: outputURL)
-                currentRecordingURL = outputURL
-                secondsElapsed = 0
-                isRecording = true
-            } catch {
-                isRecording = false
-                errorMessage = error.localizedDescription
+            PermissionManager.shared.requestMicrophonePermission { granted in
+                isRequestingMicrophonePermission = false
+
+                guard granted else {
+                    errorMessage = "Microphone permission is required to record audio. Enable it in Settings, then try again."
+                    PermissionManager.shared.showPermissionDeniedAlert(for: .microphone)
+                    return
+                }
+
+                startRecording()
             }
+        }
+    }
+
+    private func startRecording() {
+        do {
+            let recordingsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                .appendingPathComponent("MusicXNA_Recordings")
+            try FileManager.default.createDirectory(at: recordingsDirectory, withIntermediateDirectories: true)
+
+            let outputURL = recordingsDirectory.appendingPathComponent("recording-\(Int(Date().timeIntervalSince1970)).wav")
+            try recorder.startRecording(to: outputURL)
+            currentRecordingURL = outputURL
+            secondsElapsed = 0
+            isRecording = true
+        } catch {
+            isRecording = false
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func toggleMetronome() {
+        isMetronomeOn.toggle()
+
+        if isMetronomeOn {
+            metronome.start(bpm: 120)
+        } else {
+            metronome.stop()
+        }
+    }
+
+    private func refreshInputSource() {
+        let session = AVAudioSession.sharedInstance()
+        if let input = session.currentRoute.inputs.first {
+            inputSource = input.portName
+        } else if let input = session.availableInputs?.first {
+            inputSource = input.portName
+        } else {
+            inputSource = "No Microphone"
+            errorMessage = "No active microphone input was found."
         }
     }
 }

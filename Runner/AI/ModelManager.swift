@@ -109,4 +109,56 @@ public class ModelManager {
     public func getBeatModel() -> MLModel? {
         return beatModel
     }
+
+    /// Runs a tiny dummy prediction so CoreML can compile/cache analysis models early.
+    public func warmUpModels() {
+        warmUp(model: chordModel, label: "Chord Detection")
+        warmUp(model: beatModel, label: "Beat & Tempo")
+    }
+
+    private func warmUp(model: MLModel?, label: String) {
+        guard let model else { return }
+
+        do {
+            let provider = try dummyInputProvider(for: model)
+            _ = try model.prediction(from: provider)
+            Logger.shared.debug("ModelManager: Warmed \(label) model")
+        } catch {
+            Logger.shared.warning("ModelManager: Warm-up skipped for \(label): \(error.localizedDescription)")
+        }
+    }
+
+    private func dummyInputProvider(for model: MLModel) throws -> MLFeatureProvider {
+        var values: [String: MLFeatureValue] = [:]
+
+        for (name, description) in model.modelDescription.inputDescriptionsByName {
+            switch description.type {
+            case .multiArray:
+                guard let constraint = description.multiArrayConstraint else { continue }
+                let shape = constraint.shape.map { NSNumber(value: max(1, $0.intValue)) }
+                let elementCount = shape.reduce(1) { partial, number in
+                    partial * max(1, number.intValue)
+                }
+
+                guard elementCount <= 2_000_000 else {
+                    throw NSError(
+                        domain: "ModelManager",
+                        code: 413,
+                        userInfo: [NSLocalizedDescriptionKey: "Dummy input would be too large."]
+                    )
+                }
+
+                let array = try MLMultiArray(shape: shape, dataType: constraint.dataType)
+                values[name] = MLFeatureValue(multiArray: array)
+            default:
+                throw NSError(
+                    domain: "ModelManager",
+                    code: 400,
+                    userInfo: [NSLocalizedDescriptionKey: "Unsupported warm-up input type for \(name)."]
+                )
+            }
+        }
+
+        return try MLDictionaryFeatureProvider(dictionary: values)
+    }
 }

@@ -21,6 +21,7 @@ public class CoreMLStemSeparatorWrapper {
         processingMode: String? = nil,
         modelQuality: String? = nil,
         selectedStems: [String]? = nil,
+        previewDuration: TimeInterval? = nil,
         onProgress: @escaping (String, Double) -> Void
     ) async throws -> [String: URL] {
         guard processingGate.requestOperation(.separation) else {
@@ -60,6 +61,7 @@ public class CoreMLStemSeparatorWrapper {
                 processingMode: processingMode,
                 modelQuality: modelQuality,
                 selectedStems: selectedStems,
+                previewDuration: previewDuration,
                 onProgress: wrappedProgress
             )
             

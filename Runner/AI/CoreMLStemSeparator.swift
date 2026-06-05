@@ -147,6 +147,7 @@ public class CoreMLStemSeparator {
         processingMode: String?,
         modelQuality: String?,
         selectedStems: [String]? = nil,
+        previewDuration: TimeInterval? = nil,
         onProgress: @escaping (String, Double) -> Void
     ) async throws -> [String: URL] {
         guard FileManager.default.fileExists(atPath: audioURL.path) else {
@@ -160,7 +161,7 @@ public class CoreMLStemSeparator {
         onProgress("Memulai pemisahan stem...", 0.02)
         onProgress("Memeriksa format file audio...", 0.04)
 
-        let readableURL = try await transcodeToM4AIfNeeded(url: audioURL)
+        let readableURL = try await transcodeToM4AIfNeeded(url: audioURL, maxDuration: previewDuration)
         defer {
             if readableURL != audioURL {
                 try? FileManager.default.removeItem(at: readableURL)
@@ -172,6 +173,7 @@ public class CoreMLStemSeparator {
                 audioURL: readableURL,
                 modelQuality: modelQuality,
                 selectedStems: selectedStems,
+                previewDuration: previewDuration,
                 onProgress: onProgress
             )
             onProgress("Proses pemisahan stem berhasil diselesaikan!", 1.0)
@@ -182,7 +184,7 @@ public class CoreMLStemSeparator {
         }
     }
 
-    private func transcodeToM4AIfNeeded(url: URL) async throws -> URL {
+    private func transcodeToM4AIfNeeded(url: URL, maxDuration: TimeInterval?) async throws -> URL {
         do {
             _ = try AVAudioFile(forReading: url)
             return url
@@ -204,6 +206,12 @@ public class CoreMLStemSeparator {
 
         exportSession.outputURL = outputURL
         exportSession.outputFileType = .m4a
+        if let maxDuration, maxDuration > 0 {
+            exportSession.timeRange = CMTimeRange(
+                start: .zero,
+                duration: CMTime(seconds: maxDuration, preferredTimescale: 600)
+            )
+        }
 
         await exportSession.export()
 
@@ -222,6 +230,7 @@ public class CoreMLStemSeparator {
         audioURL: URL,
         modelQuality: String?,
         selectedStems: [String]?,
+        previewDuration: TimeInterval?,
         onProgress: @escaping (String, Double) -> Void
     ) async throws -> [String: URL] {
         onProgress("Memuat model CoreML...", 0.05)
@@ -233,7 +242,7 @@ public class CoreMLStemSeparator {
         onProgress("Model aktif: \(loadedModel.name)", 0.07)
 
         onProgress("Menyiapkan streaming PCM 44.1kHz stereo...", 0.1)
-        let streamingURL = try normalizeAudioForStreamingIfNeeded(url: audioURL)
+        let streamingURL = try normalizeAudioForStreamingIfNeeded(url: audioURL, maxDuration: previewDuration)
         defer {
             if streamingURL != audioURL {
                 try? FileManager.default.removeItem(at: streamingURL)
@@ -475,9 +484,10 @@ public class CoreMLStemSeparator {
         }
     }
 
-    private func normalizeAudioForStreamingIfNeeded(url: URL) throws -> URL {
+    private func normalizeAudioForStreamingIfNeeded(url: URL, maxDuration: TimeInterval?) throws -> URL {
         let sourceFile = try AVAudioFile(forReading: url)
         let sourceFormat = sourceFile.processingFormat
+        let hasDurationLimit = (maxDuration ?? 0) > 0
 
         guard let targetFormat = AVAudioFormat(
             commonFormat: .pcmFormatFloat32,
@@ -498,7 +508,7 @@ public class CoreMLStemSeparator {
             sourceFormat.commonFormat == .pcmFormatFloat32 &&
             !sourceFormat.isInterleaved
 
-        if alreadyStreamable {
+        if alreadyStreamable && !hasDurationLimit {
             return url
         }
 
@@ -519,9 +529,18 @@ public class CoreMLStemSeparator {
 
         let outputFile = try AVAudioFile(forWriting: outputURL, settings: targetFormat.settings)
         let readCapacity: AVAudioFrameCount = 32768
+        let sourceFrameLimit: AVAudioFramePosition
+        if let maxDuration, maxDuration > 0 {
+            sourceFrameLimit = min(
+                sourceFile.length,
+                AVAudioFramePosition(maxDuration * sourceFormat.sampleRate)
+            )
+        } else {
+            sourceFrameLimit = sourceFile.length
+        }
 
-        while sourceFile.framePosition < sourceFile.length {
-            let remainingFrames = sourceFile.length - sourceFile.framePosition
+        while sourceFile.framePosition < sourceFrameLimit {
+            let remainingFrames = sourceFrameLimit - sourceFile.framePosition
             let frameCount = min(readCapacity, AVAudioFrameCount(remainingFrames))
 
             guard let inputBuffer = AVAudioPCMBuffer(

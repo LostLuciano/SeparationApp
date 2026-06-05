@@ -1,5 +1,9 @@
 import Foundation
 
+extension Notification.Name {
+    static let projectStoreDidUpdate = Notification.Name("MusicXNAProjectStoreDidUpdate")
+}
+
 /// JSON-based project persistence using FileManager.
 public class ProjectStore {
     
@@ -8,6 +12,7 @@ public class ProjectStore {
     private let projectDirectory: URL
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()
+    private let lock = NSLock()
     
     public init() {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
@@ -17,18 +22,34 @@ public class ProjectStore {
     
     /// Save a project to JSON file
     public func save(_ project: StemProject) throws {
+        lock.lock()
         let projectDir = projectDirectory.appendingPathComponent(project.id.uuidString)
-        try FileManager.default.createDirectory(at: projectDir, withIntermediateDirectories: true)
-        
         let jsonURL = projectDir.appendingPathComponent("project.json")
-        let data = try encoder.encode(project)
-        try data.write(to: jsonURL)
+
+        do {
+            try FileManager.default.createDirectory(at: projectDir, withIntermediateDirectories: true)
+            let data = try encoder.encode(project)
+            try data.write(to: jsonURL)
+            lock.unlock()
+        } catch {
+            lock.unlock()
+            throw error
+        }
+
+        NotificationCenter.default.post(
+            name: .projectStoreDidUpdate,
+            object: nil,
+            userInfo: ["projectID": project.id]
+        )
         
         print("ProjectStore: Saved project \(project.name) to \(jsonURL.path)")
     }
     
     /// Load a project by ID
     public func load(_ id: UUID) throws -> StemProject {
+        lock.lock()
+        defer { lock.unlock() }
+
         let projectDir = projectDirectory.appendingPathComponent(id.uuidString)
         let jsonURL = projectDir.appendingPathComponent("project.json")
         
@@ -44,6 +65,9 @@ public class ProjectStore {
     
     /// List all projects
     public func listProjects() -> [StemProject] {
+        lock.lock()
+        defer { lock.unlock() }
+
         var projects: [StemProject] = []
         
         if let contents = try? FileManager.default.contentsOfDirectory(
@@ -63,11 +87,33 @@ public class ProjectStore {
         projects.sort { $0.createdDate > $1.createdDate }
         return projects
     }
+
+    public func findReusableProject(sourceHash: String, requiredStems: [String]) -> StemProject? {
+        listProjects().first { project in
+            project.sourceHash == sourceHash &&
+            project.status == .separated &&
+            project.hasStems(requiredStems)
+        }
+    }
     
     /// Delete a project
     public func delete(_ id: UUID) throws {
+        lock.lock()
         let projectDir = projectDirectory.appendingPathComponent(id.uuidString)
-        try FileManager.default.removeItem(at: projectDir)
+
+        do {
+            try FileManager.default.removeItem(at: projectDir)
+            lock.unlock()
+        } catch {
+            lock.unlock()
+            throw error
+        }
+
+        NotificationCenter.default.post(
+            name: .projectStoreDidUpdate,
+            object: nil,
+            userInfo: ["projectID": id]
+        )
         print("ProjectStore: Deleted project \(id.uuidString)")
     }
     

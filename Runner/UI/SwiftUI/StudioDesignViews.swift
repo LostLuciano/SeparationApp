@@ -392,7 +392,7 @@ struct HomeDashboardView: View {
                 Text(context.hasProject ? context.artist : "Choose a song before processing")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(DesignSystem.TextSecondary)
-                Text(context.hasProject ? "\(projects.first?.stemPaths.count ?? 0) stems - \(context.duration)" : "No active session")
+                Text(context.hasProject ? (projects.first?.processingSummary ?? "\(projects.first?.stemPaths.count ?? 0) stems - \(context.duration)") : "No active session")
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(DesignSystem.TextMuted)
                 ProgressView(value: context.hasProject ? 1.0 : 0.0)
@@ -400,7 +400,7 @@ struct HomeDashboardView: View {
                     .scaleEffect(y: 0.65)
             }
             Spacer()
-            Button(action: { onNavigateToTool(context.hasProject ? "Studio Timeline" : "Import Source") }) {
+            Button(action: { onNavigateToTool(context.hasProject ? "Studio Timeline" : "Split Actions") }) {
                 Image(systemName: context.hasProject ? "play.fill" : "plus")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(.white)
@@ -420,7 +420,7 @@ struct HomeDashboardView: View {
                 .foregroundStyle(.white)
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                actionTile("Split Stems", "Separate vocals, drums", "camera.macro", true, "Import Source")
+                actionTile("Split Stems", "Separate vocals, drums", "camera.macro", true, "Split Actions")
                 actionTile("Record Cover", "Video + audio input", "video.fill", true, "Record Cover")
                 actionTile("Practice Loop", "Loop and isolate", "repeat", false, "Loop Practice")
                 actionTile("AI Analyzer", "Key, BPM, chords", "waveform.path.ecg", false, "AI Analyzer")
@@ -480,7 +480,7 @@ struct HomeDashboardView: View {
                     } else {
                         ForEach(projects.prefix(6)) { project in
                             Button(action: { onProjectSelected(project) }) {
-                                recentCard(title: project.name, subtitle: "\(project.stemPaths.count) Stems - \(project.displayDuration)", icon: "waveform")
+                                recentCard(title: project.name, subtitle: project.processingSummary, icon: "waveform")
                             }
                         }
                     }
@@ -542,6 +542,262 @@ struct HomeDashboardView: View {
                 .lineLimit(1)
         }
         .frame(width: 92, alignment: .leading)
+    }
+}
+
+private struct SplitPresetItem: Identifiable {
+    let id = UUID()
+    let title: String
+    let subtitle: String
+    let options: StemProcessingOptions
+    let icons: [String]
+
+    var stemCountText: String {
+        "\(options.selectedStems.count) Stemz"
+    }
+}
+
+struct ActionsSplitView: View {
+    var latestProject: StemProject?
+    var onPresetSelected: (StemProcessingOptions) -> Void
+    var onProjectSelected: (StemProject) -> Void
+    var onNavigateToTool: (String) -> Void
+
+    private let actionTabs = ["Split", "Lagu Baru", "Bisu", "Ekstrak", "Peralatan"]
+    private let presets: [SplitPresetItem] = [
+        SplitPresetItem(
+            title: "Suara",
+            subtitle: "Vocals, Other",
+            options: .voice,
+            icons: ["mic.fill", "waveform"]
+        ),
+        SplitPresetItem(
+            title: "Klasik",
+            subtitle: "Vocals, Bass, Drums, Other",
+            options: .classic,
+            icons: ["mic.fill", "bassguitar.fill", "drumsticks.fill", "waveform"]
+        ),
+        SplitPresetItem(
+            title: "Gitar",
+            subtitle: "Vocals, Guitar, Bass, Drums, Other",
+            options: .guitar,
+            icons: ["mic.fill", "guitars.fill", "bassguitar.fill", "drumsticks.fill", "waveform"]
+        ),
+        SplitPresetItem(
+            title: "Piano",
+            subtitle: "Vocals, Piano, Bass, Drums, Other",
+            options: .piano,
+            icons: ["mic.fill", "pianokeys", "bassguitar.fill", "drumsticks.fill", "waveform"]
+        ),
+        SplitPresetItem(
+            title: "Splits",
+            subtitle: "Vocals, Drums, Bass, Guitar, Piano, Other",
+            options: .splits,
+            icons: ["mic.fill", "drumsticks.fill", "bassguitar.fill", "guitars.fill", "pianokeys", "waveform"]
+        )
+    ]
+
+    var body: some View {
+        StudioScreen(title: "Tindakan", subtitle: "Split cepat, import, dan tools", showsBack: true, trailingIcon: "slider.horizontal.3") {
+            VStack(alignment: .leading, spacing: 16) {
+                tabStrip
+                splitSection
+                utilityActions
+                latestProjectCard
+            }
+        }
+    }
+
+    private var tabStrip: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                ForEach(actionTabs, id: \.self) { tab in
+                    Button(action: {
+                        handleTab(tab)
+                    }) {
+                        Text(tab)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(tab == "Split" ? DesignSystem.TextPrimaryLight : DesignSystem.TextSecondary)
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(tab == "Split" ? Color.white : Color.white.opacity(0.06))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .stroke(tab == "Split" ? Color.white.opacity(0.25) : DesignSystem.BorderGlass, lineWidth: 0.9)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.vertical, 2)
+        }
+    }
+
+    private var splitSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Split")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(.white)
+
+            VStack(spacing: 12) {
+                ForEach(presets) { preset in
+                    presetCard(preset)
+                }
+            }
+        }
+    }
+
+    private func presetCard(_ preset: SplitPresetItem) -> some View {
+        Button(action: { onPresetSelected(preset.options) }) {
+            HStack(spacing: 14) {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 8) {
+                        Text(preset.title)
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+
+                        Text(preset.stemCountText)
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(DesignSystem.TextSecondary)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(Color.white.opacity(0.08))
+                            .clipShape(Capsule())
+                    }
+
+                    Text(preset.subtitle)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(DesignSystem.TextSecondary)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
+                }
+
+                Spacer(minLength: 4)
+
+                HStack(spacing: -4) {
+                    ForEach(Array(preset.icons.enumerated()), id: \.offset) { index, icon in
+                        stemIcon(icon, color: iconColor(index))
+                    }
+                }
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity, minHeight: 86)
+            .studioGlass(cornerRadius: 18)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func stemIcon(_ icon: String, color: Color) -> some View {
+        Image(systemName: icon)
+            .font(.system(size: 12, weight: .bold))
+            .foregroundStyle(color)
+            .frame(width: 28, height: 28)
+            .background(Color.black.opacity(0.18))
+            .clipShape(Circle())
+            .overlay(Circle().stroke(Color.white.opacity(0.16), lineWidth: 0.8))
+    }
+
+    private func iconColor(_ index: Int) -> Color {
+        let colors: [Color] = [
+            Color(hex: "C084FC"),
+            Color(hex: "22D3EE"),
+            Color(hex: "F43F5E"),
+            Color(hex: "4ADE80"),
+            Color(hex: "FACC15"),
+            Color(hex: "38BDF8")
+        ]
+        return colors[index % colors.count]
+    }
+
+    private var utilityActions: some View {
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+            compactAction("Import Audio", "folder.fill", "Import Source")
+            compactAction("Record", "record.circle.fill", "Recording")
+            compactAction("Analyze", "waveform.path.ecg", "AI Analyzer")
+            compactAction("Export", "square.and.arrow.up", "Export")
+        }
+    }
+
+    private func compactAction(_ title: String, _ icon: String, _ route: String) -> some View {
+        Button(action: { onNavigateToTool(route) }) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(DesignSystem.SoftRed)
+                Text(title)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
+            .studioGlass(cornerRadius: 12)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var latestProjectCard: some View {
+        Group {
+            if let latestProject {
+                Button(action: { onProjectSelected(latestProject) }) {
+                    HStack(spacing: 12) {
+                        ArtworkTile(size: 52, icon: "waveform")
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(latestProject.name)
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+
+                            Text(latestProject.processingSummary)
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundStyle(DesignSystem.TextSecondary)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+
+                            if latestProject.isPreviewOnly {
+                                ProgressView(value: latestProject.renderProgress ?? 0)
+                                    .tint(DesignSystem.SoftRed)
+                                    .scaleEffect(y: 0.65)
+                            }
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "play.fill")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundStyle(.white)
+                            .frame(width: 44, height: 44)
+                            .background(DesignSystem.AccentRed.opacity(0.78))
+                            .clipShape(Circle())
+                    }
+                    .padding(12)
+                    .studioGlass(cornerRadius: 18)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func handleTab(_ tab: String) {
+        switch tab {
+        case "Lagu Baru":
+            onPresetSelected(.splits)
+        case "Bisu":
+            onNavigateToTool("Mixer")
+        case "Ekstrak":
+            onPresetSelected(.splits)
+        case "Peralatan":
+            onNavigateToTool("Studio Timeline")
+        default:
+            break
+        }
     }
 }
 

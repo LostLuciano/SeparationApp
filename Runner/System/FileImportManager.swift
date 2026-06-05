@@ -13,15 +13,15 @@ public class FileImportManager {
     ]
     
     public func getSupportedAudioUTTypes() -> [UTType] {
-        return [.item]
+        supportedTypes(forExtensions: ["mp3", "wav", "m4a", "aac", "aiff", "aif", "caf", "flac"], fallback: .audio)
     }
     
     public func getSupportedVideoUTTypes() -> [UTType] {
-        return [.item]
+        supportedTypes(forExtensions: ["mov", "mp4", "m4v", "mkv"], fallback: .movie)
     }
     
     public func getSupportedUTTypes() -> [UTType] {
-        return [.item]
+        Array(Set(getSupportedAudioUTTypes() + getSupportedVideoUTTypes() + [.item]))
     }
     
     public init() {}
@@ -80,5 +80,12 @@ public class FileImportManager {
     /// Get list of supported file extensions
     public func getSupportedExtensions() -> [String] {
         return supportedFormats
+    }
+
+    private func supportedTypes(forExtensions extensions: [String], fallback: UTType) -> [UTType] {
+        var types = [fallback]
+        types.append(contentsOf: extensions.compactMap { UTType(filenameExtension: $0) })
+        types.append(.item)
+        return Array(Set(types))
     }
 }

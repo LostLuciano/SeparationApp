@@ -3,7 +3,7 @@ import AVFoundation
 import Accelerate
 
 /// Struct mapping a timing beat index boundary.
-public struct BeatMarker: Codable {
+public struct BeatMarker: Codable, Sendable {
     public let time: Double
     public let index: Int
 
@@ -14,7 +14,7 @@ public struct BeatMarker: Codable {
 }
 
 /// Consolidated struct of tempo metadata.
-public struct BeatTempoResult: Codable {
+public struct BeatTempoResult: Codable, Sendable {
     public let tempo: Double
     public let beatTimings: [BeatMarker]
     public let timeSignature: String

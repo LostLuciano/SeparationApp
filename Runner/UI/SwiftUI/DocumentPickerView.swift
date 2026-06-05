@@ -2,14 +2,16 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct DocumentPickerView: UIViewControllerRepresentable {
+    var allowedTypes: [UTType] = AudioImportManager.allowedUTTypes
     var onPick: (URL) -> Void
     var onError: (Error) -> Void
 
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: AudioImportManager.allowedUTTypes, asCopy: false)
+        let contentTypes = allowedTypes.isEmpty ? AudioImportManager.allowedUTTypes : allowedTypes
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: contentTypes, asCopy: false)
         picker.allowsMultipleSelection = false
         picker.delegate = context.coordinator
-        Logger.shared.info("Opening Files picker")
+        Logger.shared.info("Opening Files picker with \(contentTypes.count) allowed content types")
         return picker
     }
 
@@ -33,11 +35,17 @@ struct DocumentPickerView: UIViewControllerRepresentable {
                 return
             }
 
-            do {
-                let localURL = try AudioImportManager.shared.importFile(from: sourceURL)
-                parent.onPick(localURL)
-            } catch {
-                parent.onError(error)
+            Task {
+                do {
+                    let localURL = try await AudioImportManager.shared.importPlayableAudio(from: sourceURL)
+                    await MainActor.run {
+                        parent.onPick(localURL)
+                    }
+                } catch {
+                    await MainActor.run {
+                        parent.onError(error)
+                    }
+                }
             }
         }
 

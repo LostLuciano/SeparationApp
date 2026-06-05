@@ -283,7 +283,7 @@ struct HomeView: View {
     }
 
     private func projectSummary(_ project: StemProject) -> String {
-        "\(project.stemPaths.count) Stems - \(project.displayDuration) - \(formatDate(project.createdAt))"
+        "\(project.processingSummary) - \(formatDate(project.createdAt))"
     }
 
     private func formatDate(_ date: Date) -> String {

@@ -56,11 +56,13 @@ struct ProcessingView: View {
     @State private var startedAt = Date()
     @State private var steps: [ProcessingStep] = [
         ProcessingStep(name: "Decode Audio", status: .inProgress),
-        ProcessingStep(name: "STFT Transform", status: .pending),
+        ProcessingStep(name: "Preview Cache", status: .pending),
         ProcessingStep(name: "AI Inference", status: .pending),
-        ProcessingStep(name: "Reconstruction", status: .pending),
-        ProcessingStep(name: "Save Project", status: .pending)
+        ProcessingStep(name: "Open Player", status: .pending),
+        ProcessingStep(name: "Full Render", status: .pending)
     ]
+
+    private let previewDuration: TimeInterval = 12.0
 
     private let elapsedTimer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
 
@@ -142,7 +144,7 @@ struct ProcessingView: View {
     }
 
     private var progressRing: some View {
-        GlassProgressRing(progress: progress, subtitle: "Separating real audio")
+        GlassProgressRing(progress: progress, subtitle: "Preparing playable stems")
             .padding(.top, 10)
     }
 
@@ -291,28 +293,55 @@ struct ProcessingView: View {
         guard shouldStart else { return }
 
         do {
+            let sourceHash = try? AudioImportManager.shared.contentHash(for: audioURL)
+            if let sourceHash,
+               let cachedProject = ProjectStore.shared.findReusableProject(
+                    sourceHash: sourceHash,
+                    requiredStems: options.selectedStems
+               ) {
+                await MainActor.run {
+                    progress = 1.0
+                    statusMessage = "Cached project ready."
+                    isFinished = true
+                    steps = steps.map { ProcessingStep(name: $0.name, status: .completed) }
+                    onComplete(cachedProject)
+                }
+                return
+            }
+
             let generatedStems = try await CoreMLStemSeparatorWrapper.shared.separate(
                 audioURL: audioURL,
                 processingMode: "Performance",
                 modelQuality: "Performance",
-                selectedStems: options.selectedStems
+                selectedStems: options.selectedStems,
+                previewDuration: previewDuration
             ) { message, value in
                 Task { @MainActor in
-                    updateProgress(value, message: message)
+                    updateProgress(value, message: "Preview: \(message)")
                 }
             }
 
             await MainActor.run {
-                updateProgress(0.94, message: "Analyzing tempo and chords...")
+                updateProgress(0.94, message: "Saving quick playable project...")
             }
 
-            let project = try await createProject(from: audioURL, generatedStems: generatedStems)
+            let project = try await createProject(
+                from: audioURL,
+                generatedStems: generatedStems,
+                sourceHash: sourceHash,
+                status: .separating,
+                runAnalysis: false
+            )
+
+            startFullSeparationInBackground(projectID: project.id)
 
             await MainActor.run {
                 progress = 1.0
-                statusMessage = "Project saved successfully."
+                statusMessage = "Preview ready. Full song keeps rendering in the background."
                 isFinished = true
-                steps = steps.map { ProcessingStep(name: $0.name, status: .completed) }
+                steps = steps.enumerated().map { index, step in
+                    ProcessingStep(name: step.name, status: index < 4 ? .completed : .inProgress)
+                }
                 onComplete(project)
             }
         } catch {
@@ -340,7 +369,13 @@ struct ProcessingView: View {
         }
     }
 
-    private func createProject(from sourceURL: URL, generatedStems: [String: URL]) async throws -> StemProject {
+    private func createProject(
+        from sourceURL: URL,
+        generatedStems: [String: URL],
+        sourceHash: String?,
+        status: ProjectStatus,
+        runAnalysis: Bool
+    ) async throws -> StemProject {
         guard !generatedStems.isEmpty else {
             throw NSError(
                 domain: "ProcessingView",
@@ -362,7 +397,9 @@ struct ProcessingView: View {
             sampleRate: metadata.sampleRate,
             bpm: nil,
             key: nil,
-            status: .separated,
+            status: status,
+            sourceHash: sourceHash,
+            renderProgress: status == .separating ? previewDuration / max(metadata.duration, previewDuration) : 1.0,
             stemPaths: [:],
             chordSegments: [],
             beatResult: nil,
@@ -382,6 +419,75 @@ struct ProcessingView: View {
             project.setStemPath(stem, url: destination)
         }
 
+        if runAnalysis {
+            await Self.enrichProjectAnalysis(&project, sourceURL: sourceURL)
+        }
+
+        try ProjectStore.shared.save(project)
+        return project
+    }
+
+    private func startFullSeparationInBackground(projectID: UUID) {
+        let sourceURL = audioURL
+        let selectedOptions = options
+
+        Task.detached(priority: .utility) {
+            var lastSavedProgress = 0.0
+            do {
+                Logger.shared.info("Background full separation started for project \(projectID.uuidString)")
+                let fullStems = try await CoreMLStemSeparatorWrapper.shared.separate(
+                    audioURL: sourceURL,
+                    processingMode: "Performance",
+                    modelQuality: "Performance",
+                    selectedStems: selectedOptions.selectedStems,
+                    previewDuration: nil
+                ) { message, value in
+                    Logger.shared.info("Background full separation \(Int(value * 100))%: \(message)")
+                    if value - lastSavedProgress >= 0.08 || value >= 0.99 {
+                        lastSavedProgress = value
+                        do {
+                            var project = try ProjectStore.shared.load(projectID)
+                            project.status = .separating
+                            project.renderProgress = min(max(value, project.renderProgress ?? 0), 0.99)
+                            try ProjectStore.shared.save(project)
+                        } catch {
+                            Logger.shared.error("Could not update render progress: \(error.localizedDescription)")
+                        }
+                    }
+                }
+
+                var project = try ProjectStore.shared.load(projectID)
+                try FileManager.default.createDirectory(at: project.stemDirectory, withIntermediateDirectories: true)
+
+                for (stem, tempURL) in fullStems {
+                    let fileExtension = tempURL.pathExtension.isEmpty ? "m4a" : tempURL.pathExtension
+                    let destination = project.stemDirectory.appendingPathComponent("\(stem).\(fileExtension)")
+                    if FileManager.default.fileExists(atPath: destination.path) {
+                        try FileManager.default.removeItem(at: destination)
+                    }
+                    try FileManager.default.copyItem(at: tempURL, to: destination)
+                    project.setStemPath(stem, url: destination)
+                }
+
+                await ProcessingView.enrichProjectAnalysis(&project, sourceURL: sourceURL)
+                project.status = .separated
+                project.renderProgress = 1.0
+                try ProjectStore.shared.save(project)
+                Logger.shared.info("Background full separation finished for project \(projectID.uuidString)")
+            } catch {
+                Logger.shared.error("Background full separation failed: \(error.localizedDescription)")
+                do {
+                    var project = try ProjectStore.shared.load(projectID)
+                    project.status = .failed
+                    try ProjectStore.shared.save(project)
+                } catch {
+                    Logger.shared.error("Could not mark project failed: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
+    private static func enrichProjectAnalysis(_ project: inout StemProject, sourceURL: URL) async {
         do {
             let beatResult = try await BeatDetectionManager().analyzeBeats(audioURL: sourceURL)
             project.beatResult = beatResult
@@ -397,9 +503,6 @@ struct ProcessingView: View {
         } catch {
             print("ProcessingView: Chord analysis skipped: \(error.localizedDescription)")
         }
-
-        try ProjectStore.shared.save(project)
-        return project
     }
 
     private func readAudioMetadata(from url: URL) async -> (duration: Double, sampleRate: Double) {
@@ -416,7 +519,7 @@ struct ProcessingView: View {
         return (duration, sampleRate)
     }
 
-    private func inferKey(from segments: [ChordSegment]) -> String? {
+    private static func inferKey(from segments: [ChordSegment]) -> String? {
         guard let firstChord = segments.first?.name else { return nil }
         return firstChord.replacingOccurrences(of: ":", with: " ")
     }

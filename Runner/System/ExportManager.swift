@@ -47,6 +47,7 @@ public class ExportManager {
         case fileWriteError
         case invalidFormat
         case insufficientSpace
+        case renderInProgress
         case cancelled
         
         public var errorDescription: String? {
@@ -63,6 +64,8 @@ public class ExportManager {
                 return "Invalid export format"
             case .insufficientSpace:
                 return "Insufficient storage space"
+            case .renderInProgress:
+                return "Full render is still running. Export will be available when the complete stems are ready."
             case .cancelled:
                 return "Export cancelled"
             }
@@ -288,6 +291,10 @@ public class ExportManager {
         quality: AudioQuality,
         progress: @escaping (Float) -> Void
     ) throws -> URL {
+        guard !project.isPreviewOnly else {
+            throw ExportError.renderInProgress
+        }
+
         let originalURL = project.originalAudioURL
         
         // Create output file
@@ -340,6 +347,10 @@ public class ExportManager {
         quality: AudioQuality,
         progress: @escaping (Float) -> Void
     ) throws -> [String: URL] {
+        guard !project.isPreviewOnly else {
+            throw ExportError.renderInProgress
+        }
+
         guard !project.stemURLs.isEmpty else {
             throw ExportError.noStemsAvailable
         }

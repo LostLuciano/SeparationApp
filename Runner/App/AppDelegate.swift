@@ -29,6 +29,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         for (model, status) in modelStatus {
             Logger.shared.debug("  \(model): \(status)")
         }
+        DispatchQueue.global(qos: .utility).async {
+            ModelManager.shared.warmUpModels()
+        }
         
         // Project Store - verify directory
         Logger.shared.info("💾 Initializing project storage...")
