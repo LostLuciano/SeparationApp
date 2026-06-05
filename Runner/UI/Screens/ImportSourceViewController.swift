@@ -153,7 +153,7 @@ class ImportSourceViewController: UIViewController {
         let alert = UIAlertController(title: "Impor Audio", message: "Pilih sumber audio Anda", preferredStyle: .actionSheet)
         
         alert.addAction(UIAlertAction(title: "Files App", style: .default, handler: { [weak self] _ in
-            self?.presentDocumentPicker()
+            self?.presentDocumentPicker(allowedTypes: FileImportManager.shared.getSupportedAudioUTTypes())
         }))
         
         alert.addAction(UIAlertAction(title: "Music Library", style: .default, handler: { [weak self] _ in
@@ -193,11 +193,11 @@ class ImportSourceViewController: UIViewController {
     
     @objc private func browseFilesTapped() {
         Logger.shared.info("Browse files tapped")
-        presentDocumentPicker()
+        presentDocumentPicker(allowedTypes: FileImportManager.shared.getSupportedAudioUTTypes())
     }
     
-    private func presentDocumentPicker() {
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: AudioImportManager.allowedUTTypes, asCopy: false)
+    private func presentDocumentPicker(allowedTypes: [UTType]) {
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: allowedTypes, asCopy: false)
         picker.allowsMultipleSelection = false
         picker.delegate = self
         Logger.shared.info("Opening Files picker")

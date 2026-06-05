@@ -21,7 +21,7 @@ public class FileImportManager {
     }
     
     public func getSupportedUTTypes() -> [UTType] {
-        Array(Set(getSupportedAudioUTTypes() + getSupportedVideoUTTypes() + [.item]))
+        Array(Set(getSupportedAudioUTTypes() + getSupportedVideoUTTypes()))
     }
     
     public init() {}
@@ -85,7 +85,6 @@ public class FileImportManager {
     private func supportedTypes(forExtensions extensions: [String], fallback: UTType) -> [UTType] {
         var types = [fallback]
         types.append(contentsOf: extensions.compactMap { UTType(filenameExtension: $0) })
-        types.append(.item)
         return Array(Set(types))
     }
 }

@@ -46,17 +46,17 @@ struct ImportSourceView: View {
         ),
         ImportSourceOption(
             title: "Browse Files",
-            subtitle: "Choose from local files",
+            subtitle: "Audio files only",
             icon: "folder.fill",
-            detail: "Select audio or video from device storage",
-            allowedTypes: FileImportManager.shared.getSupportedUTTypes()
+            detail: "Select audio from device storage",
+            allowedTypes: FileImportManager.shared.getSupportedAudioUTTypes()
         ),
         ImportSourceOption(
             title: "From iCloud Drive",
-            subtitle: "Import from iCloud",
+            subtitle: "Audio files only",
             icon: "icloud.fill",
-            detail: "Browse shared files in iCloud folders",
-            allowedTypes: FileImportManager.shared.getSupportedUTTypes()
+            detail: "Browse audio files in iCloud folders",
+            allowedTypes: FileImportManager.shared.getSupportedAudioUTTypes()
         )
     ]
 
@@ -90,7 +90,7 @@ struct ImportSourceView: View {
         .navigationBarBackButtonHidden()
         .sheet(isPresented: $isDocumentPickerPresented) {
             DocumentPickerView(
-                allowedTypes: activeSource?.allowedTypes ?? FileImportManager.shared.getSupportedUTTypes(),
+                allowedTypes: activeSource?.allowedTypes ?? FileImportManager.shared.getSupportedAudioUTTypes(),
                 onPick: { importedURL in
                     isDocumentPickerPresented = false
                     onImportSelected(importedURL, selectedTemplate)

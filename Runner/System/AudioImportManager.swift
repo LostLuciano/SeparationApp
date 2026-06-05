@@ -14,12 +14,8 @@ public class AudioImportManager {
         .mp3,
         .wav,
         .mpeg4Audio,
-        .aiff,
-        .movie,
-        .mpeg4Movie,
-        .quickTimeMovie,
-        .item
-    ] + ["aac", "caf", "flac", "m4a", "mkv"].compactMap { UTType(filenameExtension: $0) }
+        .aiff
+    ] + ["aac", "caf", "flac", "m4a"].compactMap { UTType(filenameExtension: $0) }
     
     // Supported file extensions
     public static let supportedExtensions = [
@@ -28,8 +24,16 @@ public class AudioImportManager {
     
     /// Checks if a file is supported based on extension
     public func isFormatSupported(_ url: URL) -> Bool {
-        let ext = url.pathExtension.lowercased()
-        return AudioImportManager.supportedExtensions.contains(ext)
+        let ext = resolvedPathExtension(for: url)
+        if AudioImportManager.supportedExtensions.contains(ext) {
+            return true
+        }
+
+        if let contentType = try? url.resourceValues(forKeys: [.contentTypeKey]).contentType {
+            return contentType.conforms(to: .audio) || contentType.conforms(to: .movie)
+        }
+
+        return false
     }
     
     /// Copies a security-scoped URL to the app sandbox (Documents/Imports/)
@@ -96,7 +100,7 @@ public class AudioImportManager {
         let originalName = sourceURL.deletingPathExtension().lastPathComponent.isEmpty
             ? "ImportedAudio"
             : sourceURL.deletingPathExtension().lastPathComponent
-        let pathExtension = sourceURL.pathExtension.lowercased()
+        let pathExtension = resolvedPathExtension(for: sourceURL)
         let sanitizedName = sanitizeFilename(originalName)
         
         var destinationURL = importsDir.appendingPathComponent("\(sanitizedName).\(pathExtension)")
@@ -199,7 +203,16 @@ public class AudioImportManager {
     }
 
     private func isVideoFile(_ url: URL) -> Bool {
-        ["mp4", "mov", "m4v", "mkv"].contains(url.pathExtension.lowercased())
+        let ext = resolvedPathExtension(for: url)
+        if ["mp4", "mov", "m4v", "mkv"].contains(ext) {
+            return true
+        }
+
+        if let contentType = try? url.resourceValues(forKeys: [.contentTypeKey]).contentType {
+            return contentType.conforms(to: .movie)
+        }
+
+        return false
     }
 
     private func extractAudio(fromVideoAt videoURL: URL) async throws -> URL {
@@ -258,5 +271,20 @@ public class AudioImportManager {
         return sanitized.trimmingCharacters(in: CharacterSet(charactersIn: "_")).isEmpty
             ? "ImportedAudio"
             : sanitized
+    }
+
+    private func resolvedPathExtension(for url: URL) -> String {
+        let explicitExtension = url.pathExtension.lowercased()
+        if !explicitExtension.isEmpty {
+            return explicitExtension
+        }
+
+        if let contentType = try? url.resourceValues(forKeys: [.contentTypeKey]).contentType,
+           let preferredExtension = contentType.preferredFilenameExtension?.lowercased(),
+           !preferredExtension.isEmpty {
+            return preferredExtension
+        }
+
+        return "m4a"
     }
 }
